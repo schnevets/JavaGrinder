@@ -1,53 +1,69 @@
+
+PROJECT NOTES
+CURRENT OBJECTIVE (10/6):
+    Get CIMS accounts/CVS working
+    Dissect Abstract Syntax Tree, list off all GNodes (and descriptions)
+    Partition GNodes, work individually on translating implementations
+
+FUTURE OBJECTIVES:
+    Work individually on particular Nodes
+    Start explaining our functionality
+    Wedge individual code together
+    Bug fixing and program sprucing
+
+PAST OBJECTIVES:
+
+SHARED INFORMATION:
+WHAT FOO IN JAVA SHOULD BE IN C++
+
+ONGOING LIST OF AST PARTS WITH DESCRIPTIONS
+
+ORGANISATIONAL STUFF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NOSTALGIC BULLSHIT NONE OF US EVER READ (Including me, the writer)
 Since we are still in the planning phase of this project, this README will also
 act as a discussion and organization page for everyone within the group. We
 will be continuing to list off objectives, questions, and comments here for the
-time being. Feel free to practice git by adding your own commits to this file
-as well!
-
-
-
-
+time being.
 
 WHAT WE LEARNED IN CLASS 9/15
-	2 choices for structure representation
-		General Node may be preferable for the first semester
-			One visitor class(es) vs. type by type class
-			
-			
-	2 choices for functionality structures
-		
-		
-
-
+    2 choices for structure representation
+        General Node may be preferable for the first semester
+            One visitor class(es) vs. type by type class
+    2 choices for functionality structures
 
 OBJECTIVES FOR THE WEEKEND:
-	1. Read xtc, especially parser
-	2. Start thinking of how it will work, to a flowchart level.
-	3. What we will designate to Ver. 1
-	4. Expand 4-step system into larger instructions
-	5. What to do with the GNode, what to take from XTC
-
-
-
-
+    1. Read xtc, especially parser
+    2. Start thinking of how it will work, to a flowchart level.
+    3. What we will designate to Ver. 1
+    4. Expand 4-step system into larger instructions
+    5. What to do with the GNode, what to take from XTC
 
 GROUP ROLES:
-	Git Admin: Steve
-	Speaker: Ari
-
-
-
-
+    Speaker: Ari
 
 PREFERENCE OF ROBERT TIME
 Thursdays Between 12:15-2:00
 Tuesdays Between 12:15-1:00 (Dan's Obligation)
 Fridays are out (Justin's Obligation)
 
-
-
-
-
-Git Guide:
-To be added later (although I really think the built in guide is best)
-Oh, and be sure to follow!
+STRUCTURE BRAINSTORMING:
+Ask questions, propose solutions, and let’s make a structure:
