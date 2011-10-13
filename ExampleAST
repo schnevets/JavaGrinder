@@ -1,0 +1,192 @@
+Questions:
+	What are all of the null statements?
+		If a null exists on the AST, it is asking a yes/no question (Is this part of a package? Does this implement?)
+	Do we need to translate every import statement? 
+		If we don't, what will we be missing, and what needs to be done instead?
+
+
+Java to C++ Translator, v. 2.1.1, My Group
+Processing basicTest.java ...
+CompilationUnit(							//The whole program
+  null,												//Package Declaration
+															//Import declarations would go here
+  ClassDeclaration(						//
+    Modifiers(
+      Modifier(
+        "public"							//Public, static, private, protected
+      )
+    ),
+    "basicTest",							//Back to class declaration
+    null,											//Find out nulls (OBJECTIVE)
+    Extension(								//Second null deals with extensions
+      Type(
+        QualifiedIdentifier(	//A specific handler may not be needed, all this does is prove type/name.
+          "String"
+        ),
+        null
+      )
+    ),
+    Implementation(						//Third null deals with implementations
+      Type(
+        QualifiedIdentifier(
+          "fakefile"
+        ),
+        null
+      )
+    ),												//Thats it for the Class Declaration
+    ClassBody(
+      MethodDeclaration(
+        Modifiers(
+          Modifier(
+            "public"
+          ),
+          Modifier(
+            "static"
+          )
+        ),
+        null,
+        VoidType(),
+        "main",
+        FormalParameters(
+          FormalParameter(
+            Modifiers(),
+            Type(
+              QualifiedIdentifier(
+                "String"
+              ),
+              null
+            ),
+            null,
+            "args",
+            Dimensions(
+              "["
+            )
+          )
+        ),
+        null,
+        null,
+        Block(
+          FieldDeclaration(
+            Modifiers(),
+            Type(
+              PrimitiveType(
+                "int"
+              ),
+              null
+            ),
+            Declarators(
+              Declarator(
+                "number",
+                null,
+                IntegerLiteral(
+                  "1"
+                )
+              )
+            )
+          ),
+          FieldDeclaration(
+            Modifiers(),
+            Type(
+              QualifiedIdentifier(
+                "String"
+              ),
+              null
+            ),
+            Declarators(
+              Declarator(
+                "cliche",
+                null,
+                StringLiteral(
+                  "\"Hello World\""
+                )
+              )
+            )
+          ),
+          WhileStatement(
+            RelationalExpression(
+              PrimaryIdentifier(
+                "number"
+              ),
+              "<",
+              IntegerLiteral(
+                "7"
+              )
+            ),
+            ExpressionStatement(
+              PostfixExpression(
+                PrimaryIdentifier(
+                  "number"
+                ),
+                "++"
+              )
+            )
+          ),
+          ForStatement(
+            BasicForControl(
+              Modifiers(),
+              Type(
+                PrimitiveType(
+                  "int"
+                ),
+                null
+              ),
+              Declarators(
+                Declarator(
+                  "i",
+                  null,
+                  IntegerLiteral(
+                    "0"
+                  )
+                )
+              ),
+              RelationalExpression(
+                PrimaryIdentifier(
+                  "i"
+                ),
+                "<",
+                IntegerLiteral(
+                  "9"
+                )
+              ),
+              ExpressionList(
+                PostfixExpression(
+                  PrimaryIdentifier(
+                    "i"
+                  ),
+                  "++"
+                )
+              )
+            ),
+            ConditionalStatement(
+              EqualityExpression(
+                MultiplicativeExpression(
+                  PrimaryIdentifier(
+                    "i"
+                  ),
+                  "%",
+                  IntegerLiteral(
+                    "3"
+                  )
+                ),
+                "==",
+                IntegerLiteral(
+                  "0"
+                )
+              ),
+              ExpressionStatement(
+                PostfixExpression(
+                  PrimaryIdentifier(
+                    "number"
+                  ),
+                  "--"
+                )
+              ),
+              null
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
