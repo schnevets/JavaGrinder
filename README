@@ -1,9 +1,22 @@
-
 PROJECT NOTES
-CURRENT OBJECTIVE (10/6):
-    Get CIMS accounts/CVS working
-    Dissect Abstract Syntax Tree, list off all GNodes (and descriptions)
-    Partition GNodes, work individually on translating implementations
+CURRENT OBJECTIVES (10/15):
+		Find way to pass methods from SuperClass to Sub Class (Big Chalenge)
+		Divide up .cc and .h elements
+		Divise translation methods    
+
+SPECIFIC OBJECTIVES:
+		Justin: Method inheritence process
+		Daniel: Polish code for easier compatibility
+		Steve: Commenting, planning, and researching syntax
+		Chris: Keep being awesome
+		Ari:
+
+CURRENT BUILD:
+		Currently, the translator's visitor "walks" through the code, not making any
+		impacts or recording anything. Creates a file, and writes "Dadsa" (random 
+		letters) to prove that it is able to tranlsate Java code into C++ elements
+		(which can then be Assembled).
+
 
 FUTURE OBJECTIVES:
     Work individually on particular Nodes
@@ -21,9 +34,35 @@ ONGOING LIST OF AST PARTS WITH DESCRIPTIONS
 ORGANISATIONAL STUFF
 
 
+QUICK AND DIRTY SOLUTION TO INHERITENCE ISSUE:
+	A second process method that explores methods and finds out if the method has
+	a superclass. If it does, it returns the methods to the subclass.
 
 
+ACTUAL METHODOLOGY:
+	The primary objective of JavaGrinder is to write two files, .cc and .h which
+	contain a translation of a Java file into C++. These two files will be 
+	organized in a similar manner to Robert's java_lang.h/.cc examples. Actual
+	translatng will be done in methods, and then PUBLISHED into the different
+	ELEMENTS of .h/.cc. An element is a list containing the C++ code in String 
+	form. At the very end of the program, all of the elements are ASSEMBLED as
+  full .h and .cc files.
 
+List of Elements
+	.cc:
+		includes
+		namespace
+		method(function)
+		vtabledef
+	.h:
+		includes
+		namespace
+		ForwardDeclaration
+		Constructor
+		DataLayout
+		Functions
+		VTable
+		VTableLayout
 
 
 
