@@ -1,8 +1,15 @@
 PROJECT NOTES
-CURRENT OBJECTIVE (10/15):
+CURRENT OBJECTIVES (10/15):
 		Find way to pass methods from SuperClass to Sub Class (Big Chalenge)
 		Divide up .cc and .h elements
 		Divise translation methods    
+
+SPECIFIC OBJECTIVES:
+		Justin: Method inheritence process
+		Daniel: Polish code for easier compatibility
+		Steve: Commenting, planning, and researching syntax
+		Chris: Keep being awesome
+		Ari:
 
 CURRENT BUILD:
 		Currently, the translator's visitor "walks" through the code, not making any
