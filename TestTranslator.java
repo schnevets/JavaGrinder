@@ -87,19 +87,19 @@ public class TestTranslator extends xtc.util.Tool {
     		private BufferedWriter outCC;
     		private BufferedWriter outH;
     		
-    		private List<String> includesCC;
-    		private List<String> nameSpaceCC;
-    		private List<String> methodCC;
-    		private List<String> vTableDefCC;
+    		private LinkedList<String> includesCC;
+    		private LinkedList<String> nameSpaceCC;
+    		private LinkedList<String> methodCC;
+    		private LinkedList<String> vTableDefCC;
     		
-    		private List<String> includesH;
-    		private List<String> nameSpaceH;
-    		private List<String> forwardDeclarationsH;
-    		private List<String> constructorH;
-    		private List<String> dataLayoutH;
-    		private List<String> methodsImplementedH;
-    		private List<String> vTableH;
-    		private List<String> vTableLayoutH;
+    		private LinkedList<String> includesH;
+    		private LinkedList<String> nameSpaceH;
+    		private LinkedList<String> forwardDeclarationsH;
+    		private LinkedList<String> constructorH;
+    		private LinkedList<String> dataLayoutH;
+    		private LinkedList<String> methodsImplementedH;
+    		private LinkedList<String> vTableH;
+    		private LinkedList<String> vTableLayoutH;
 
 
 		
@@ -113,19 +113,19 @@ public class TestTranslator extends xtc.util.Tool {
     				//fileCC.createNewFile();
     				//fileH.createNewFile();
 
-    				includesCC=new LinkedList();
-    	    		nameSpaceCC=new LinkedList();
-    	    		methodCC=new LinkedList();
-    	    		vTableDefCC=new LinkedList();
+    				includesCC = new LinkedList();
+    	    		nameSpaceCC = new LinkedList();
+    	    		methodCC = new LinkedList();
+    	    		vTableDefCC = new LinkedList();
     	    		
-    	    		includesH=new LinkedList();
-    	    		nameSpaceH=new LinkedList();
-    	    		forwardDeclarationsH=new LinkedList();
-    	    		constructorH=new LinkedList();
-    	    		dataLayoutH=new LinkedList();
-    	    		methodsImplementedH=new LinkedList();
-    	    		vTableH=new LinkedList();
-    	    		vTableLayoutH=new LinkedList();
+    	    		includesH = new LinkedList();
+    	    		nameSpaceH = new LinkedList();
+    	    		forwardDeclarationsH = new LinkedList();
+    	    		constructorH = new LinkedList();
+    	    		dataLayoutH = new LinkedList();
+    	    		methodsImplementedH = new LinkedList();
+    	    		vTableH = new LinkedList();
+    	    		vTableLayoutH = new LinkedList();
    					
     				writerCC = new FileWriter(fileCC);
 					writerH = new FileWriter(fileH);
