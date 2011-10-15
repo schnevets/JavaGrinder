@@ -23,7 +23,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.LinkedList;
-import java.util.List;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
@@ -43,6 +42,8 @@ import xtc.lang.JavaFiveParser;
 
 public class TestTranslator extends xtc.util.Tool {
 
+  private String outFileName = "";
+	
   /** Create a new translator. */
   public TestTranslator() {
     // Nothing to do.
@@ -67,7 +68,8 @@ public class TestTranslator extends xtc.util.Tool {
   }
 
   public Node parse(Reader in, File file) throws IOException, ParseException {
-    JavaFiveParser parser =
+	outFileName = file.getName().substring(0, file.getName().indexOf('.'));		// This is the only place I could find where I could save the name of the argument file.
+    JavaFiveParser parser =														// But I'm ignorant and there's probably a more elegant way of getting it.
       new JavaFiveParser(in, file.toString(), (int)file.length());
     Result result = parser.pCompilationUnit(0);
     return (Node)parser.value(result);
@@ -104,8 +106,9 @@ public class TestTranslator extends xtc.util.Tool {
 
 		
 		//the source directory for the .java files
-    		private String basedirectory = "/home/tev/workspace/OOPHomework1/";
+    		private String basedirectory = "./";	
     		
+    		/** What it says on the tin.*/
     		private void createFilesAndWriters(){
     			try{
     				fileCC = new File(basedirectory + "Tempfile" + ".cc");
@@ -113,19 +116,19 @@ public class TestTranslator extends xtc.util.Tool {
     				//fileCC.createNewFile();
     				//fileH.createNewFile();
 
-    				includesCC = new LinkedList();
-    	    		nameSpaceCC = new LinkedList();
-    	    		methodCC = new LinkedList();
-    	    		vTableDefCC = new LinkedList();
+    				includesCC = new LinkedList<String>();
+    	    		nameSpaceCC = new LinkedList<String>();
+    	    		methodCC = new LinkedList<String>();
+    	    		vTableDefCC = new LinkedList<String>();
     	    		
-    	    		includesH = new LinkedList();
-    	    		nameSpaceH = new LinkedList();
-    	    		forwardDeclarationsH = new LinkedList();
-    	    		constructorH = new LinkedList();
-    	    		dataLayoutH = new LinkedList();
-    	    		methodsImplementedH = new LinkedList();
-    	    		vTableH = new LinkedList();
-    	    		vTableLayoutH = new LinkedList();
+    	    		includesH = new LinkedList<String>();
+    	    		nameSpaceH = new LinkedList<String>();
+    	    		forwardDeclarationsH = new LinkedList<String>();
+    	    		constructorH = new LinkedList<String>();
+    	    		dataLayoutH = new LinkedList<String>();
+    	    		methodsImplementedH = new LinkedList<String>();
+    	    		vTableH = new LinkedList<String>();
+    	    		vTableLayoutH = new LinkedList<String>();
    					
     				writerCC = new FileWriter(fileCC);
 					writerH = new FileWriter(fileH);
@@ -140,6 +143,7 @@ public class TestTranslator extends xtc.util.Tool {
     			}
     		}
     		
+    		/** Final aseembly of .cc and .h files */
     		private void assembleFile(){
     			assembleElement(includesCC,outCC);
         		assembleElement(nameSpaceCC,outCC);
@@ -166,7 +170,13 @@ public class TestTranslator extends xtc.util.Tool {
         		
     		}
     		
-    		private void assembleElement(List Element, BufferedWriter file){
+    		/** 
+    		 * Aseembles elements from list into appropriate file. 
+    		 * 
+    		 * @param Element List of elements.
+    		 * @param file File aseembled to (outH or outCC).
+    		 */
+    		private void assembleElement(LinkedList<String> Element, BufferedWriter file){
     			while(!Element.isEmpty()){
     				try {
 						file.write((String)Element.remove(0)+"\n");
@@ -176,6 +186,11 @@ public class TestTranslator extends xtc.util.Tool {
     			}
     		}
     		
+    		/**
+    		 * Visiting the Compilation Unit, which is parent of everything.
+    		 * 
+    		 * @param n It's the Node, genius.
+    		 */
     		public void visitCompilationUnit(GNode n){
     			createFilesAndWriters();
     			try {
@@ -190,6 +205,16 @@ public class TestTranslator extends xtc.util.Tool {
     			assembleFile();
     		}    		
 
+    		/**
+    		 * Visiting a Class Declaration.
+    		 * This is where files are created.
+    		 * ...is this where files should be created?
+    		 * I assume one of you thought about this harder than I am.
+    		 * I will ask one of you later.
+    		 * DAN OUT
+    		 * 
+    		 * @param n It's the Node, smarty.
+    		 */
     		public void visitClassDeclaration(GNode n){
     			
     			File tempfile1 = new File(basedirectory + ((String)n.get(1)) + ".cc");
@@ -201,9 +226,7 @@ public class TestTranslator extends xtc.util.Tool {
     				fileH = tempfile2;
     			}
     			
-    			String testname = "javatest";
-    			
-    			String sprfilename = new String(basedirectory + testname + ".cc");
+    			String sprfilename = new String(basedirectory + outFileName + ".cc");
     			File argstest = new File(sprfilename);
     	    			
     			
@@ -213,12 +236,13 @@ public class TestTranslator extends xtc.util.Tool {
     				System.out.println("We are in here!");
 					String[] args = new String[2];
     				args[0] = ("-translate");
-    				args[1] = (basedirectory + testname + ".java");
+    				args[1] = (basedirectory + outFileName + ".java");
     				TestTranslator trans = new TestTranslator();
     				trans.run(args);
 				}    			
     		}
     		
+    		/** visiting... anything else? Dadsa? */
     		public void visit(Node n) {
     			methodCC.add("Dadsa");
     			for (Object o : n) if (o instanceof Node) dispatch((Node)o);
