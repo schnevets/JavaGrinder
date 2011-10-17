@@ -108,7 +108,7 @@ public class TestTranslator extends xtc.util.Tool {
 		//the source directory for the .java files
     		private String basedirectory = "./";	
     		
-    		/** What it says on the tin.*/
+    		/** What it says on the tin. */
     		private void createFilesAndWriters(){
     			try{
     				fileCC = new File(basedirectory + "Tempfile" + ".cc");
