@@ -108,13 +108,13 @@ public class TestTranslator extends xtc.util.Tool {
 		//the source directory for the .java files
     		private String basedirectory = "./";	
     		
-    		/** What it says on the tin. */
+    		/** What it says on the tin.*/
     		private void createFilesAndWriters(){
     			try{
-    				fileCC = new File(basedirectory + "Tempfile" + ".cc");
-    				fileH = new File(basedirectory + "Tempfile" + ".h");
-    				//fileCC.createNewFile();
-    				//fileH.createNewFile();
+    				fileCC = new File(basedirectory + outFileName + ".cc");
+    				fileH = new File(basedirectory + outFileName + ".h");
+    				fileCC.createNewFile();
+    				fileH.createNewFile();
 
     				includesCC = new LinkedList<String>();
     	    		nameSpaceCC = new LinkedList<String>();
@@ -207,42 +207,28 @@ public class TestTranslator extends xtc.util.Tool {
 
     		/**
     		 * Visiting a Class Declaration.
-    		 * This is where files are created.
-    		 * ...is this where files should be created?
-    		 * I assume one of you thought about this harder than I am.
-    		 * I will ask one of you later.
-    		 * DAN OUT
     		 * 
     		 * @param n It's the Node, smarty.
     		 */
     		public void visitClassDeclaration(GNode n){
-    			
-    			File tempfile1 = new File(basedirectory + ((String)n.get(1)) + ".cc");
-    			File tempfile2 = new File(basedirectory + ((String)n.get(1)) + ".h");
-    			if(fileCC.renameTo(tempfile1)){
-    				fileCC = tempfile1;
-    			}
-    			if(fileH.renameTo(tempfile2)){
-    				fileH = tempfile2;
-    			}
-    			
-    			String sprfilename = new String(basedirectory + outFileName + ".cc");
-    			File argstest = new File(sprfilename);
-    	    			
-    			
-				System.out.println(fileCC.getPath());
+
+//    			String sprfilename = new String(basedirectory + outFileName + ".cc");
+//    			File argstest = new File(sprfilename);
+//    	    			
+//    			
+//				System.out.println(fileCC.getPath());
     			visit(n);
-				if(!argstest.exists()){
-    				System.out.println("We are in here!");
-					String[] args = new String[2];
-    				args[0] = ("-translate");
-    				args[1] = (basedirectory + outFileName + ".java");
-    				TestTranslator trans = new TestTranslator();
-    				trans.run(args);
-				}    			
+//				if(!argstest.exists()){
+//    				System.out.println("We are in here!");
+//					String[] args = new String[2];
+//    				args[0] = ("-translate");
+//    				args[1] = (basedirectory + outFileName + ".java");
+//    				TestTranslator trans = new TestTranslator();
+//    				trans.run(args);
+//				}    			
     		}
     		
-    		/** visiting... anything else? Dadsa? */
+    		/** visiting... anything else? Dadsa! */
     		public void visit(Node n) {
     			methodCC.add("Dadsa");
     			for (Object o : n) if (o instanceof Node) dispatch((Node)o);
