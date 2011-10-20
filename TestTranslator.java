@@ -143,6 +143,11 @@ public class TestTranslator extends xtc.util.Tool {
 					writerH = new FileWriter(fileH);
 					outCC = new BufferedWriter(writerCC);
 					outH = new BufferedWriter(writerH);
+					
+					hstring = " ";
+					hstring = hstring.replace(" ", "");
+					ccstring = " ";
+					ccstring = ccstring.replace(" ", "");
 
     			}
     			
@@ -216,22 +221,46 @@ public class TestTranslator extends xtc.util.Tool {
 
     	//covers byte, int, short, long
 		public void visitIntegerLiteral(GNode n){
-			System.out.print(n.getString(0));
+			if(hflag == true){
+				hstring = hstring + n.getString(0);
+			}
+			else{
+				ccstring = ccstring + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
 		}
 		
 		public void visitBooleanLiteral(GNode n){	
-			System.out.print(n.getString(0));	
+			if(hflag == true){
+				hstring = hstring + n.getString(0);
+			}
+			else{
+				ccstring = ccstring + n.getString(0);
+			}
+			//System.out.print(n.getString(0));	
 		}
 		
 		//covers doubles and floats
 		public void visitFloatingPointLiteral(GNode n){
 			//System.out.println("Double Literal Test: " + n.getString(0));
-			System.out.print(n.getString(0));
+			if(hflag == true){
+				hstring = hstring + n.getString(0);
+			}
+			else{
+				ccstring = ccstring + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
 		}
 		
 		public void visitStringLiteral(GNode n){
 			//System.out.println("String Literal Test: " + n.getString(0));
-			System.out.print(n.getString(0));
+			if(hflag == true){
+				hstring = hstring + n.getString(0);
+			}
+			else{
+				ccstring = ccstring + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
 		}
 	
 		//handles addition and subtraction
@@ -248,7 +277,13 @@ public class TestTranslator extends xtc.util.Tool {
 		//Single Expression Statement
 		public void visitExpressionStatement(GNode n){
 			visit(n);
-			System.out.print(";\r");
+			if (hflag == true){
+				hstring = hstring + ";\r";
+			}
+			else{
+				ccstring = ccstring + ";\r";
+			}
+			//System.out.print(";\r");
 		}
 		
 		//Standard Expression
@@ -263,28 +298,159 @@ public class TestTranslator extends xtc.util.Tool {
 					dispatch((Node)o);
 				}
 				else{
-					if(o != null)
-					System.out.print(((String)o).toString());
+					if(o != null){
+						if (hflag == true){
+							hstring = hstring + ((String)o).toString();
+						}
+						else{
+							ccstring = ccstring + ((String)o).toString();
+						}
+					}
+					//System.out.print(((String)o).toString());
 				}
 			}
 		}
 		
+		public void visitFieldDeclaration(GNode n){
+			visit(n);
+		}
+		
+		public void visitType(GNode n){
+			visit(n);
+		}
+		
+		public void visitPrimitiveType(GNode n){
+			if (hflag == true){ //this type belongs to the .h file
+				hstring = hstring + n.getString(0) + " ";
+			}
+			else{  //this type belongs to the .cc file
+				ccstring = ccstring + n.getString(0) + " ";
+			}
+			//System.out.println(n.getString(0));
+		}
+		
 		public void visitPrimaryIdentifier(GNode n){
-			System.out.print(n.getString(0));
+			if (hflag == true){ //this type belongs to the .h file
+				hstring = hstring + n.getString(0);
+			}
+			else{  //this type belongs to the .cc file
+				ccstring = ccstring + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
+		}
+		
+		//object identifier, ex String -- note, not actually complete, needs c++ translation
+		public void visitQualifiedIdentifier(GNode n){
+			if (hflag == true){ //this type belongs to the .h file
+				hstring = hstring + n.getString(0) + " ";
+			}
+			else{  //this type belongs to the .cc file
+				ccstring = ccstring + n.getString(0) + " ";
+			}
+		}
+		
+		public void visitModifiers(GNode n){
+			//visit(n);
 		}
 		
 		public void visitModifier(GNode n){
 			//System.out.println("Modifier Test: " + n.getString(0) + " ");
-			System.out.print(n.getString(0) + " ");
+			if (hflag == true){ //this type belongs to the .h file
+				hstring = hstring + n.getString(0) + " ";
+			}
+			else{  //this type belongs to the .cc file
+				ccstring = ccstring + n.getString(0) +  " ";
+			}
+			//System.out.print(n.getString(0) + " ");
+		}
+		
+		public void visitDeclarators(GNode n){
+			visit(n);
 		}
 		
 		public void visitDeclarator(GNode n){
-			System.out.print(n.getString(0));
+			if(hflag == true){
+				hstring = hstring + n.getString(0) + "="; //check for other children, if has children then =, else nothing
+				visit(n);
+				hstring = hstring + "; \r";
+			}
+			else{
+				ccstring = ccstring + n.getString(0) + "=";
+				visit(n);
+				ccstring = ccstring + "; \r";
+				
+			}
+			//System.out.print(n.getString(0));
 			//if(n.get(1) != null) visit(n.getNode(1));
-			System.out.print("=");
-			visit(n);
-			System.out.print(";\r");
+			//System.out.print("=");
+			//visit(n);
+			//System.out.print(";\r");
 		}
+		
+		public void visitBlock(GNode n){
+			visit(n);
+		}
+		
+		public void visitClassBody(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					if(((GNode)o).getName().equals("FieldDeclaration")){
+						hflag = true;
+						System.out.println("Translation Note: hfile access");
+					}
+					else{
+						hflag = false;
+					}
+					dispatch((Node)o);
+					
+					if(hflag == true){
+						System.out.println(hstring);
+						hstring = " ";
+						hstring = hstring.replace(" ", "");
+					}
+					else{
+						System.out.println(ccstring);
+						ccstring = " ";
+						ccstring = ccstring.replace(" ", "");
+					}
+				}
+				else{
+					//if(o != null)
+					//System.out.print(((String)o).toString());
+				}
+			}
+		}
+		
+		public void visitConstructorDeclaration(GNode n){
+			visit(n);
+		}
+		
+		//method arguments
+		public void visitFormalParameters(GNode n){
+			//add the first parenthesis
+			visit(n);
+			//add the closing parenthesis and the opening curly brace
+		}
+		
+		public void visitFormalParameter(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					dispatch((Node)o);
+				}
+				else{
+					if(o != null){
+						if (hflag == true){
+							hstring = hstring + ((String)o).toString();
+						}
+						else{
+							ccstring = ccstring + ((String)o).toString();
+						}
+					}
+					//System.out.print(((String)o).toString());
+				}
+			}
+		}
+		
 		
     		/**
     		 * Visiting a Class Declaration.
