@@ -16,7 +16,7 @@
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
  */
-package xtc.oop;
+package oop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -102,7 +102,16 @@ public class TestTranslator extends xtc.util.Tool {
     		private LinkedList<String> methodsImplementedH;
     		private LinkedList<String> vTableH;
     		private LinkedList<String> vTableLayoutH;
-
+    		
+    		private String ccstring;
+    		private String hstring;
+    		private boolean hflag;
+    		
+    		//global string variable for assembling each line
+    		//each line counts as an element in the linekd list
+    		//at some higher level the completed line gets pushed onto the list, global string gets cleared
+    		//making way for next line, example would be at the expressionstatement level the string would be pushed
+    		//the lower expressions would just append the global string
 
 		
 		//the source directory for the .java files
@@ -205,6 +214,78 @@ public class TestTranslator extends xtc.util.Tool {
     			assembleFile();
     		}    		
 
+    	//covers byte, int, short, long
+		public void visitIntegerLiteral(GNode n){
+			System.out.print(n.getString(0));
+		}
+		
+		public void visitBooleanLiteral(GNode n){	
+			System.out.print(n.getString(0));	
+		}
+		
+		//covers doubles and floats
+		public void visitFloatingPointLiteral(GNode n){
+			//System.out.println("Double Literal Test: " + n.getString(0));
+			System.out.print(n.getString(0));
+		}
+		
+		public void visitStringLiteral(GNode n){
+			//System.out.println("String Literal Test: " + n.getString(0));
+			System.out.print(n.getString(0));
+		}
+	
+		//handles addition and subtraction
+		public void visitAdditiveExpression(GNode n){
+			ExpressionHandler(n);
+			//System.out.print("\n");
+		}
+		
+		//handles multiplication, division and modulus
+		public void visitMultiplicativeExpression(GNode n){
+			ExpressionHandler(n);
+		}
+		
+		//Single Expression Statement
+		public void visitExpressionStatement(GNode n){
+			visit(n);
+			System.out.print(";\r");
+		}
+		
+		//Standard Expression
+		public void visitExpression(GNode n){
+			ExpressionHandler(n);
+		}
+		
+		//Primary Handler for all Expression nodes
+		public void ExpressionHandler(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					dispatch((Node)o);
+				}
+				else{
+					if(o != null)
+					System.out.print(((String)o).toString());
+				}
+			}
+		}
+		
+		public void visitPrimaryIdentifier(GNode n){
+			System.out.print(n.getString(0));
+		}
+		
+		public void visitModifier(GNode n){
+			//System.out.println("Modifier Test: " + n.getString(0) + " ");
+			System.out.print(n.getString(0) + " ");
+		}
+		
+		public void visitDeclarator(GNode n){
+			System.out.print(n.getString(0));
+			//if(n.get(1) != null) visit(n.getNode(1));
+			System.out.print("=");
+			visit(n);
+			System.out.print(";\r");
+		}
+		
     		/**
     		 * Visiting a Class Declaration.
     		 * 
@@ -230,7 +311,7 @@ public class TestTranslator extends xtc.util.Tool {
     		
     		/** visiting... anything else? Dadsa! */
     		public void visit(Node n) {
-    			methodCC.add("Dadsa");
+    			//methodCC.add("Dadsa");
     			for (Object o : n) if (o instanceof Node) dispatch((Node)o);
     		}
     	}.dispatch(node);
