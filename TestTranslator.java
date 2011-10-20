@@ -75,6 +75,13 @@ public class TestTranslator extends xtc.util.Tool {
     return (Node)parser.value(result);
   }
 
+  /*
+   * Existing Issues
+   * - Not all visitors created so the printing of each line (cc or h) will not be perfect at all, predict outputs using AST before testing
+   * - Formatting will be a constant issue as we add in more visitors, debug and check outputs often
+   * - primitive types are not c++ 32bit versions (ex int32_t), have to change that
+   * - most of the formatting to c++ has not been done yet
+   */
   public void process(Node node) {
     if (runtime.test("printJavaAST")) {
       runtime.console().format(node).pln().flush();
@@ -106,12 +113,6 @@ public class TestTranslator extends xtc.util.Tool {
     		private String ccstring;
     		private String hstring;
     		private boolean hflag;
-    		
-    		//global string variable for assembling each line
-    		//each line counts as an element in the linekd list
-    		//at some higher level the completed line gets pushed onto the list, global string gets cleared
-    		//making way for next line, example would be at the expressionstatement level the string would be pushed
-    		//the lower expressions would just append the global string
 
 		
 		//the source directory for the .java files
@@ -144,6 +145,7 @@ public class TestTranslator extends xtc.util.Tool {
 					outCC = new BufferedWriter(writerCC);
 					outH = new BufferedWriter(writerH);
 					
+					//we want to create a blank string that will not print null
 					hstring = " ";
 					hstring = hstring.replace(" ", "");
 					ccstring = " ";
@@ -319,6 +321,7 @@ public class TestTranslator extends xtc.util.Tool {
 			visit(n);
 		}
 		
+		//primitive type specific, ex int, double, float, etc.
 		public void visitPrimitiveType(GNode n){
 			if (hflag == true){ //this type belongs to the .h file
 				hstring = hstring + n.getString(0) + " ";
@@ -329,6 +332,7 @@ public class TestTranslator extends xtc.util.Tool {
 			//System.out.println(n.getString(0));
 		}
 		
+		//the name of the variable
 		public void visitPrimaryIdentifier(GNode n){
 			if (hflag == true){ //this type belongs to the .h file
 				hstring = hstring + n.getString(0);
@@ -339,7 +343,7 @@ public class TestTranslator extends xtc.util.Tool {
 			//System.out.print(n.getString(0));
 		}
 		
-		//object identifier, ex String -- note, not actually complete, needs c++ translation
+		//object type, ex String -- note, not actually complete, needs c++ translation
 		public void visitQualifiedIdentifier(GNode n){
 			if (hflag == true){ //this type belongs to the .h file
 				hstring = hstring + n.getString(0) + " ";
@@ -349,10 +353,12 @@ public class TestTranslator extends xtc.util.Tool {
 			}
 		}
 		
+		//container for Modifier nodes
 		public void visitModifiers(GNode n){
-			//visit(n);
+			visit(n);
 		}
 		
+		//public, private, protected, abstract, static, etc.
 		public void visitModifier(GNode n){
 			//System.out.println("Modifier Test: " + n.getString(0) + " ");
 			if (hflag == true){ //this type belongs to the .h file
@@ -364,10 +370,12 @@ public class TestTranslator extends xtc.util.Tool {
 			//System.out.print(n.getString(0) + " ");
 		}
 		
+		//container for Declarator nodes
 		public void visitDeclarators(GNode n){
 			visit(n);
 		}
 		
+		//Large construct for declaring a variable
 		public void visitDeclarator(GNode n){
 			if(hflag == true){
 				hstring = hstring + n.getString(0) + "="; //check for other children, if has children then =, else nothing
@@ -391,18 +399,20 @@ public class TestTranslator extends xtc.util.Tool {
 			visit(n);
 		}
 		
+		//large construct for the body of a Class
 		public void visitClassBody(GNode n){
 			for(Object o: n){
 				if (o instanceof Node){
 					if(((GNode)o).getName().equals("FieldDeclaration")){
 						hflag = true;
-						System.out.println("Translation Note: hfile access");
+						//System.out.println("Translation Note: hfile access");
 					}
 					else{
 						hflag = false;
 					}
 					dispatch((Node)o);
 					
+					//we want to create a blank string that will not print null
 					if(hflag == true){
 						System.out.println(hstring);
 						hstring = " ";
@@ -420,6 +430,7 @@ public class TestTranslator extends xtc.util.Tool {
 				}
 			}
 		}
+		
 		
 		public void visitConstructorDeclaration(GNode n){
 			visit(n);
