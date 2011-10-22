@@ -17,10 +17,12 @@
  * USA.
  */
 package xtc.oop;
-
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.LinkedList;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
@@ -37,19 +39,22 @@ import xtc.lang.JavaFiveParser;
  * @author Robert Grimm
  * @version $Revision$
  */
-public class Translator extends xtc.util.Tool {
 
+public class TestTranslator extends xtc.util.Tool {
+
+  private String outFileName = "";
+	
   /** Create a new translator. */
-  public Translator() {
+  public TestTranslator() {
     // Nothing to do.
   }
 
   public String getName() {
-    return "JavaGrinder: A Translator from Java to C++";
+    return "JavaGrinder - A Java to C++ Translator";
   }
 
   public String getCopy() {
-    return "Ariel Bendon, Christopher Lee, Daniel Uebelein, Justin Bernegger, & Steven J Socha";
+    return "Christopher Lee, Daniel Uebelein, Justin Bernegger, & Steven Socha";
   }
 
   public void init() {
@@ -57,46 +62,472 @@ public class Translator extends xtc.util.Tool {
 
     runtime.
       bool("printJavaAST", "printJavaAST", false, "Print Java AST.").
-      bool("countMethods", "countMethods", false, "Count all Java methods.");
+      bool("countMethods", "countMethods", false, "Count all Java methods.").
+      bool("translate", "translate", false, "Translate a Java file to a C++ file.");
+    
   }
 
   public Node parse(Reader in, File file) throws IOException, ParseException {
-    JavaFiveParser parser =
+	outFileName = file.getName().substring(0, file.getName().indexOf('.'));		// This is the only place I could find where I could save the name of the argument file.
+    JavaFiveParser parser =														// But I'm ignorant and there's probably a more elegant way of getting it.
       new JavaFiveParser(in, file.toString(), (int)file.length());
     Result result = parser.pCompilationUnit(0);
     return (Node)parser.value(result);
   }
 
+  /*
+   * Existing Issues
+   * - Not all visitors created so the printing of each line (cc or h) will not be perfect at all, predict outputs using AST before testing
+   * - Formatting will be a constant issue as we add in more visitors, debug and check outputs often
+   * - primitive types are not c++ 32bit versions (ex int32_t), have to change that
+   * - most of the formatting to c++ has not been done yet
+   */
   public void process(Node node) {
     if (runtime.test("printJavaAST")) {
       runtime.console().format(node).pln().flush();
     }
+    
+    if (runtime.test("translate")) {
+    	new Visitor() {
+    		private FileWriter writerCC;
+    		private FileWriter writerH;
+    		private File fileCC;
+    		private File fileH;
+    		private BufferedWriter outCC;
+    		private BufferedWriter outH;
+    		
+    		private LinkedList<String> includesCC;
+    		private LinkedList<String> nameSpaceCC;
+    		private LinkedList<String> methodCC;
+    		private LinkedList<String> vTableDefCC;
+    		
+    		private LinkedList<String> includesH;
+    		private LinkedList<String> nameSpaceH;
+    		private LinkedList<String> forwardDeclarationsH;
+    		private LinkedList<String> constructorH;
+    		private LinkedList<String> dataLayoutH;
+    		private LinkedList<String> methodsImplementedH;
+    		private LinkedList<String> vTableH;
+    		private LinkedList<String> vTableLayoutH;
+    		
+    		private String[] ccstring;
+    		private String[] hstring;
+    		private boolean hflag;
 
-    if (runtime.test("countMethods")) {
-      new Visitor() {
-        private int count = 0;
+		
+		//the source directory for the .java files
+    		private String basedirectory = "./";	
+    		
+    		/** What it says on the tin.*/
+    		private void createFilesAndWriters(){
+    			try{
+    				fileCC = new File(basedirectory + outFileName + ".cc");
+    				fileH = new File(basedirectory + outFileName + ".h");
+    				fileCC.createNewFile();
+    				fileH.createNewFile();
 
-        public void visitCompilationUnit(GNode n) {
-          visit(n);
-          runtime.console().p("Number of methods: ").p(count).pln().flush();
-        }
+    				includesCC = new LinkedList<String>();
+        			includesCC.add("#include \""+outFileName+".h\"");
+    	    		nameSpaceCC = new LinkedList<String>();
+    	    		methodCC = new LinkedList<String>();
+    	    		vTableDefCC = new LinkedList<String>();
+    	    		
+    	    		includesH = new LinkedList<String>();
+    	    		nameSpaceH = new LinkedList<String>();
+    	    		forwardDeclarationsH = new LinkedList<String>();
+    	    		constructorH = new LinkedList<String>();
+    	    		dataLayoutH = new LinkedList<String>();
+    	    		methodsImplementedH = new LinkedList<String>();
+    	    		vTableH = new LinkedList<String>();
+    	    		vTableLayoutH = new LinkedList<String>();
+   					
+    				writerCC = new FileWriter(fileCC);
+					writerH = new FileWriter(fileH);
+					outCC = new BufferedWriter(writerCC);
+					outH = new BufferedWriter(writerH);
+					
+					ccstring = new String[8];
+					hstring = new String[8];
+					
+					//we want to create a blank string that will not print null
+					for(int j = 0; j < 8;j++){
+						hstring[j] = " ";
+						hstring[j] = hstring[0].replace(" ", "");
+						ccstring[j] = " ";
+						ccstring[j] = ccstring[0].replace(" ", "");
+					}
+    			}
+    			
+    			catch (IOException e){
+    				e.printStackTrace();
+    				System.out.println("Something's up with the files and writers. Bitch.");
+    			}
+    		}
+    		
+    		/** Final aseembly of .cc and .h files */
+    		private void assembleFile(){
+    			assembleElement(includesCC,outCC);
+        		assembleElement(nameSpaceCC,outCC);
+        		assembleElement(methodCC,outCC);
+        		assembleElement(vTableDefCC,outCC);
+        		try {
+					outCC.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+        		assembleElement(includesH,outH);
+        		assembleElement(nameSpaceH,outH);
+        		assembleElement(forwardDeclarationsH,outH);
+        		assembleElement(constructorH,outH);
+        		assembleElement(dataLayoutH,outH);
+        		assembleElement(methodsImplementedH,outH);
+        		assembleElement(vTableH,outH);
+        		assembleElement(vTableLayoutH,outH);
+        		try {
+					outH.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+        		
+    		}
+    		
+    		/** 
+    		 * Aseembles elements from list into appropriate file. 
+    		 * 
+    		 * @param Element List of elements.
+    		 * @param file File aseembled to (outH or outCC).
+    		 */
+    		private void assembleElement(LinkedList<String> Element, BufferedWriter file){
+    			while(!Element.isEmpty()){
+    				try {
+						file.write((String)Element.remove(0)+"\n");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+    			}
+    		}
+    		
+    		/**
+    		 * Visiting the Compilation Unit, which is parent of everything.
+    		 * 
+    		 * @param n It's the Node, genius.
+    		 */
+    		public void visitCompilationUnit(GNode n){
+    			createFilesAndWriters();
+    			visit(n);
+    			assembleFile();
+    		}    		
 
-        public void visitMethodDeclaration(GNode n) {
-          visit(n);
-          count++;
-        }
+    	//covers byte, int, short, long
+		public void visitIntegerLiteral(GNode n){
+			if(hflag == true){
+				hstring[0] = hstring[0] + n.getString(0);
+			}
+			else{
+				ccstring[0] = ccstring[0] + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
+		}
+		
+		public void visitBooleanLiteral(GNode n){	
+			if(hflag == true){
+				hstring[0] = hstring[0] + n.getString(0);
+			}
+			else{
+				ccstring[0] = ccstring[0] + n.getString(0);
+			}
+			//System.out.print(n.getString(0));	
+		}
+		
+		//covers doubles and floats
+		public void visitFloatingPointLiteral(GNode n){
+			//System.out.println("Double Literal Test: " + n.getString(0));
+			if(hflag == true){
+				hstring[0] = hstring[0] + n.getString(0);
+			}
+			else{
+				ccstring[0] = ccstring[0] + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
+		}
+		
+		public void visitStringLiteral(GNode n){
+			//System.out.println("String Literal Test: " + n.getString(0));
+			if(hflag == true){
+				hstring[0] = hstring[0] + n.getString(0);
+			}
+			else{
+				ccstring[0] = ccstring[0] + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
+		}
+	
+		//handles addition and subtraction
+		public void visitAdditiveExpression(GNode n){
+			ExpressionHandler(n);
+			//System.out.print("\n");
+		}
+		
+		//handles multiplication, division and modulus
+		public void visitMultiplicativeExpression(GNode n){
+			ExpressionHandler(n);
+		}
+		
+		//Single Expression Statement
+		public void visitExpressionStatement(GNode n){
+			visit(n);
+			if (hflag == true){
+				hstring[0] = hstring[0] + ";\r";
+			}
+			else{
+				ccstring[0] = ccstring[0] + ";\r";
+			}
+			//System.out.print(";\r");
+		}
+		
+		//Standard Expression
+		public void visitExpression(GNode n){
+			ExpressionHandler(n);
+		}
+		
+		//Primary Handler for all Expression nodes
+		public void ExpressionHandler(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					dispatch((Node)o);
+				}
+				else{
+					if(o != null){
+						if (hflag == true){
+							hstring[0] = hstring[0] + ((String)o).toString();
+						}
+						else{
+							ccstring[0] = ccstring[0] + ((String)o).toString();
+						}
+					}
+					//System.out.print(((String)o).toString());
+				}
+			}
+		}
+		
+		public void visitFieldDeclaration(GNode n){
+			visit(n);
+		}
+		
+		public void visitType(GNode n){
+			visit(n);
+		}
+		
+		//primitive type specific, ex int, double, float, etc.
+		public void visitPrimitiveType(GNode n){
+			if (hflag == true){ //this type belongs to the .h file
+				hstring[0] = hstring[0] + n.getString(0) + " ";
+			}
+			else{  //this type belongs to the .cc file
+				ccstring[0] = ccstring[0] + n.getString(0) + " ";
+			}
+			//System.out.println(n.getString(0));
+		}
+		
+		//the name of the variable
+		public void visitPrimaryIdentifier(GNode n){
+			if (hflag == true){ //this type belongs to the .h file
+				hstring[0] = hstring[0] + n.getString(0);
+			}
+			else{  //this type belongs to the .cc file
+				ccstring[0] = ccstring[0] + n.getString(0);
+			}
+			//System.out.print(n.getString(0));
+		}
+		
+		//object type, ex String -- note, not actually complete, needs c++ translation
+		public void visitQualifiedIdentifier(GNode n){
+			hflag = true;
+			int j = 0;
+			while(n.size()>j){				
+				if (hflag == true){ //this type belongs to the .h file
+					hstring[j] = hstring[j] + n.getString(j) + " ";
+				}
+				else{  //this type belongs to the .cc file
+					ccstring[j] = ccstring[j] + n.getString(j);
+				}
+				j++;
+			}
+		}
+		
+		//container for Modifier nodes
+		public void visitModifiers(GNode n){
+			visit(n);
+		}
+		
+		//public, private, protected, abstract, static, etc.
+		public void visitModifier(GNode n){
+			//System.out.println("Modifier Test: " + n.getString(0) + " ");
+			if (hflag == true){ //this type belongs to the .h file
+				hstring[0] = hstring[0] + n.getString(0) + " ";
+			}
+			else{  //this type belongs to the .cc file
+				ccstring[0] = ccstring[0] + n.getString(0) +  " ";
+			}
+			//System.out.print(n.getString(0) + " ");
+		}
+		
+		//container for Declarator nodes
+		public void visitDeclarators(GNode n){
+			visit(n);
+		}
+		
+		//Large construct for declaring a variable
+		public void visitDeclarator(GNode n){
+			if(hflag == true){
+				hstring[0] = hstring[0] + n.getString(0); //check for other children, if has children then =, else nothing
+				System.out.println(n.hasVariable());
+				if(n.hasVariable())
+					hstring[0]+="=";
+				visit(n);
+				hstring[0] = hstring[0] + "; \r";
+				methodCC.add(ccstring[0]);
+			}
+			else{
+				ccstring[0] = ccstring[0] + n.getString(0) + "=";
+				visit(n);
+				ccstring[0] = ccstring[0] + "; \r";
+				methodCC.add(ccstring[0]);
+			}
+			//System.out.print(n.getString(0));
+			//if(n.get(1) != null) visit(n.getNode(1));
+			//System.out.print("=");
+			//visit(n);
+			//System.out.print(";\r");
+		}
+		
+		public void visitBlock(GNode n){
+			visit(n);
+		}
+		
+		//large construct for the body of a Class
+		public void visitClassBody(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					if(((GNode)o).getName().equals("FieldDeclaration")){
+						hflag = true;
+						//System.out.println("Translation Note: hfile access");
+					}
+					else{
+						hflag = false;
+					}
+					dispatch((Node)o);
 
-        public void visit(Node n) {
-          /*
-          for (Iterator<Object> iter = n.iterator(); iter.hasNext(); ) {
-            Object o = iter.next();
+					//we want to create a blank string that will not print null
+					if(hflag == true){
+						System.out.println(hstring[0]);
+						includesCC.add(hstring[0]);
+						hstring[0] = " ";
+						hstring[0] = hstring[0].replace(" ", "");
+					}
+					else{
+						System.out.println(ccstring[0]);
+						ccstring[0] = " ";
+						ccstring[0] = ccstring[0].replace(" ", "");
+					}
+				}
+				else{
+					//if(o != null)
+					//System.out.print(((String)o).toString());
+				}
+			}
+		}
+		
+		
+		public void visitConstructorDeclaration(GNode n){
+			visit(n);
+		}
+		
+		//method arguments
+		public void visitFormalParameters(GNode n){
+			//add the first parenthesis
+			visit(n);
+			//add the closing parenthesis and the opening curly brace
+		}
+		
+		public void visitFormalParameter(GNode n){
+			for(Object o: n){
+				if (o instanceof Node){
+					dispatch((Node)o);
+				}
+				else{
+					if(o != null){
+						if (hflag == true){
+							hstring[0] = hstring[0] + ((String)o).toString();
+						}
+						else{
+							ccstring[0] = ccstring[0] + ((String)o).toString();
+						}
+					}
+					//System.out.print(((String)o).toString());
+				}
+			}
+		}
+		public void visitImportDeclaration(GNode n){								//ToDo: Separate .cc and .h imports
+			ccstring[0]+="#include <";
+			for(Object o: n){
+				if (o instanceof Node){
+					dispatch((Node)o);
+				}
+				else{
+					if(o != null){
+						if (hflag == true){
+							hstring[0] = hstring[0] + ((String)o).toString();
+						}
+						else{
+							ccstring[0] = ccstring[0] + ((String)o).toString();
+						}
+					}
+				}
+			}			
+			ccstring[0] += ">;";
+			includesCC.add(ccstring[0]);
+			ccstring[0]="";
+		}
+		
+		public void visitPackageDeclaration(GNode n){
+			hflag = true;
+			visit(n);
+			for(int k=0;k<hstring.length;k++)
+				if(hstring[k]!=" ")
+					System.out.println(hstring[k]);
+			hflag = false;
+		}
+		
+    		/**
+    		 * Visiting a Class Declaration.
+    		 * 
+    		 * @param n It's the Node, smarty.
+    		 */
+    		public void visitClassDeclaration(GNode n){
 
-            }*/
-
-          for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-        }
-
-      }.dispatch(node);
+//    			String sprfilename = new String(basedirectory + outFileName + ".cc");
+//    			File argstest = new File(sprfilename);
+//    	    			
+//    			
+//				System.out.println(fileCC.getPath());
+    			visit(n);
+//				if(!argstest.exists()){
+//    				System.out.println("We are in here!");
+//					String[] args = new String[2];
+//    				args[0] = ("-translate");
+//    				args[1] = (basedirectory + outFileName + ".java");
+//    				TestTranslator trans = new TestTranslator();
+//    				trans.run(args);
+//				}    			
+    		}
+    		
+    		/** visiting... anything else? */
+    		public void visit(Node n) {
+    			//methodCC.add("Dadsa");
+    			for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+    		}
+    	}.dispatch(node);
     }
   }
 
@@ -106,7 +537,7 @@ public class Translator extends xtc.util.Tool {
    * @param args The command line arguments.
    */
   public static void main(String[] args) {
-    new Translator().run(args);
+    new TestTranslator().run(args);
   }
 
 }
