@@ -150,7 +150,6 @@ public class TestTranslator extends xtc.util.Tool {
 						ccstring = new LinkedList<String>();
 						hstring = new LinkedList<String>();
 
-
 					}
 					
 					catch (IOException e){
@@ -304,12 +303,15 @@ public class TestTranslator extends xtc.util.Tool {
 					else{
 						ccstring.add(";\r");
 					}
+					String s = "";
 					while(hstring.size()!=0){
-						includesH.add(hstring.pop());
+						s.concat(hstring.pop());
 					}
+					s = "";
 					while(ccstring.size()!=0){
-						includesCC.add(ccstring.pop());
+						s.concat(ccstring.pop());
 					}
+					includesCC.add(s);
 				}
 
 				/**
@@ -386,7 +388,22 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitQualifiedIdentifier(GNode n){
-					addStringsToList(n);
+					int i = 0;
+					while (i < n.size()){
+						if (hflag == true){
+							if(0<i && i<n.size()){
+								hstring.add(".");
+							}
+							hstring.add(((String)n.getString(i)));
+						}
+						else{
+							if(0<i && i<n.size()){
+								ccstring.add(".");
+							}
+							ccstring.add(((String)n.getString(i)));
+						}
+						i++;
+					}
 				}
 
 				/**
@@ -424,7 +441,7 @@ public class TestTranslator extends xtc.util.Tool {
 
 				/**
 				 * Possible Parents: Declarators
-				 * Writes to Elements: methodCC
+				 * Writes to Elements: methodCC, dataLayoutH
 				 * 
 				 * Large construct for declaring a variable
 				 * @param n
@@ -442,12 +459,16 @@ public class TestTranslator extends xtc.util.Tool {
 						visit(n);
 						ccstring.add("; \r");
 					}
+					String s = "";
 					while(hstring.size()!=0){
-						includesH.add(hstring.pop());
+						s.concat(hstring.pop());
 					}
+					dataLayoutH.add(s);
+					s = "";
 					while(ccstring.size()!=0){
-						includesCC.add(ccstring.pop());
+						s.concat(ccstring.pop());
 					}
+					methodCC.add(s);
 					//System.out.print(n.getString(0));
 					//if(n.get(1) != null) visit(n.getNode(1));
 					//System.out.print("=");
@@ -530,17 +551,26 @@ public class TestTranslator extends xtc.util.Tool {
 				 * 
 				 * @param n
 				 */
-				public void visitImportDeclaration(GNode n){								//ToDo: Separate .cc and .h imports
-					hflag = true;
-					hstring.add("#include <");
+				public void visitImportDeclaration(GNode n){
+					String hLine = "";					//Creating the string line for includesH
+					hflag = true;						
+					hLine = hLine + "#include <";    
 					visit(n);			
-					hstring.add(">;");
 					while(hstring.size()!=0){
-						includesH.add(hstring.pop());
+						hLine = hLine + hstring.pop();
 					}
+					hLine= hLine + ">;";
+					includesH.add(hLine);
+					hflag = false;
+
+					String ccLine = "";					//Creating the string line for includesH						
+					ccLine = ccLine + "#include <";    
+					visit(n);			
 					while(ccstring.size()!=0){
-						includesCC.add(ccstring.pop());
+						ccLine = ccLine + ccstring.pop();
 					}
+					ccLine= ccLine + ">;";
+					includesCC.add(ccLine);
 				}
 				
 				/**
