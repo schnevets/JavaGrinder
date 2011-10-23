@@ -128,7 +128,7 @@ public class TestTranslator extends xtc.util.Tool {
 						fileH.createNewFile();
 
 						includesCC = new LinkedList<String>();
-						includesCC.add("#include \""+outFileName+".h\"");
+						includesCC.add("#include \""+outFileName+".h\";");
 						nameSpaceCC = new LinkedList<String>();
 						methodCC = new LinkedList<String>();
 						vTableDefCC = new LinkedList<String>();
@@ -563,7 +563,7 @@ public class TestTranslator extends xtc.util.Tool {
 					includesH.add(hLine);
 					hflag = false;
 
-					String ccLine = "";					//Creating the string line for includesH						
+					String ccLine = "";					//Creating the string line for includesCC						
 					ccLine = ccLine + "#include <";    
 					visit(n);			
 					while(ccstring.size()!=0){
@@ -581,11 +581,31 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitPackageDeclaration(GNode n){
+					String hLine = "";
 					hflag = true;
 					visit(n);
-					while(!hstring.isEmpty())
-						System.out.println(hstring.pop());
+					while(hstring.peekFirst()!=null){
+						if(hstring.peekFirst()=="."){
+							hstring.pop();
+							hLine = "\t";
+						}
+						hLine = hLine + "namespace ";
+						hLine = hLine + hstring.pop() + "{";
+						nameSpaceH.add(hLine);
+					}
 					hflag = false;
+					
+					String ccLine = "";
+					visit(n);
+					while(ccstring.peekFirst()!=null){
+						if(ccstring.peekFirst()=="."){
+							ccstring.pop();
+							ccLine = "\t";
+						}
+						ccLine = ccLine + "namespace ";
+						ccLine = ccLine + ccstring.pop() + "{";
+						nameSpaceCC.add(ccLine);
+					}									
 				}
 
 				/**
