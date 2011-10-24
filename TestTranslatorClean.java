@@ -19,10 +19,12 @@
 package oop;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
@@ -95,6 +97,7 @@ public class TestTranslator extends xtc.util.Tool {
 				private File fileH;
 				private BufferedWriter outCC;
 				private BufferedWriter outH;
+				private File java_langH;
 
 				private LinkedList<String> includesCC;
 				private LinkedList<String> nameSpaceCC;
@@ -108,7 +111,10 @@ public class TestTranslator extends xtc.util.Tool {
 				private LinkedList<String> dataLayoutH;
 				private LinkedList<String> methodsImplementedH;
 				private LinkedList<String> vTableH;
-				private LinkedList<String> vTableLayoutH;
+				
+				private LinkedList<LinkedList> vTableLayoutH;
+				private LinkedList<LinkedList> vTableAddressH;
+				private LinkedList<String> classTracker;  //tracks what classes have been visited
 
 				private LinkedList<String> ccstring;
 				private LinkedList<String> hstring;
@@ -127,6 +133,9 @@ public class TestTranslator extends xtc.util.Tool {
 				/** What it says on the tin.*/
 				private void createFilesAndWriters(){
 					try{
+						java_langH = new File(basedirectory + "java_lang.h");
+						readJavaLang();
+						
 						fileCC = new File(basedirectory + outFileName + ".cc");
 						fileH = new File(basedirectory + outFileName + ".h");
 						fileCC.createNewFile();
@@ -145,7 +154,7 @@ public class TestTranslator extends xtc.util.Tool {
 						dataLayoutH = new LinkedList<String>();
 						methodsImplementedH = new LinkedList<String>();
 						vTableH = new LinkedList<String>();
-						vTableLayoutH = new LinkedList<String>();
+						vTableLayoutH = new LinkedList<LinkedList>();
 
 						writerCC = new FileWriter(fileCC);
 						writerH = new FileWriter(fileH);
@@ -155,8 +164,8 @@ public class TestTranslator extends xtc.util.Tool {
 						ccstring = new LinkedList<String>();
 						hstring = new LinkedList<String>();
 
-						marginSpaceH = "";
-						marginSpaceCC = "";
+						marginSpaceH = "  ";
+						marginSpaceCC = "  ";
 					}
 					
 					catch (IOException e){
@@ -165,7 +174,7 @@ public class TestTranslator extends xtc.util.Tool {
 					}
 				}
 
-				/** Final aseembly of .cc and .h files */
+				/** Final assembly of .cc and .h files */
 				private void assembleFile(){
 					assembleElement(includesCC,outCC);
 					assembleElement(nameSpaceCC,outCC);
@@ -183,7 +192,7 @@ public class TestTranslator extends xtc.util.Tool {
 					assembleElement(constructorH,outH);
 					assembleElement(methodsImplementedH,outH);
 					assembleElement(vTableH,outH);
-					assembleElement(vTableLayoutH,outH);
+					//assembleElement(vTableLayoutH,outH);											//Will need it's own implementation to handle LinkedList<LinkedList> and insertion location details
 					try {
 						outH.close();
 					} catch (IOException e) {
@@ -219,6 +228,27 @@ public class TestTranslator extends xtc.util.Tool {
 							}
 						}
 					}
+				}
+				
+				/** 
+				 * Reads java_lang.h and assembles java.lang.Object vtable in a LinkedList format
+				 * 
+				 */
+				public void readJavaLang(){
+					try {
+						Scanner scan = new Scanner(java_langH);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					/*
+					 * VTableLayout line can be broken up into several parts
+					 * return type (*methodname) (parameters)
+					 * 
+					 * VTableAddress line can be broken up into several parts
+					 * methodname((anyspecialcasting)&class::methodname);
+					 */
+					
 				}
 				
 				/**
@@ -465,7 +495,13 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitModifier(GNode n){
-						addStringsToList(n);	
+					addStringsToList(n);	
+					if (hflag == true){
+						hstring.add(" ");
+					}
+					else{
+						ccstring.add(" ");
+					}
 				}
 
 				/**
@@ -841,7 +877,7 @@ public class TestTranslator extends xtc.util.Tool {
 								}
 							}
 						}
-						while(!hstring.isEmpty()){
+						while(!ccstring.isEmpty()){
 							ccLine = ccLine + ccstring.pop() + " ";
 						}
 						ccLine = ccLine + "}";
