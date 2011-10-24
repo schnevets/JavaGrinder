@@ -1,0 +1,13 @@
+I made some significant changes to the translator in the new TestTranslatorClean.
+-ccstring and hstring are now linked lists of strings
+	-The new method addStringsToList finds all the string children of a Node and adds them to the ccstring or hstring depending on the hflag.
+	-Instead of making one big string, strings are added to ccstring and hstring in order.
+	-When it comes to to write a line to an Element, ccstring and hstring simply pop all of their gathered strings to the next line of that element.
+	*The printing isn't as pretty as before at the moment; needs some work to get the spacing and returns correct.
+	*Things are now printed directly into the element files.
+-Each visit method has standard comments
+	-Possible Parents: lets us know from what other node the Visitor might have just come from.
+	-Writes to Elements: lets us know if and to what elements the visit method is printing.
+-I deleted a lot of System.out.println()s. Sorry if you guys formed bonds with them.
+
+It works great on my PC. Let me know if you guys have any questions and what you think!
