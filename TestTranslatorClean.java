@@ -179,8 +179,8 @@ public class TestTranslator extends xtc.util.Tool {
 					assembleElement(includesH,outH);
 					assembleElement(nameSpaceH,outH);
 					assembleElement(forwardDeclarationsH,outH);
-					assembleElement(constructorH,outH);
 					assembleElement(dataLayoutH,outH);
+					assembleElement(constructorH,outH);
 					assembleElement(methodsImplementedH,outH);
 					assembleElement(vTableH,outH);
 					assembleElement(vTableLayoutH,outH);
@@ -341,8 +341,8 @@ public class TestTranslator extends xtc.util.Tool {
 						if (o instanceof Node){
 							dispatch((Node)o);
 						}
-						addStringsToList(n);
 					}
+					addStringsToList(n);
 				}
 
 				/**
@@ -358,7 +358,7 @@ public class TestTranslator extends xtc.util.Tool {
 						while(hstring.size()>0){
 							hLine = hLine + hstring.pop();
 						}
-						System.out.println(hLine);
+						hLine = hLine + ";";
 						dataLayoutH.add(hLine);
 					}
 					
@@ -373,6 +373,12 @@ public class TestTranslator extends xtc.util.Tool {
 				 */
 				public void visitType(GNode n){
 					visit(n);
+					if (hflag == true){						//adding a space after the type name
+						hstring.add(" ");
+					}
+					else{
+						ccstring.add(" ");
+					}
 				}
 
 				/**
@@ -444,7 +450,7 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitModifier(GNode n){
-					addStringsToList(n);
+						addStringsToList(n);	
 				}
 
 				/**
@@ -467,32 +473,15 @@ public class TestTranslator extends xtc.util.Tool {
 				 */
 				public void visitDeclarator(GNode n){
 					if(hflag == true){
-						hstring.add(n.getString(0)); //check for other children, if has children then =, else nothing
-						if(n.hasVariable())
-							hstring.add("=");
-						visit(n);
-						hstring.add("; \r");
+						hstring.add(" ");
+						hstring.add(n.getString(0)); 
 					}
 					else{
-						ccstring.add(n.getString(0) + "=");
+						ccstring.add(n.getString(0));
+						if(n.hasVariable())					//check for other children, if has children then =, else nothing
+							ccstring.add("=");				
 						visit(n);
-						ccstring.add("; \r");
 					}
-					String s = "";
-					while(hstring.size()!=0){
-						s.concat(hstring.pop());
-					}
-					dataLayoutH.add(s);
-					s = "";
-					while(ccstring.size()!=0){
-						s.concat(ccstring.pop());
-					}
-					methodCC.add(s);
-					//System.out.print(n.getString(0));
-					//if(n.get(1) != null) visit(n.getNode(1));
-					//System.out.print("=");
-					//visit(n);
-					//System.out.print(";\r");
 				}
 
 				/**
@@ -533,6 +522,17 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitConstructorDeclaration(GNode n){
+					hflag = true;
+					dispatch((Node)n.getNode(3));
+					String hLine;
+					hLine = marginSpaceH + "__" + className;
+					while (hstring.size()>0){
+						hLine = hLine + hstring.pop();
+					}
+					hLine = hLine + ";";
+					constructorH.add(hLine);
+					hflag = false;
+					
 					visit(n);
 				}
 
@@ -544,9 +544,20 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitFormalParameters(GNode n){
-					//add the first parenthesis
-					visit(n);
-					//add the closing parenthesis and the opening curly brace
+					if (hflag == true){
+						hstring.add("(");
+						int i = 0;
+						for(Object o: n){
+							if (o instanceof Node){
+								dispatch((Node)o);
+							}
+							i++;
+							if (i < n.size()){
+								hstring.add(",");
+							}
+						}
+						hstring.add(")");
+					}
 				}
 
 				/**
@@ -560,8 +571,8 @@ public class TestTranslator extends xtc.util.Tool {
 						if (o instanceof Node){
 							dispatch((Node)o);
 						}
-						addStringsToList(n);
 					}
+					addStringsToList(n);
 				}
 				
 				/**
@@ -654,7 +665,7 @@ public class TestTranslator extends xtc.util.Tool {
 					hLine = marginSpaceH + "__" + className + "_VT* __vptr;";							//Adding '__ClassName_VT* __vptr; {' to dataLayoutH
 					dataLayoutH.add(hLine);
 					
-					
+
 					
 					visit(n); 
 					
