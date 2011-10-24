@@ -1,22 +1,6 @@
 /*
- * xtc - The eXTensible Compiler
- * Copyright (C) 2011 Robert Grimm
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
- * USA.
  */
-package oop;
+package xtc.oop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -179,8 +163,8 @@ public class TestTranslator extends xtc.util.Tool {
 					assembleElement(includesH,outH);
 					assembleElement(nameSpaceH,outH);
 					assembleElement(forwardDeclarationsH,outH);
-					assembleElement(dataLayoutH,outH);
 					assembleElement(constructorH,outH);
+					assembleElement(dataLayoutH,outH);
 					assembleElement(methodsImplementedH,outH);
 					assembleElement(vTableH,outH);
 					assembleElement(vTableLayoutH,outH);
@@ -294,8 +278,21 @@ public class TestTranslator extends xtc.util.Tool {
 				 */
 				public void visitMultiplicativeExpression(GNode n){
 					ExpressionHandler(n);
+					System.out.println(ccstring);
 				}
 
+				/**
+				 * Possible Parents:
+				 * Writes to Elemenst: No
+				 * 
+				 * handles multiplication, division and modulus
+				 * @param n
+				 */
+				public void visitPostfixExpression(GNode n){
+					ccstring.clear();
+					}
+
+				
 				/**
 				 * Possible Parents: Block
 				 * Writes to Elements: methodCC
@@ -342,7 +339,8 @@ public class TestTranslator extends xtc.util.Tool {
 							dispatch((Node)o);
 						}
 					}
-					addStringsToList(n);
+					System.out.println(ccstring);
+					addStringsToList(n);				//Adjusted... MAKE SURE THIS WORKS!!!
 				}
 
 				/**
@@ -358,7 +356,7 @@ public class TestTranslator extends xtc.util.Tool {
 						while(hstring.size()>0){
 							hLine = hLine + hstring.pop();
 						}
-						hLine = hLine + ";";
+//						System.out.println(hLine);
 						dataLayoutH.add(hLine);
 					}
 					
@@ -373,12 +371,6 @@ public class TestTranslator extends xtc.util.Tool {
 				 */
 				public void visitType(GNode n){
 					visit(n);
-					if (hflag == true){						//adding a space after the type name
-						hstring.add(" ");
-					}
-					else{
-						ccstring.add(" ");
-					}
 				}
 
 				/**
@@ -450,7 +442,7 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitModifier(GNode n){
-						addStringsToList(n);	
+					addStringsToList(n);
 				}
 
 				/**
@@ -473,15 +465,32 @@ public class TestTranslator extends xtc.util.Tool {
 				 */
 				public void visitDeclarator(GNode n){
 					if(hflag == true){
-						hstring.add(" ");
-						hstring.add(n.getString(0)); 
+						hstring.add(n.getString(0)); //check for other children, if has children then =, else nothing
+						if(n.hasVariable())
+							hstring.add("=");
+						visit(n);
+						hstring.add("; \r");
 					}
 					else{
-						ccstring.add(n.getString(0));
-						if(n.hasVariable())					//check for other children, if has children then =, else nothing
-							ccstring.add("=");				
+						ccstring.add(n.getString(0) + "=");
 						visit(n);
+						ccstring.add("; \r");
 					}
+					String s = "";
+					while(hstring.size()!=0){
+						s.concat(hstring.pop());
+					}
+					dataLayoutH.add(s);
+					s = "";
+					while(ccstring.size()!=0){
+						s.concat(ccstring.pop());
+					}
+					methodCC.add(s);
+					//System.out.print(n.getString(0));
+					//if(n.get(1) != null) visit(n.getNode(1));
+					//System.out.print("=");
+					//visit(n);
+					//System.out.print(";\r");
 				}
 
 				/**
@@ -522,17 +531,6 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitConstructorDeclaration(GNode n){
-					hflag = true;
-					dispatch((Node)n.getNode(3));
-					String hLine;
-					hLine = marginSpaceH + "__" + className;
-					while (hstring.size()>0){
-						hLine = hLine + hstring.pop();
-					}
-					hLine = hLine + ";";
-					constructorH.add(hLine);
-					hflag = false;
-					
 					visit(n);
 				}
 
@@ -544,20 +542,9 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitFormalParameters(GNode n){
-					if (hflag == true){
-						hstring.add("(");
-						int i = 0;
-						for(Object o: n){
-							if (o instanceof Node){
-								dispatch((Node)o);
-							}
-							i++;
-							if (i < n.size()){
-								hstring.add(",");
-							}
-						}
-						hstring.add(")");
-					}
+					//add the first parenthesis
+					visit(n);
+					//add the closing parenthesis and the opening curly brace
 				}
 
 				/**
@@ -571,8 +558,67 @@ public class TestTranslator extends xtc.util.Tool {
 						if (o instanceof Node){
 							dispatch((Node)o);
 						}
+						addStringsToList(n);
 					}
+				}
+				
+
+				/**
+				 * Possible Parents: ExpressionStatement, EqualityExpression, AdditiveExpression, Expression
+				 * Writes to Elements: No
+				 * 
+				 * @param n
+				 */				
+				public void visitCallExpression(GNode n){
+//					System.out.println("Visiting Call");
+					ExpressionHandler(n);
 					addStringsToList(n);
+//					System.out.println(ccstring);
+					visit(n);
+				}
+				
+				/**
+				 * Only used for System.out.println... for now
+				 * Possible Parents: CallExpression
+				 * Writes to Elements: MethodCC (special case)
+				 * 
+				 * @param n
+				 */
+				public void visitSelectionExpression(GNode n){
+					visit(n);
+					addStringsToList(n);
+//					System.out.println(ccstring);
+					if(ccstring.size()>3 && ccstring.get(0).startsWith("System") && ccstring.get(1).startsWith("out")
+							&& ccstring.get(2).startsWith("println")){
+//									System.out.println("There's a print!");
+						}
+				}
+
+				/**
+				 * Possible Parents: None (Comma)
+				 * Writes to Elements: MethodCC
+				 * 
+				 * @param n
+				 */
+				public void visitConditionalStatement(GNode n){
+					hflag=false;
+					visit(n);			
+				}
+
+				/**
+				 * Possible Parents: ConditionalStatement,
+				 * Writes to Elements: ccLine
+				 * 
+				 * @param n
+				 */				
+				public void visitEqualityExpression(GNode n){
+					visit(n);
+					System.out.println(ccstring);
+					String condition = ccstring.remove(2);
+					String ccLine = "if("+ccstring.pop()+condition+ccstring.pop()+"=="+ccstring.pop()+")";
+					System.out.println(ccLine);
+					methodCC.add(ccLine);
+					ccLine="";
 				}
 				
 				/**
@@ -665,7 +711,7 @@ public class TestTranslator extends xtc.util.Tool {
 					hLine = marginSpaceH + "__" + className + "_VT* __vptr;";							//Adding '__ClassName_VT* __vptr; {' to dataLayoutH
 					dataLayoutH.add(hLine);
 					
-
+					
 					
 					visit(n); 
 					
@@ -691,5 +737,6 @@ public class TestTranslator extends xtc.util.Tool {
 	public static void main(String[] args) {
 		new TestTranslator().run(args);
 	}
-
 }
+
+
