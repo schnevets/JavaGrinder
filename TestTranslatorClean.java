@@ -114,6 +114,11 @@ public class TestTranslator extends xtc.util.Tool {
 				private LinkedList<String> hstring;
 
 				private boolean hflag;
+				
+				private String marginSpaceCC;
+				private String marginSpaceH;
+				
+				private String className;
 
 
 				//the source directory for the .java files
@@ -150,6 +155,8 @@ public class TestTranslator extends xtc.util.Tool {
 						ccstring = new LinkedList<String>();
 						hstring = new LinkedList<String>();
 
+						marginSpaceH = "";
+						marginSpaceCC = "";
 					}
 					
 					catch (IOException e){
@@ -340,12 +347,22 @@ public class TestTranslator extends xtc.util.Tool {
 
 				/**
 				 * Possible Parents: ClassBody
-				 * Writes to Elements: No
+				 * Writes to Elements: dataLayoutH
 				 * 
 				 * @param n
 				 */
 				public void visitFieldDeclaration(GNode n){
 					visit(n);
+					if (hflag == true){
+						String hLine = marginSpaceH;
+						while(hstring.size()>0){
+							hLine = hLine + hstring.pop();
+						}
+						System.out.println(hLine);
+						dataLayoutH.add(hLine);
+					}
+					
+
 				}
 
 				/**
@@ -414,7 +431,9 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitModifiers(GNode n){
-					visit(n);
+					if (hflag == false){
+						visit(n);
+					}
 				}
 
 				/**
@@ -587,7 +606,8 @@ public class TestTranslator extends xtc.util.Tool {
 					while(hstring.peekFirst()!=null){
 						if(hstring.peekFirst()=="."){
 							hstring.pop();
-							hLine = "\t";
+							marginSpaceH = marginSpaceH + "  ";
+							hLine = marginSpaceH;
 						}
 						hLine = hLine + "namespace ";
 						hLine = hLine + hstring.pop() + "{";
@@ -600,7 +620,8 @@ public class TestTranslator extends xtc.util.Tool {
 					while(ccstring.peekFirst()!=null){
 						if(ccstring.peekFirst()=="."){
 							ccstring.pop();
-							ccLine = "\t";
+							marginSpaceCC = marginSpaceCC + "  ";
+							ccLine = marginSpaceCC;
 						}
 						ccLine = ccLine + "namespace ";
 						ccLine = ccLine + ccstring.pop() + "{";
@@ -610,17 +631,36 @@ public class TestTranslator extends xtc.util.Tool {
 
 				/**
 				 * Possible Parents: CompilationUnit
-				 * Writes to Elements: No
+				 * Writes to Elements: forwardDeclarationsH, dataLayoutH
 				 * 
 				 * @param n
 				 */
 				public void visitClassDeclaration(GNode n){
+					
+					String hLine;
+					className = n.getString(1);
+					hLine = marginSpaceH + "struct __" + className + ";";								//Adding 'struct __ClassName;' to forwardDeclarationH
+					forwardDeclarationsH.add(hLine);
+					hLine = marginSpaceH + "struct __" + className + "_VT;";							//Adding 'struct __ClassName_VT'; to forwardDeclarationH
+					forwardDeclarationsH.add(hLine);
+					hLine = "";																			//Adding an empty line to forwardDeclarationH
+					forwardDeclarationsH.add(hLine);
+					hLine = marginSpaceH + "typedef __" + className + "* " + className + ";";			//Adding 'typedef __ClassName* ClassName;' to forwardDeclarationH
+					forwardDeclarationsH.add(hLine);
+
+					hLine =  marginSpaceH + "struct __" + className + " {";								//Adding 'struct __ClassName {' to dataLayoutH
+					dataLayoutH.add(hLine);
+					marginSpaceH = marginSpaceH + "  ";
+					hLine = marginSpaceH + "__" + className + "_VT* __vptr;";							//Adding '__ClassName_VT* __vptr; {' to dataLayoutH
+					dataLayoutH.add(hLine);
+					
+					
+					
 					visit(n); 
 					
 				}
 				
 				/**
-				 * Possible Parents:
 				 * 
 				 * 
 				 * @param n
