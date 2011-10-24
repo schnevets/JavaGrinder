@@ -732,6 +732,14 @@ public class TestTranslator extends xtc.util.Tool {
 					marginSpaceH = marginSpaceH + "  ";
 					hLine = marginSpaceH + "__" + className + "_VT* __vptr;";							//Adding '__ClassName_VT* __vptr; {' to dataLayoutH
 					dataLayoutH.add(hLine);
+
+					hLine = marginSpaceH + "static Class __class();";									//Adding 'static Class __class();' to vTableH
+					vTableH.add(hLine);
+					hLine = marginSpaceH + "static __" + className + "_VT __vtable;";					//Adding 'static __ClassName_VT __vtable;' to vTableH
+					vTableH.add(hLine);
+					marginSpaceH = marginSpaceH.substring(2);
+					hLine = marginSpaceH + "};";
+					vTableH.add(hLine);	
 					
 
 					
