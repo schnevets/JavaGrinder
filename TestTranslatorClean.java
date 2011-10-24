@@ -16,7 +16,7 @@
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
  */
-package oop;
+package xtc.oop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -532,8 +532,18 @@ public class TestTranslator extends xtc.util.Tool {
 					hLine = hLine + ";";
 					constructorH.add(hLine);
 					hflag = false;
-					
 					visit(n);
+				}
+				
+				/**
+				* Possible Parents:
+				* Writes to Elemenst: No
+				*
+				* handles multiplication, division and modulus
+				* @param n
+				*/
+				public void visitPostfixExpression(GNode n){
+					ccstring.clear();
 				}
 
 				/**
@@ -573,6 +583,64 @@ public class TestTranslator extends xtc.util.Tool {
 						}
 					}
 					addStringsToList(n);
+				}
+				
+				/**
+				* Possible Parents: ExpressionStatement, EqualityExpression, AdditiveExpression, Expression
+				* Writes to Elements: No
+				*
+				* @param n
+				*/
+				public void visitCallExpression(GNode n){
+					// System.out.println("Visiting Call");
+					ExpressionHandler(n);
+					addStringsToList(n);
+					// System.out.println(ccstring);
+					visit(n);
+				}
+				
+				/**
+				* Only used for System.out.println... for now
+				* Possible Parents: CallExpression
+				* Writes to Elements: MethodCC (special case)
+				*
+				* @param n
+				*/
+				public void visitSelectionExpression(GNode n){
+					visit(n);
+					addStringsToList(n);
+					System.out.println(ccstring+":P");
+					if(ccstring.size()>3 && ccstring.get(0).startsWith("System") && ccstring.get(1).startsWith("out")
+					&& ccstring.get(2).startsWith("println")){
+						System.out.println("There's a print!");
+				}
+				}
+				
+				/**
+				* Possible Parents: None (Comma)
+				* Writes to Elements: MethodCC
+				*
+				* @param n
+				*/
+				public void visitConditionalStatement(GNode n){
+					hflag=false;
+					visit(n);
+				}
+				
+				/**
+				* Possible Parents: ConditionalStatement,
+				* Writes to Elements: ccLine
+				*
+				* @param n
+				*/
+				public void visitEqualityExpression(GNode n){
+					visit(n);
+					System.out.println(ccstring);
+					String condition = ccstring.remove(2);
+					String ccLine = "if("+ccstring.pop()+condition+ccstring.pop()+"=="+ccstring.pop()+")";
+					System.out.println(ccLine);
+					methodCC.add(ccLine);
+					ccLine="";
 				}
 				
 				/**
