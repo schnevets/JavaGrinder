@@ -16,7 +16,7 @@
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
  */
-package xtc.oop;
+package oop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -366,6 +366,21 @@ public class TestTranslator extends xtc.util.Tool {
 				}
 
 				/**
+				 * Possible Parents: FieldDeclaration, MethodDeclaration
+				 * Writes to Elements: No
+				 * 
+				 * @param n
+				 */
+				public void visitVoidType(GNode n){
+					if (hflag == true){
+						hstring.add("void ");
+					}
+					else{
+						ccstring.add("void ");
+					}
+				}
+				
+				/**
 				 * Possible Parents: FieldDeclaration
 				 * Writes to Elements: No
 				 * 
@@ -568,6 +583,20 @@ public class TestTranslator extends xtc.util.Tool {
 						}
 						hstring.add(")");
 					}
+					else{
+						ccstring.add("(");
+						int i = 0;
+						for(Object o: n){
+							if (o instanceof Node){
+								dispatch((Node)o);
+							}
+							i++;
+							if (i < n.size()){
+								ccstring.add(",");
+							}
+						}
+						ccstring.add(")");
+					}
 				}
 
 				/**
@@ -746,6 +775,75 @@ public class TestTranslator extends xtc.util.Tool {
 					visit(n); 
 					
 				}
+				
+				public void visitMethodDeclaration(GNode n){					
+					 // --- header file --- (nothing here yet, really)
+						hflag = true;
+						String hLine = "";
+						addStringsToList(n);
+						String methodName = hstring.pop();
+						hstring.clear();
+						for(Object o: n){					// I'm making the assumption that the h file won't need to look
+							if (o instanceof Node){			// in the block of the method; I could be wrong.
+								Node c = (Node)o;			// (but I don't think so)
+								if (!c.hasName("Block")){
+									dispatch((Node)o);
+								}
+							}
+						}
+//						while(!hstring.isEmpty()){
+//							hLine = hLine + hstring.pop() + " ";  <---- printing stuff haphazardly, just to look at it
+//						}
+//						methodsImplementedH.add(hLine);
+						
+						
+					 // --- cc file ---
+						hflag = false;
+						String ccLine = "";
+						ccstring.clear();
+						
+						// actual method declaration line
+						for(Object o: n){
+							if (o instanceof Node){
+								Node c = (Node)o;
+								if (!c.hasName("Block")){
+									dispatch((Node)o);
+								}
+							}
+						}
+						while(!ccstring.isEmpty()){
+							if (ccstring.peekFirst() == "public" 
+									|| ccstring.peekFirst() == "private" 
+									|| ccstring.peekFirst() == "protected"){
+								ccLine = marginSpaceCC.substring(2) + ccstring.pop() + ":\n" + marginSpaceCC;
+							}
+							else if (ccstring.peekFirst().charAt(0) == '('){
+								ccLine = ccLine + methodName + ccstring.pop();
+							}
+							else{
+								ccLine = ccLine + ccstring.pop();
+							}
+						}
+						ccLine = ccLine + "{";
+						marginSpaceCC.concat("  ");
+						methodCC.add(ccLine);
+						
+						// method block
+						ccLine = marginSpaceCC;
+						for(Object o: n){
+							if (o instanceof Node){
+								Node c = (Node)o;
+								if (c.hasName("Block")){
+									dispatch((Node)o);
+								}
+							}
+						}
+						while(!hstring.isEmpty()){
+							ccLine = ccLine + ccstring.pop() + " ";
+						}
+						ccLine = ccLine + "}";
+						methodCC.add(ccLine);
+					}
 				
 				/**
 				 * 
