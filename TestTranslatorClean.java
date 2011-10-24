@@ -621,10 +621,6 @@ public class TestTranslator extends xtc.util.Tool {
 				* @param n
 				*/
 				public void visitCallExpression(GNode n){
-					// System.out.println("Visiting Call");
-					ExpressionHandler(n);
-					addStringsToList(n);
-					// System.out.println(ccstring);
 					visit(n);
 				}
 				
@@ -638,12 +634,9 @@ public class TestTranslator extends xtc.util.Tool {
 				public void visitSelectionExpression(GNode n){
 					visit(n);
 					addStringsToList(n);
-					System.out.println(ccstring+":P");
-					if(ccstring.size()>3 && ccstring.get(0).startsWith("System") && ccstring.get(1).startsWith("out")
-					&& ccstring.get(2).startsWith("println")){
-						System.out.println("There's a print!");
+					System.out.println(ccstring);
 				}
-				}
+
 				
 				/**
 				* Possible Parents: None (Comma)
@@ -775,7 +768,17 @@ public class TestTranslator extends xtc.util.Tool {
 					visit(n); 
 					
 				}
-				
+
+				public void visitArguments(GNode n){
+					visit(n);
+					System.out.println(ccstring);
+					if(ccstring.size()>2 && ccstring.get(0).startsWith("System") && ccstring.get(1).startsWith("out")){
+						System.out.println(ccstring+"Blah?");
+						if(!includesCC.contains("#include <iostream>"))
+							includesCC.add("#include <iostream>");
+						methodCC.add("cout << "+ccstring.get(2)+"<< std::endl;");
+					}
+				}
 				public void visitMethodDeclaration(GNode n){					
 					 // --- header file --- (nothing here yet, really)
 						hflag = true;
