@@ -112,9 +112,11 @@ public class TestTranslator extends xtc.util.Tool {
 				private LinkedList<String> methodsImplementedH;
 				private LinkedList<String> vTableH;
 				
+				private LinkedList<vTableLayoutLine> OvTableLayoutH;
+				private LinkedList<vTableAddressLine> OvTableAddressH;
 				private LinkedList<vTableLayoutLine> vTableLayoutH;
 				private LinkedList<vTableAddressLine> vTableAddressH;
-				private LinkedList<String> classTracker;  //tracks what classes have been visited
+				private LinkedList<String> classTracker;  //tracks what classes have been visited, not used yet
 
 				private LinkedList<String> ccstring;
 				private LinkedList<String> hstring;
@@ -155,6 +157,8 @@ public class TestTranslator extends xtc.util.Tool {
 						dataLayoutH = new LinkedList<String>();
 						methodsImplementedH = new LinkedList<String>();
 						vTableH = new LinkedList<String>();
+						OvTableLayoutH = new LinkedList<vTableLayoutLine>();
+						OvTableAddressH = new LinkedList<vTableAddressLine>();
 						vTableLayoutH = new LinkedList<vTableLayoutLine>();
 						vTableAddressH = new LinkedList<vTableAddressLine>();
 						
@@ -195,7 +199,7 @@ public class TestTranslator extends xtc.util.Tool {
 					assembleElement(constructorH,outH);
 					assembleElement(methodsImplementedH,outH);
 					assembleElement(vTableH,outH);
-					//assembleElement(vTableLayoutH,outH);											//Will need it's own implementation to handle LinkedList<LinkedList> and insertion location details
+					//assembleVTable(vTableLayoutH,vTableAddressH,outH);											//Will need it's own implementation to handle LinkedList<LinkedList> and insertion location details
 					try {
 						outH.close();
 					} catch (IOException e) {
@@ -213,11 +217,50 @@ public class TestTranslator extends xtc.util.Tool {
 				private void assembleElement(LinkedList<String> Element, BufferedWriter file){
 					while(!Element.isEmpty()){
 						try {
+							String vtablesearch = Element.peek();
 							file.write((String)Element.remove(0)+"\n");
+							if (vtablesearch.contains("//vTableStart")){
+								assembleVTable(file);
+							}
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
+				}
+				
+				private void assembleVTable(BufferedWriter file){
+					String classsearch = vTableLayoutH.peek().vTableClass;
+					while(!vTableLayoutH.isEmpty()){
+						String classcheck = vTableLayoutH.peek().vTableClass;
+						if(classcheck.equals(classsearch)){
+							vTableLayoutLine line = vTableLayoutH.pop();
+							try {
+								file.write(line.vTableLine);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else{
+							break;
+						}
+					}
+					while(!vTableAddressH.isEmpty()){
+						String classcheck = vTableAddressH.peek().vTableClass;
+						if(classcheck.equals(classsearch)){
+							vTableAddressLine line = vTableAddressH.pop();
+							try {
+								file.write(line.vTableLine);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else{
+							break;
+						}
+					}
+					
 				}
 
 				private void addStringsToList(GNode n){
@@ -252,36 +295,36 @@ public class TestTranslator extends xtc.util.Tool {
 					line.setReturnType("Class");
 					line.setMethodName("__isa");
 					line.createVTableLine();
-					vTableLayoutH.add(line);
+					OvTableLayoutH.add(line);
 					line = new vTableLayoutLine();
 					line.setVTableClass("Object");
 					line.setReturnType("int32_t");
 					line.setMethodName("hashCode");
-					line.setParameters("Object");
+					line.setReferenceParameter("Object");
 					line.createVTableLine();
-					vTableLayoutH.add(line);
+					OvTableLayoutH.add(line);
 					line = new vTableLayoutLine();
 					line.setVTableClass("Object");
 					line.setReturnType("bool");
 					line.setMethodName("equals");
-					line.setParameters("Object");
+					line.setReferenceParameter("Object");
 					line.setParameters("Object");
 					line.createVTableLine();
-					vTableLayoutH.add(line);
+					OvTableLayoutH.add(line);
 					line = new vTableLayoutLine();
 					line.setVTableClass("Object");
 					line.setReturnType("Class");
 					line.setMethodName("getClass");
-					line.setParameters("Object");
+					line.setReferenceParameter("Object");
 					line.createVTableLine();
-					vTableLayoutH.add(line);
+					OvTableLayoutH.add(line);
 					line = new vTableLayoutLine();
 					line.setVTableClass("Object");
 					line.setReturnType("String");
 					line.setMethodName("toString");
-					line.setParameters("Object");
+					line.setReferenceParameter("Object");
 					line.createVTableLine();
-					vTableLayoutH.add(line);
+					OvTableLayoutH.add(line);
 					
 					//vTableAddressH
 					vTableAddressLine liner = new vTableAddressLine();
@@ -290,42 +333,78 @@ public class TestTranslator extends xtc.util.Tool {
 					liner.setClassname("__Object");
 					liner.setMethodName("__isa");
 					liner.createVTableLine();
-					vTableAddressH.add(liner);
+					OvTableAddressH.add(liner);
 					liner = new vTableAddressLine();
 					liner.setVTableClass("Object");
 					liner.setClassname("__Object");
 					liner.setMethodName("hashCode");
 					liner.createVTableLine();
-					vTableAddressH.add(liner);
+					OvTableAddressH.add(liner);
 					liner = new vTableAddressLine();
 					liner.setVTableClass("Object");
 					liner.setClassname("__Object");
 					liner.setMethodName("equals");
 					liner.createVTableLine();
-					vTableAddressH.add(liner);
+					OvTableAddressH.add(liner);
 					liner = new vTableAddressLine();
 					liner.setVTableClass("Object");
 					liner.setClassname("__Object");
 					liner.setMethodName("getClass");
 					liner.createVTableLine();
-					vTableAddressH.add(liner);
+					OvTableAddressH.add(liner);
 					liner = new vTableAddressLine();
 					liner.setVTableClass("Object");
 					liner.setClassname("__Object");
 					liner.setMethodName("toString");
 					liner.createVTableLine();
-					vTableAddressH.add(liner);
+					OvTableAddressH.add(liner);
 					
 					//testing
-					while(!(vTableLayoutH.isEmpty())){
-						vTableLayoutLine current = vTableLayoutH.pop();
+					/*
+					while(!(OvTableLayoutH.isEmpty())){
+						vTableLayoutLine current = OvTableLayoutH.pop();
 						System.out.print(current.vTableLine);
 					}
-					while(!(vTableAddressH.isEmpty())){
-						vTableAddressLine current = vTableAddressH.pop();
+					while(!(OvTableAddressH.isEmpty())){
+						vTableAddressLine current = OvTableAddressH.pop();
 						System.out.print(current.vTableLine);
+					}
+					*/
+				}
+				
+				public LinkedList<vTableLayoutLine> convertVLayoutPrelim(LinkedList<vTableLayoutLine> cloneOL, String classname){
+					LinkedList<vTableLayoutLine> newclone = new LinkedList<vTableLayoutLine>();
+					while(!(cloneOL.isEmpty())){
+						vTableLayoutLine current = cloneOL.pop();
+						current.setReferenceParameter(classname);
+						current.setVTableClass(classname);
+						current.createVTableLine();
+						newclone.add(current);
 					}
 					
+					//testing
+					/*
+					while(!(newclone.isEmpty())){
+						vTableLayoutLine current = newclone.pop();
+						System.out.print(current.vTableLine);
+					}
+					*/
+					return newclone;
+				}
+				
+				//in progress conversion of addresslines to the right reference types
+				public LinkedList<vTableAddressLine> convertVTableAddress(vTableAddressLine cloneO, String classname){
+					LinkedList<vTableAddressLine> newcloneO = new LinkedList<vTableAddressLine>();
+					
+					//rework this method entirely, convert one address line only
+					/*
+					while(!(cloneO.isEmpty())){
+						vTableAddressLine current = cloneO.pop();
+						current.setClassname(classname);
+					}
+					*/
+					
+					return newcloneO;
 				}
 				
 				/**
@@ -908,6 +987,11 @@ public class TestTranslator extends xtc.util.Tool {
 					hLine = marginSpaceH + "};";
 					vTableH.add(hLine);	
 					
+					hLine = "//vTableStart " + className;
+					vTableH.add(hLine);
+					hLine = "\r";
+					vTableH.add(hLine);
+					
 					vTableAddressLine liner = new vTableAddressLine();
 					vTableLayoutLine line = new vTableLayoutLine();
 					line.setVTableClass(className);
@@ -916,7 +1000,13 @@ public class TestTranslator extends xtc.util.Tool {
 					liner.createStructLine("__" + className + "_VT() \r : ");
 					vTableAddressH.add(liner);
 					vTableLayoutH.add(line);
-
+					
+					LinkedList<vTableLayoutLine> cloneOL = new LinkedList<vTableLayoutLine>();
+					LinkedList<vTableAddressLine> cloneOA = new LinkedList<vTableAddressLine>();
+					cloneOA.addAll(OvTableAddressH);
+					cloneOL.addAll(OvTableLayoutH);
+					cloneOL = convertVLayoutPrelim(cloneOL, className);
+					//cloneOA = convertVTableAddress(cloneOA, className);
 					
 					visit(n); 
 					
@@ -925,10 +1015,9 @@ public class TestTranslator extends xtc.util.Tool {
 					line.setVTableClass(className);
 					liner.setVTableClass(className);
 					line.createStructLine("\r");
-					liner.createStructLine("");
+					liner.createStructLine(" { \r" + marginSpaceH + "} \r" + marginSpaceH + "}; \r");
 					vTableAddressH.add(liner);
 					vTableLayoutH.add(line);
-					
 				}
 
 				public void visitArguments(GNode n){
@@ -1054,15 +1143,20 @@ class vTableLayoutLine{
 	String returntype;
 	String methodname;
 	String parameters;
+	String referenceparameter;
 	String vTableLine;
 	int parametercount = 0;
 	
 	public vTableLayoutLine(){
-		parameters = "(";
+		parameters = ",";
 	}
 	
 	public void setReturnType(String returnable){
 		returntype = returnable;
+	}
+	
+	public void setReferenceParameter(String reference){
+		referenceparameter = reference;
 	}
 	
 	public void setMethodName(String methodnamable){
@@ -1095,10 +1189,12 @@ class vTableLayoutLine{
 		}
 		else{
 			vTableLine = vTableLine + "(*" + methodname + ") ";
-		}
-		
-		if (!(parameters.length() < 2)){
-			vTableLine = vTableLine + parameters + ")";
+			vTableLine = vTableLine + "(" + referenceparameter;
+			
+			if (!(parameters.length() < 2)){
+				vTableLine = vTableLine + parameters;
+			}
+			vTableLine = vTableLine + ")";
 		}
 		
 		vTableLine = vTableLine + "; \r";
