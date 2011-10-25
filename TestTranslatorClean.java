@@ -116,12 +116,18 @@ public class TestTranslator extends xtc.util.Tool {
 				private LinkedList<vTableAddressLine> OvTableAddressH;
 				private LinkedList<vTableLayoutLine> vTableLayoutH;
 				private LinkedList<vTableAddressLine> vTableAddressH;
+				private vTableLayoutLine currentLayoutLineTemplate;
+				private vTableLayoutLine currentLayoutLine;
+				private vTableAddressLine currentAddressLineTemplate;
+				private vTableAddressLine currentAddressLine;
 				private LinkedList<String> classTracker;  //tracks what classes have been visited, not used yet
 
 				private LinkedList<String> ccstring;
 				private LinkedList<String> hstring;
 
 				private boolean hflag;
+				private boolean hreturntype;
+				private boolean hparameter;
 				
 				private int cccount;
 				
@@ -372,7 +378,28 @@ public class TestTranslator extends xtc.util.Tool {
 					*/
 				}
 				
-				public LinkedList<vTableLayoutLine> convertVLayoutPrelim(LinkedList<vTableLayoutLine> cloneOL, String classname){
+				public void convertVLayoutPrelim(String classname){
+					//clone the OvTableLayoutH
+					LinkedList<vTableLayoutLine> cloneOL = new LinkedList<vTableLayoutLine>();
+					int counter = 0;
+					try{
+						while(true){
+						vTableLayoutLine current = OvTableLayoutH.get(counter);
+						vTableLayoutLine news = new vTableLayoutLine();
+						news.setMethodName(current.methodname);
+						news.resetParameters(current.parameters);
+						news.setReferenceParameter(current.referenceparameter);
+						news.setReturnType(current.returntype);
+						news.setVTableClass(current.vTableClass);
+						cloneOL.add(news);
+						counter = counter + 1;
+						}
+					}
+					catch(Exception e){
+						//System.out.println("counter = " + counter);
+					}
+					
+					
 					LinkedList<vTableLayoutLine> newclone = new LinkedList<vTableLayoutLine>();
 					while(!(cloneOL.isEmpty())){
 						vTableLayoutLine current = cloneOL.pop();
@@ -389,22 +416,92 @@ public class TestTranslator extends xtc.util.Tool {
 						System.out.print(current.vTableLine);
 					}
 					*/
-					return newclone;
+					//return newclone;
+					vTableLayoutH.addAll(newclone);
 				}
 				
 				//in progress conversion of addresslines to the right reference types
-				public LinkedList<vTableAddressLine> convertVTableAddress(vTableAddressLine cloneO, String classname){
-					LinkedList<vTableAddressLine> newcloneO = new LinkedList<vTableAddressLine>();
-					
-					//rework this method entirely, convert one address line only
-					/*
-					while(!(cloneO.isEmpty())){
-						vTableAddressLine current = cloneO.pop();
-						current.setClassname(classname);
+				public void convertVTableAddress(String classname){
+					LinkedList<vTableAddressLine> cloneOA= new LinkedList<vTableAddressLine>();
+					int counter = 0;
+					try{
+						while(true){
+						vTableAddressLine current = OvTableAddressH.get(counter);
+						vTableAddressLine news = new vTableAddressLine();
+						//news.resetParameters(current.parameters);
+						//news.setReferenceParameter(current.referenceparameter);
+						//news.setReturnType(current.returntype);
+						news.setVTableClass(current.vTableClass);
+						news.setTypeCast(current.typecast);
+						news.setClassname(current.classname);
+						news.setMethodName(current.methodname);
+						cloneOA.add(news);
+						counter = counter + 1;
+						}
 					}
-					*/
+					catch(Exception e){
+						//System.out.println("counter = " + counter);
+					}
 					
-					return newcloneO;
+					LinkedList<vTableAddressLine> newclone = new LinkedList<vTableAddressLine>();
+					while(!(cloneOA.isEmpty())){
+						vTableAddressLine current = cloneOA.pop();
+						//current.setReferenceParameter(classname);
+						current.setVTableClass(classname);
+						if(current.methodname.equals("getClass")){
+							//current.classname = "__" + classname;
+							current.typecast = "(Class(*)(__" + classname + "))";
+						}
+						current.createVTableLine();
+						newclone.add(current);
+					}
+					
+					vTableAddressH.addAll(newclone);
+				}
+				
+				public void searchForMethodOverride(){
+					String classsearch = currentLayoutLine.vTableClass;
+					//System.out.println(classsearch);
+					String methodsearch = currentLayoutLine.methodname;
+					//System.out.println(methodsearch);
+					String parametersearch = currentLayoutLine.parameters;
+					//System.out.println(parametersearch);
+					String returntypesearch = currentLayoutLine.returntype;
+					//System.out.println(returntypesearch);
+					//System.out.println();
+					int counter = 0;
+					try{
+						boolean found = false;
+						while(true){
+							vTableLayoutLine current = vTableLayoutH.get(counter);
+							//if (current.vTableClass.equals(classsearch) && current.returntype.equals(returntypesearch) && current.methodname.equals(methodsearch) && current.parameters.equals(parametersearch)){
+							if(current.vTableLine.equals(currentLayoutLine.vTableLine))	{
+								vTableLayoutH.remove(counter);
+								found = true;
+								System.out.println("found over");
+								break;
+							}
+							counter = counter + 1;
+						}
+						if(found == true){
+							counter = 0;
+							classsearch = currentAddressLine.vTableClass;
+							methodsearch = currentAddressLine.methodname;
+							//System.out.println("looking for " + methodsearch);
+							while(true){
+								vTableAddressLine current = vTableAddressH.get(counter);
+								System.out.println(current.vTableClass + " " + current.methodname);
+								if(current.vTableClass.equals(classsearch) && current.methodname.equals(methodsearch) && !current.methodname.equals(null)){
+									vTableAddressH.remove(counter);
+									break;
+								}
+								counter = counter + 1;
+							}
+						}
+					}
+					catch (Exception e){
+						
+					}
 				}
 				
 				/**
@@ -585,6 +682,20 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitPrimitiveType(GNode n){
+					if(hreturntype == true){
+						String returntype = n.getString(0);
+						if(returntype.equals("int")){
+							returntype = "int32_t";
+						}
+						currentLayoutLine.setReturnType(returntype);
+					}
+					else if (hparameter == true){
+						String parameter = n.getString(0);
+						if(parameter.equals("int")){
+							parameter = "int32_t";
+						}
+						currentLayoutLine.setParameters(parameter);
+					}
 					addStringsToList(n);
 				}
 
@@ -607,6 +718,15 @@ public class TestTranslator extends xtc.util.Tool {
 				 * @param n
 				 */
 				public void visitQualifiedIdentifier(GNode n){
+					if(hreturntype == true){
+						String returntype = n.getString(0);
+						currentLayoutLine.setReturnType(returntype);
+					}
+					else if (hparameter == true){
+						String parameter = n.getString(0);
+						currentLayoutLine.setParameters(parameter);
+					}
+					
 					int i = 0;
 					while (i < n.size()){
 						if (hflag == true){
@@ -799,6 +919,7 @@ public class TestTranslator extends xtc.util.Tool {
 						}
 					}
 					addStringsToList(n);
+					
 				}
 				
 				/**
@@ -992,20 +1113,31 @@ public class TestTranslator extends xtc.util.Tool {
 					hLine = "\r";
 					vTableH.add(hLine);
 					
+					currentLayoutLineTemplate = new vTableLayoutLine();
+					currentLayoutLineTemplate.setReferenceParameter(className);
+					currentLayoutLineTemplate.setVTableClass(className);
+					currentAddressLineTemplate = new vTableAddressLine();
+					currentAddressLineTemplate.setVTableClass(className);
+					currentAddressLineTemplate.setClassname(className);
+					
 					vTableAddressLine liner = new vTableAddressLine();
 					vTableLayoutLine line = new vTableLayoutLine();
 					line.setVTableClass(className);
 					liner.setVTableClass(className);
-					line.createStructLine("struct " + "__" + className + "_VT {");
+					line.createStructLine("struct " + "__" + className + "_VT { \r");
 					liner.createStructLine("__" + className + "_VT() \r : ");
 					vTableAddressH.add(liner);
 					vTableLayoutH.add(line);
 					
-					LinkedList<vTableLayoutLine> cloneOL = new LinkedList<vTableLayoutLine>();
-					LinkedList<vTableAddressLine> cloneOA = new LinkedList<vTableAddressLine>();
-					cloneOA.addAll(OvTableAddressH);
-					cloneOL.addAll(OvTableLayoutH);
-					cloneOL = convertVLayoutPrelim(cloneOL, className);
+					//LinkedList<vTableLayoutLine> cloneOL = new LinkedList<vTableLayoutLine>();
+					//LinkedList<vTableAddressLine> cloneOA = new LinkedList<vTableAddressLine>();
+					//cloneOA.addAll(OvTableAddressH);
+					//cloneOL.addAll(OvTableLayoutH);
+					convertVLayoutPrelim(className);
+					convertVTableAddress(className);
+					//while(!cloneOL.isEmpty()){
+					//	vTableLayoutH.add(cloneOL.pop());
+				    //}
 					//cloneOA = convertVTableAddress(cloneOA, className);
 					
 					visit(n); 
@@ -1031,13 +1163,41 @@ public class TestTranslator extends xtc.util.Tool {
 						addStringsToList(n);
 						String methodName = hstring.pop();
 						hstring.clear();
+						currentLayoutLine = new vTableLayoutLine();
+						currentLayoutLine.setReferenceParameter(currentLayoutLineTemplate.referenceparameter);
+						currentLayoutLine.setVTableClass(currentLayoutLineTemplate.vTableClass);
+						currentLayoutLine.setMethodName(n.getString(3));
+						currentAddressLine = new vTableAddressLine();
+						currentAddressLine.setVTableClass(currentAddressLineTemplate.vTableClass);
+						currentAddressLine.setMethodName(n.getString(3));
+						currentAddressLine.setClassname("__" + currentAddressLineTemplate.classname);
 						for(Object o: n){					// I'm making the assumption that the h file won't need to look
 							if (o instanceof Node){			// in the block of the method; I could be wrong.
 								Node c = (Node)o;			// (but I don't think so)
 								if (!c.hasName("Block")){
+									if(c.hasName("Type")){
+										hparameter = false;
+										hreturntype = true;
+									}	
+									else if (c.hasName("FormalParameters")){
+										hparameter = true;
+										hreturntype = false;
+									}
+									else{
+										hparameter = false;
+										hreturntype = false;
+									}
+										
 									dispatch((Node)o);
 								}
 							}
+						}
+						currentLayoutLine.createVTableLine();
+						currentAddressLine.createVTableLine();
+						searchForMethodOverride();
+						if(!currentLayoutLine.methodname.equals("main")){
+							vTableLayoutH.add(currentLayoutLine);
+							vTableAddressH.add(currentAddressLine);
 						}
 //						while(!hstring.isEmpty()){
 //							hLine = hLine + hstring.pop() + " ";  <---- printing stuff haphazardly, just to look at it
@@ -1163,6 +1323,13 @@ class vTableLayoutLine{
 		methodname = methodnamable;
 	}
 	
+	public void resetParameters(String parameter){
+		if(!parameter.equals(",")){
+			parameters = parameter;
+			parametercount = 1;
+		}
+	}
+	
 	public void setParameters(String parameter){
 		if(parametercount == 0){
 			parameters = parameters + parameter;
@@ -1183,7 +1350,10 @@ class vTableLayoutLine{
 	}
 	
 	public void createVTableLine(){
+		if(returntype == null)
+			returntype = "void";
 		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
+		
 		if (methodname.equals("__isa")){
 			vTableLine = vTableLine + methodname;
 		}
@@ -1191,7 +1361,7 @@ class vTableLayoutLine{
 			vTableLine = vTableLine + "(*" + methodname + ") ";
 			vTableLine = vTableLine + "(" + referenceparameter;
 			
-			if (!(parameters.length() < 2)){
+			if (parametercount > 0){
 				vTableLine = vTableLine + parameters;
 			}
 			vTableLine = vTableLine + ")";
@@ -1233,7 +1403,7 @@ class vTableAddressLine{
 
 		if(methodname.equals("__isa")){
 			vTableLine = methodname + "(";
-			vTableLine = vTableLine + "&" + classname + "::" + "class()" + ")";
+			vTableLine = vTableLine + "&" + "__" + classname + "::" + "__class()" + ")";
 		}
 		else{
 			vTableLine = ", \r" + methodname + "(";
