@@ -112,7 +112,7 @@ public class TestTranslator extends xtc.util.Tool {
 				private LinkedList<String> methodsImplementedH;
 				private LinkedList<String> vTableH;
 				
-				private LinkedList<LinkedList> vTableLayoutH;
+				private LinkedList<vTableLayoutLine> vTableLayoutH;
 				private LinkedList<LinkedList> vTableAddressH;
 				private LinkedList<String> classTracker;  //tracks what classes have been visited
 
@@ -134,7 +134,6 @@ public class TestTranslator extends xtc.util.Tool {
 				private void createFilesAndWriters(){
 					try{
 						java_langH = new File(basedirectory + "java_lang.h");
-						readJavaLang();
 						
 						fileCC = new File(basedirectory + outFileName + ".cc");
 						fileH = new File(basedirectory + outFileName + ".h");
@@ -154,8 +153,9 @@ public class TestTranslator extends xtc.util.Tool {
 						dataLayoutH = new LinkedList<String>();
 						methodsImplementedH = new LinkedList<String>();
 						vTableH = new LinkedList<String>();
-						vTableLayoutH = new LinkedList<LinkedList>();
-
+						vTableLayoutH = new LinkedList<vTableLayoutLine>();
+						vTableAddressH = new LinkedList<LinkedList>();
+						
 						writerCC = new FileWriter(fileCC);
 						writerH = new FileWriter(fileH);
 						outCC = new BufferedWriter(writerCC);
@@ -166,6 +166,7 @@ public class TestTranslator extends xtc.util.Tool {
 
 						marginSpaceH = "  ";
 						marginSpaceCC = "  ";
+						readJavaLang();
 					}
 					
 					catch (IOException e){
@@ -235,19 +236,20 @@ public class TestTranslator extends xtc.util.Tool {
 				 * 
 				 */
 				public void readJavaLang(){
+					/*
 					try {
 						Scanner scan = new Scanner(java_langH);
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					/*
-					 * VTableLayout line can be broken up into several parts
-					 * return type (*methodname) (parameters)
-					 * 
-					 * VTableAddress line can be broken up into several parts
-					 * methodname((anyspecialcasting)&class::methodname);
-					 */
+					*/
+					//vTableLayoutH
+					vTableLayoutLine line = new vTableLayoutLine();
+					line.setVTableClass("java.lang.Object");
+					line.setReturnType("Class");
+					line.setMethodName("__isa");
+					
 					
 				}
 				
@@ -905,4 +907,100 @@ public class TestTranslator extends xtc.util.Tool {
 		new TestTranslator().run(args);
 	}
 
+}
+
+/*
+ * VTableLayout line can be broken up into several parts
+ * return type (*methodname) (parameters)
+ * 
+ * VTableAddress line can be broken up into several parts
+ * methodname((anyspecialcasting)&class::methodname);
+ * 
+ *       
+Class __isa;
+int32_t (*hashCode)(Object);
+bool (*equals)(Object, Object);
+Class (*getClass)(Object);
+String (*toString)(Object);
+ */
+
+class vTableLayoutLine{
+	String vTableClass;
+	String returntype;
+	String methodname;
+	String parameters;
+	String vTableLine;
+	
+	public vTableLayoutLine(){
+		parameters = "(";
+	}
+	
+	public void setReturnType(String returnable){
+		returntype = returnable;
+	}
+	
+	public void setMethodName(String methodnamable){
+		methodname = methodnamable;
+	}
+	
+	public void setParameters(String parameter){
+		parameters = parameters + parameter + ",";
+	}
+	
+	public void setVTableClass(String typeclass){
+		vTableClass = typeclass;
+	}
+	
+	public void createVTableLine(){
+		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
+		if (methodname.equals("__isa")){
+			vTableLine = vTableLine + methodname;
+		}
+		else{
+			vTableLine = vTableLine + "(*" + methodname + ") ";
+		}
+		
+		if (!(parameters.length() < 2)){
+			vTableLine = vTableLine + parameters + ")";
+		}
+		
+		vTableLine = vTableLine + "; \r";
+	}
+}
+
+class vTableAddressLine{
+	String vTableClass;
+	String methodname;
+	String typecast;
+	String classname;
+	String vTableLine;
+	
+	public vTableAddressLine(){
+		
+	}
+	
+	public void setMethodName(String methodnamable){
+		methodname = methodnamable;
+	}
+	
+	public void setTypeCast(String typecastable){
+		typecast = typecastable;
+	}
+	
+	public void setClassname(String classnamable){
+		classname = classnamable;
+	}
+	
+	public void setVTableClass(String classable){
+		vTableClass = classable;
+	}
+	
+	public void createVTableLine(){
+		//methodname((anyspecialcasting)&class::methodname);
+		vTableLine = methodname + "(";
+		if(!(typecast.isEmpty())){
+			vTableLine = vTableLine + "(" + typecast + ")"; 
+		}
+		vTableLine = vTableLine + "&" + classname + "::" + methodname + "); \r";
+	}
 }
