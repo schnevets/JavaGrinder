@@ -478,7 +478,7 @@ public class TestTranslator extends xtc.util.Tool {
 							if(current.vTableLine.equals(currentLayoutLine.vTableLine))	{
 								vTableLayoutH.remove(counter);
 								found = true;
-								System.out.println("found over");
+								//System.out.println("found over");
 								break;
 							}
 							counter = counter + 1;
@@ -490,7 +490,7 @@ public class TestTranslator extends xtc.util.Tool {
 							//System.out.println("looking for " + methodsearch);
 							while(true){
 								vTableAddressLine current = vTableAddressH.get(counter);
-								System.out.println(current.vTableClass + " " + current.methodname);
+								//System.out.println(current.vTableClass + " " + current.methodname);
 								if(current.vTableClass.equals(classsearch) && current.methodname.equals(methodsearch) && !current.methodname.equals(null)){
 									vTableAddressH.remove(counter);
 									break;
