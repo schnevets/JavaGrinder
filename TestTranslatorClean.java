@@ -152,6 +152,7 @@ public class TestTranslator extends xtc.util.Tool {
 
 						includesCC = new LinkedList<String>();
 						includesCC.add("#include \""+outFileName+".h\";");
+						includesCC.add("#include \"java_lang.h\"");
 						nameSpaceCC = new LinkedList<String>();
 						methodCC = new LinkedList<String>();
 						vTableDefCC = new LinkedList<String>();
