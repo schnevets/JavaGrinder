@@ -121,6 +121,8 @@ public class TestTranslator extends xtc.util.Tool {
 
 				private boolean hflag;
 				
+				private int cccount;
+				
 				private String marginSpaceCC;
 				private String marginSpaceH;
 				
@@ -346,11 +348,6 @@ public class TestTranslator extends xtc.util.Tool {
 					while(hstring.size()!=0){
 						s.concat(hstring.pop());
 					}
-					s = "";
-					while(ccstring.size()!=0){
-						s.concat(ccstring.pop());
-					}
-					includesCC.add(s);
 				}
 
 				/**
@@ -659,6 +656,44 @@ public class TestTranslator extends xtc.util.Tool {
 				* @param n
 				*/
 				public void visitCallExpression(GNode n){
+					String ceString = "";
+					for(Object o: n){
+						if (o instanceof Node){
+							Node c = (Node)o;
+							if (c.hasName("SelectionExpression")){
+								dispatch((Node)o);
+							}
+						}
+					}
+					addStringsToList(n);
+					int i = cccount;
+					while(i < ccstring.size()){
+						ceString = ceString + ccstring.get(i) + "::";
+						ccstring.remove(i);
+					}
+					ceString = ceString.substring(0, ceString.length() -2);
+					if(ceString.contentEquals("System::out::println") || ceString.contentEquals("System::out::print")){
+						ceString = "";
+						if(!includesCC.contains("#include <iostream>"))
+							includesCC.add("#include <iostream>");
+						for(Object o: n){
+							if (o instanceof Node){
+								Node c = (Node)o;
+								if (c.hasName("Arguments")){
+									dispatch((Node)o);
+								}
+							}
+						}
+						i = cccount;
+						while(i < ccstring.size()){
+							ceString = ceString + ccstring.get(i);
+							ccstring.remove(i);
+						}
+						ceString = marginSpaceCC + "std::cout << " + ceString + "<< std::endl;\n";
+						ccstring.add(ceString);
+						cccount++;
+					}
+					
 					visit(n);
 				}
 				
@@ -672,7 +707,6 @@ public class TestTranslator extends xtc.util.Tool {
 				public void visitSelectionExpression(GNode n){
 					visit(n);
 					addStringsToList(n);
-					System.out.println(ccstring);
 				}
 
 				
@@ -802,20 +836,14 @@ public class TestTranslator extends xtc.util.Tool {
 					vTableH.add(hLine);	
 					
 
-					
+				    
 					visit(n); 
 					
 				}
 
 				public void visitArguments(GNode n){
 					visit(n);
-					System.out.println(ccstring);
-					if(ccstring.size()>2 && ccstring.get(0).startsWith("System") && ccstring.get(1).startsWith("out")){
-						System.out.println(ccstring+"Blah?");
-						if(!includesCC.contains("#include <iostream>"))
-							includesCC.add("#include <iostream>");
-						methodCC.add("cout << "+ccstring.get(2)+"<< std::endl;");
-					}
+					
 				}
 				public void visitMethodDeclaration(GNode n){					
 					 // --- header file --- (nothing here yet, really)
@@ -842,29 +870,36 @@ public class TestTranslator extends xtc.util.Tool {
 						hflag = false;
 						String ccLine = "";
 						ccstring.clear();
+						cccount = 0;
 						
 						// actual method declaration line
-						for(Object o: n){
-							if (o instanceof Node){
-								Node c = (Node)o;
-								if (!c.hasName("Block")){
-									dispatch((Node)o);
+						if(methodName == "main"){ 
+							ccLine = "int main()";
+						}
+						else{
+							for(Object o: n){
+								if (o instanceof Node){
+									Node c = (Node)o;
+									if (!c.hasName("Block")){
+										dispatch((Node)o);
+									}
+								}
+							}
+							while(!ccstring.isEmpty()){
+								if (ccstring.peekFirst() == "public" 
+										|| ccstring.peekFirst() == "private" 
+										|| ccstring.peekFirst() == "protected"){
+									ccLine = marginSpaceCC.substring(2) + ccstring.pop() + ":\n" + marginSpaceCC;
+								}
+								else if (ccstring.peekFirst().charAt(0) == '('){
+									ccLine = ccLine + methodName + ccstring.pop();
+								}
+								else{
+									ccLine = ccLine + ccstring.pop();
 								}
 							}
 						}
-						while(!ccstring.isEmpty()){
-							if (ccstring.peekFirst() == "public" 
-									|| ccstring.peekFirst() == "private" 
-									|| ccstring.peekFirst() == "protected"){
-								ccLine = marginSpaceCC.substring(2) + ccstring.pop() + ":\n" + marginSpaceCC;
-							}
-							else if (ccstring.peekFirst().charAt(0) == '('){
-								ccLine = ccLine + methodName + ccstring.pop();
-							}
-							else{
-								ccLine = ccLine + ccstring.pop();
-							}
-						}
+						
 						ccLine = ccLine + "{";
 						marginSpaceCC.concat("  ");
 						methodCC.add(ccLine);
@@ -879,10 +914,10 @@ public class TestTranslator extends xtc.util.Tool {
 								}
 							}
 						}
-						while(!ccstring.isEmpty()){
-							ccLine = ccLine + ccstring.pop() + " ";
+						for(int i = 0; i < cccount; i++){
+							ccLine = ccLine + ccstring.pop();
 						}
-						ccLine = ccLine + "}";
+						ccLine = ccLine + marginSpaceCC + "return 0;\n" + marginSpaceCC + "}";
 						methodCC.add(ccLine);
 					}
 				
