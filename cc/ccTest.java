@@ -83,8 +83,10 @@ public class ccTest extends xtc.util.Tool {
 		}
 
 		if (runtime.test("translate")) {
-			//new Visitor() {}
-				
+			LinkedList<ccClass> classList = new LinkedList<ccClass>();
+			classAndMethodCreator cnmCreator = new classAndMethodCreator(classList);
+			cnmCreator.dispatch(node);
+			System.out.print(classList);
 		}
 	}
 

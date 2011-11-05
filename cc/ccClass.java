@@ -51,7 +51,7 @@ public class ccClass {
 			if(methods.get(i).getName() == s)
 				return methods.get(i);
 		}
-		return new ccMethod("METHOD NOT FOUND", "", "", new String[0]);
+		return new ccMethod("METHOD NOT FOUND");
 	}
 	/**
 	 * If you know the index of the method you want, somehow, then this is a marginally faster way to get it.
@@ -63,5 +63,17 @@ public class ccClass {
 		return methods.get(i);
 	}
 	
+	public String toString(){
+		String s = access + " class Name:\"" + name + "\" Static:" + isStatic + " Methods:";
+		if(methods.size() > 0){
+			for(int i = 0; i < methods.size(); i++){
+				s += "\r\t" + methods.get(i);
+			}
+		}
+		else
+			s += "none";
+		
+		return s;
+	}
 	
 }
