@@ -1,13 +1,13 @@
 package Trans;
 
-import java.io.BufferedReader;
+
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
@@ -22,16 +22,22 @@ import xtc.lang.JavaFiveParser;
  * A tool to deal with dependencies when translating files from Java to C++
  * -Finds all the classes referenced within the argument file
  * -If these classes have .java files of the same name in the package, adds them to a HashSet
- * -Returns this HashSet to the Translator master class
+ * -Repeats the process for all files in the HashSet
+ * -Once there are no more files to find, returns the HashSet
  *
  * @author Justin Bernegger
  * @version 1.0
  */
 
+/**
+ * @author user
+ *
+ */
 public class DependencyMaster extends xtc.util.Tool {
 	
-	HashSet<String> filesToTranslate;
+	private HashSet<String> filesFound;
 	
+
 	public DependencyMaster() {
 	}
 	
@@ -43,9 +49,19 @@ public class DependencyMaster extends xtc.util.Tool {
 		return "Justin Bernegger";
 	}
 	
-	public Set<String> getDependencies(String s){
-		filesToTranslate = new HashSet<String>();
-		filesToTranslate.add(s);
+	/**
+	 * @param String s, the filename
+	 * @return HashSet<String>, set of all the files necessary to be translated for compilation
+	 */
+	public HashSet<String> getDependencies(String s){
+		HashSet<String> filesToTranslate = new HashSet<String>();
+		findDependencies(s, filesToTranslate);
+		return filesToTranslate;
+	}
+	
+	private void findDependencies(String s, HashSet<String> set){
+		set.add(s);
+		filesFound = new HashSet<String>();
 		try {
 			process(s);
 		} catch (IOException e) {
@@ -53,7 +69,9 @@ public class DependencyMaster extends xtc.util.Tool {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return filesToTranslate;
+		for(String t : filesFound) if (!set.contains(t)){
+			findDependencies(t, set);
+		}
 	}
 	
 	public Node parse(Reader in, File file) throws IOException, ParseException {
@@ -70,7 +88,7 @@ public class DependencyMaster extends xtc.util.Tool {
 			public void visitQualifiedIdentifier(GNode n){
 				String fileName = n.getString(0)+".java";
 				try {
-					filesToTranslate.add(locate(fileName).getAbsolutePath());
+					filesFound.add(locate(fileName).getAbsolutePath());
 				} catch (FileNotFoundException e) {
 					visit(n);
 				} catch (IOException e) {
