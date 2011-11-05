@@ -4,8 +4,8 @@ public class ccMethod {
 	private final String name;
 	private final String access;
 	private final String returnType;
-	private final String[] argumentType;
-	private final String[] argumentName;
+	private final String[] parameterType;
+	private final String[] parameterName;
 	private final boolean isStatic;
 	
 	// The first constructor only makes dummy methods, and will not actually be used
@@ -13,24 +13,24 @@ public class ccMethod {
 		name = mName;
 		access = "";
 		returnType = "";
-		argumentType = new String[0];
-		argumentName = new String[0];
+		parameterType = new String[0];
+		parameterName = new String[0];
 		isStatic = false;
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mArgumentType, String[] mArgumentName){
+	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName){
 		name = mName;
 		access = mAccess;
 		returnType = mReturnType;
-		argumentType = mArgumentType;
-		argumentName = mArgumentName;
+		parameterType = mparameterType;
+		parameterName = mparameterName;
 		isStatic = false;
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mArgumentType, String[] mArgumentName, boolean mIsStatic){
+	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic){
 		name = mName;
 		access = mAccess;
 		returnType = mReturnType;
-		argumentType = mArgumentType;
-		argumentName = mArgumentName;
+		parameterType = mparameterType;
+		parameterName = mparameterName;
 		isStatic = mIsStatic;
 	}
 
@@ -39,10 +39,10 @@ public class ccMethod {
 	}
 	
 	public String toString(){
-		String s = "" + access + " method Name:\"" + name + "\" Return Type:\"" + returnType + "\" Arguments:(";
-		for (int i = 0; i < argumentType.length; i++){
+		String s = "" + access + " method Name:\"" + name + "\" Return Type:\"" + returnType + "\" Parameters:(";
+		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) s += ", ";
-			s += argumentType[i] + " " + argumentName[i];
+			s += parameterType[i] + " " + parameterName[i];
 		}
 		s += ") Static:" + isStatic;
 		return s;

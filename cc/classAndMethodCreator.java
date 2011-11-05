@@ -10,7 +10,6 @@ import xtc.util.Pair;
 public class classAndMethodCreator extends Visitor {
 	
 	ccClass currentClass;
-	ccMethod currentMethod;
 	LinkedList<ccClass> classList;
 	LinkedList<String> modifierList;
 	String[] argumentType;
@@ -45,7 +44,23 @@ public class classAndMethodCreator extends Visitor {
 	}
 	
 	public void visitConstructorDeclaration(GNode n){
-		
+		String name = (String)n.getString(2);
+		String access = "public";
+		dispatch(n.getNode(0));
+		for(int i = 0; i < modifierList.size(); i++){
+			if(modifierList.get(i).matches("public|private|protected")){
+				access = modifierList.get(i);
+			}
+		}
+		modifierList.clear();
+		Node param = n.getNode(3);
+		argumentType = new String[param.size()];
+		argumentName = new String[param.size()];
+		for(int i = 0; i < param.size(); i++){
+			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
+			argumentName[i] = param.getNode(i).getString(3);
+		}
+		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName));
 	}
 	
 	public void visitMethodDeclaration(GNode n){
