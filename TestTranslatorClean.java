@@ -40,7 +40,7 @@ import xtc.lang.JavaFiveParser;
  *
  * @author Robert Grimm
  * @version $Revision$
- */
+ */ 
 
 public class TestTranslator extends xtc.util.Tool {
 
