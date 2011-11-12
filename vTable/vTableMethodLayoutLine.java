@@ -9,7 +9,10 @@ public class vTableMethodLayoutLine {
 	int parametercount;
 	String vTableLine;
 	
-	public vTableMethodLayoutLine(){
+	vTableClass parent;
+	
+	public vTableMethodLayoutLine(vTableClass parentable){
+		parent = parentable;
 		parametercount = 0;
 	}
 	
@@ -41,6 +44,8 @@ public class vTableMethodLayoutLine {
 		
 	}
 	
+	//obsolete method
+	/*
 	public void createVTableLine(){
 		vTableLine = modifier + " " + returntype + " " + methodname + "(" + referencetype;
 		if (parametercount > 0){
@@ -48,8 +53,15 @@ public class vTableMethodLayoutLine {
 		}
 		vTableLine = vTableLine + "); \r";
 	}
+	*/
 	
 	public void printLine(){
+		vTableLine = modifier + " " + returntype + " " + methodname + "(" + referencetype;
+		if (parametercount > 0){
+			vTableLine = vTableLine + parameters;
+		}
+		vTableLine = vTableLine + "); \r";
+		
 		System.out.print(vTableLine);
 	}
 }

@@ -4,23 +4,128 @@ import java.util.LinkedList;
 
 public class vTableClass {
 	String classname;
-	String struct;
-	String parent[];
+	LinkedList<String> namespace;
+	//String struct;
+	vTableClass superclass;  //may even want to give a vTableClass reference as the superclass
 	LinkedList<vTableMethodLayoutLine> vMethodLayout;
 	LinkedList<vTableLayoutLine> vTableLayout;
 	LinkedList<vTableAddressLine> vTableAddress;
 	
-	public vTableClass(String classnamable, String parenting){
+	//create a new linked list of vClassConstructors
+	
+	vTableMethodLayoutLine currentmethod;
+	vTableLayoutLine currentlayout;
+	vTableAddressLine currentaddress;
+	
+	boolean writeable = true;
+	
+	public vTableClass(String classnamable, vTableClass parenting){
 		classname = classnamable;
-		parent = parenting.split(".");
-		struct = "struct " + "__" + struct;
+		if(parenting == null){
+			superclass = null;
+		}
+		else{
+			superclass = parenting;
+		}
+	
+		//struct = "struct " + "__" + struct;
 		vMethodLayout = new LinkedList<vTableMethodLayoutLine>();
 		vTableLayout = new LinkedList<vTableLayoutLine>();
 		vTableAddress = new LinkedList<vTableAddressLine>();
+		namespace = new LinkedList<String>();
+	}
+	
+	public void setNoWrite(){
+		writeable = false;
+	}
+	
+	//Create a new vTableMethodLayoutLine
+	public void newMethodLayout(){
+		currentmethod = new vTableMethodLayoutLine(this);
+	}
+	
+	public void addMethod(){
+		vMethodLayout.add(currentmethod);
+	}
+	
+	public void appendMethod(String command, String arg){
+		if(command.equals("ReferenceType")){
+			currentmethod.setReferenceType(arg);
+		}
+		else if(command.equals("Modifier")){
+			currentmethod.setModifer(arg);
+		}
+		else if(command.equals("ReturnType")){
+			currentmethod.setReturnType(arg);
+		}
+		else if(command.equals("MethodName")){
+			currentmethod.setMethodName(arg);
+		}
+		else if(command.equals("Parameters")){
+			currentmethod.setParameters(arg);
+		}
+		else{
+			System.out.println("Invalid command " + command);
+		}
+	}
+	
+	//Create a new vTableLayoutLine
+	public void newTableLayout(){
+		currentlayout = new vTableLayoutLine(this);
+	}
+	
+	public void addTableLayout(){
+		vTableLayout.add(currentlayout);
+	}
+	
+	//note to self, declare the createline method in vtablemethodlayoutline obsolete and move the functionality
+	//to the printline method instead
+	public void appendTableLayout(String command, String arg){
+		if(command.equals("ReferenceType")){
+			currentlayout.setReferenceType(arg);
+		}
+		else if(command.equals("ReturnType")){
+			currentlayout.setReturnType(arg);
+		}
+		else if(command.equals("MethodName")){
+			currentlayout.setMethodName(arg);
+		}
+		else if(command.equals("Parameters")){
+			currentlayout.setParameters(arg);
+		}
+		else{
+			System.out.println("Invalid command " + command);
+		}
+	}
+	
+	//Create a new vTableAddressLine
+	public void newTableAddress(){
+		currentaddress = new vTableAddressLine(this);
+	}
+	
+	public void addTableAddress(){
+		vTableAddress.add(currentaddress);
+	}
+	
+	//note to self, make the createline method in vtableaddressline obsolete, move the functionality
+	//to the printline method instead
+	public void appendAddress(String command, String arg){
+		if(command.equals("TypeCast")){
+			currentaddress.setTypeCast(arg);
+		}
+		else if(command.equals("ClassName")){
+			currentaddress.setClassName(arg);
+		}
+		else if(command.equals("MethodName")){
+			currentaddress.setMethodName(arg);
+		}
+		else{
+			System.out.println("Invalid command " + command);
+		}
 	}
 	
 	public void printLines(){
-		System.out.print(struct + "{ \r");
+		System.out.print("struct " + "__" + classname + "{ \r");
 		System.out.print("__" + classname + "_VT*" + " __vptr;\r\r");
 		System.out.print("__" + classname + "();\r\r");
 		while(!vMethodLayout.isEmpty()){
@@ -31,15 +136,19 @@ public class vTableClass {
 		System.out.print("static Class __class(); \r\r");
 		System.out.print("static " + "__" + classname +"_VT _vtable;\r");
 		System.out.print("};\r\r");
+		
+		System.out.print("struct __" + classname + "_VT { \r");
 		while(!vTableLayout.isEmpty()){
 			vTableLayoutLine current = vTableLayout.pop();
 			current.printLine();
 		}
+		System.out.print("\r");
+		System.out.print("__" + classname + "_VT()\r:  ");
 		while(!vTableAddress.isEmpty()){
 			vTableAddressLine current = vTableAddress.pop();
 			current.printLine();
 		}
-		System.out.print("};\r");
+		System.out.print("\r};\r");
 	}
 	
 }
