@@ -3,11 +3,9 @@ package Trans;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 import xtc.parser.ParseException;
 import xtc.parser.Result;
@@ -36,6 +34,7 @@ import xtc.lang.JavaFiveParser;
 public class DependencyMaster extends xtc.util.Tool {
 	
 	private HashSet<String> filesFound;
+	private String fileDirectory;
 	
 
 	public DependencyMaster() {
@@ -50,20 +49,21 @@ public class DependencyMaster extends xtc.util.Tool {
 	}
 	
 	/**
-	 * @param String s, the filename
+	 * @param String fileName, the filename
 	 * @return HashSet<String>, set of all the files necessary to be translated for compilation
 	 */
-	public HashSet<String> getDependencies(String s){
+	public HashSet<String> getDependencies(String fileName){
 		HashSet<String> filesToTranslate = new HashSet<String>();
-		findDependencies(s, filesToTranslate);
+		fileDirectory = (new File(fileName).getParent() + '/');
+		findDependencies(fileName, filesToTranslate);
 		return filesToTranslate;
 	}
 	
-	private void findDependencies(String s, HashSet<String> set){
-		set.add(s);
+	private void findDependencies(String fileName, HashSet<String> set){
+		set.add(fileName);
 		filesFound = new HashSet<String>();
 		try {
-			process(s);
+			process(fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
@@ -84,18 +84,14 @@ public class DependencyMaster extends xtc.util.Tool {
 	public void process(Node node) {
 		new Visitor() {
 			
-			//If the qualified identifier is a class within the package, add its absolute path to filesToTranslate
+			//If the qualified identifier is a class within the original file's directory, add its absolute path to filesFound
 			public void visitQualifiedIdentifier(GNode n){
-				String fileName = n.getString(0)+".java";
-				try {
-					filesFound.add(locate(fileName).getAbsolutePath());
-				} catch (FileNotFoundException e) {
-					visit(n);
-				} catch (IOException e) {
-					e.printStackTrace();
+				String fileName = fileDirectory + n.getString(n.size()-1)+".java";
+				if(new File(fileName).exists()){
+					filesFound.add(fileName);
 				}
 			}
-
+			
 			public void visit(Node n) {
 				for(Object o : n) if (o instanceof Node){
 					dispatch((Node)o);
