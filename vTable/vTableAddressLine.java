@@ -1,14 +1,16 @@
 package oop;
 
 public class vTableAddressLine{
-	String vTableClass;
+	//String vTableClass;
 	String methodname;
 	String typecast;
 	String classname;
 	String vTableLine;
 	
-	public vTableAddressLine(){
-		
+	vTableClass parent;
+	
+	public vTableAddressLine(vTableClass parentable){
+		parent = parentable;
 	}
 	
 	public void setMethodName(String methodnamable){
@@ -19,10 +21,12 @@ public class vTableAddressLine{
 		typecast = typecastable;
 	}
 	
-	public void setClassname(String classnamable){
+	public void setClassName(String classnamable){
 		classname = classnamable;
 	}
 	
+	/*
+	//obsolete
 	public void setVTableClass(String classable){
 		vTableClass = classable;
 	}
@@ -42,12 +46,21 @@ public class vTableAddressLine{
 			vTableLine = vTableLine + "&" + classname + "::" + methodname + ")";
 		}
 	}
+	*/
 	
 	public void printLine(){
+		if(methodname.equals("__isa")){
+			vTableLine = methodname + "(";
+			vTableLine = vTableLine + "__" + classname + "::" + "__class()" + ")";
+		}
+		else{
+			vTableLine = ", \r" + methodname + "(";
+			if(!(typecast == null)){
+				vTableLine = vTableLine + "(" + typecast + ")"; 
+			}
+			vTableLine = vTableLine + "&__" + classname + "::" + methodname + ")";
+		}
+		
 		System.out.print(vTableLine);
-	}
-	
-	public void createStructLine(String definition){
-		vTableLine = definition;
 	}
 }

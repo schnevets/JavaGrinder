@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+
 import xtc.parser.ParseException;
 import xtc.parser.Result;
 
@@ -40,14 +41,14 @@ import xtc.lang.JavaFiveParser;
  *
  * @author Robert Grimm
  * @version $Revision$
- */ 
+ */
 
-public class ccTest extends xtc.util.Tool {
+public class TestTranslatorV1 extends xtc.util.Tool {
 
 	private String outFileName = "";
 
 	/** Create a new translator. */
-	public ccTest() {
+	public TestTranslatorV1() {
 		// Nothing to do.
 	}
 
@@ -77,16 +78,16 @@ public class ccTest extends xtc.util.Tool {
 		return (Node)parser.value(result);
 	}
 
+	/*
+	 * Existing Issues
+	 * - Not all visitors created so the printing of each line (cc or h) will not be perfect at all, predict outputs using AST before testing
+	 * - Formatting will be a constant issue as we add in more visitors, debug and check outputs often
+	 * - primitive types are not c++ 32bit versions (ex int32_t), have to change that
+	 * - most of the formatting to c++ has not been done yet
+	 */
 	public void process(Node node) {
 		if (runtime.test("printJavaAST")) {
 			runtime.console().format(node).pln().flush();
-		}
-
-		if (runtime.test("translate")) {
-			LinkedList<ccClass> classList = new LinkedList<ccClass>();
-			classAndMethodCreator cnmCreator = new classAndMethodCreator(classList);
-			cnmCreator.dispatch(node);
-			System.out.print(classList);
 		}
 	}
 
@@ -96,7 +97,7 @@ public class ccTest extends xtc.util.Tool {
 	 * @param args The command line arguments.
 	 */
 	public static void main(String[] args) {
-		new ccTest().run(args);
+		new TestTranslatorV1().run(args);
 	}
 
 }

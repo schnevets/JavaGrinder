@@ -16,15 +16,17 @@ String (*toString)(Object);
  */
 
 public class vTableLayoutLine{
-	String vTableClass;
 	String returntype;
 	String methodname;
 	String parameters;
-	String referenceparameter;
+	String referencetype;
 	String vTableLine;
 	int parametercount = 0;
 	
-	public vTableLayoutLine(){
+	vTableClass parent;
+	
+	public vTableLayoutLine(vTableClass parentable){
+		parent = parentable;
 		parameters = ",";
 	}
 	
@@ -32,8 +34,8 @@ public class vTableLayoutLine{
 		returntype = returnable;
 	}
 	
-	public void setReferenceParameter(String reference){
-		referenceparameter = reference;
+	public void setReferenceType(String reference){
+		referencetype = reference;
 	}
 	
 	public void setMethodName(String methodnamable){
@@ -58,14 +60,18 @@ public class vTableLayoutLine{
 		}
 	}
 	
+	/*
+	//obsolete
 	public void setVTableClass(String typeclass){
 		vTableClass = typeclass;
 	}
 	
+	//obsolete
 	public void createStructLine(String definition){
 		vTableLine = definition;
 	}
 	
+	//obsolete
 	public void createVTableLine(){
 		if(returntype == null)
 			returntype = "void";
@@ -76,7 +82,7 @@ public class vTableLayoutLine{
 		}
 		else{
 			vTableLine = vTableLine + "(*" + methodname + ") ";
-			vTableLine = vTableLine + "(" + referenceparameter;
+			vTableLine = vTableLine + "(" + referencetype;
 			
 			if (parametercount > 0){
 				vTableLine = vTableLine + parameters;
@@ -86,8 +92,28 @@ public class vTableLayoutLine{
 		
 		vTableLine = vTableLine + "; \r";
 	}
+	*/
 	
 	public void printLine(){
+		if(returntype == null)
+			returntype = "void";
+		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
+		
+		if (methodname.equals("__isa")){
+			vTableLine = vTableLine + methodname;
+		}
+		else{
+			vTableLine = vTableLine + "(*" + methodname + ") ";
+			vTableLine = vTableLine + "(" + referencetype;
+			
+			if (parametercount > 0){
+				vTableLine = vTableLine + parameters;
+			}
+			vTableLine = vTableLine + ")";
+		}
+		
+		vTableLine = vTableLine + "; \r";
+		
 		System.out.print(vTableLine);
 	}
 }

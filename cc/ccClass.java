@@ -1,12 +1,12 @@
 package oop;
 
 import java.util.ArrayList;
-import oop.ccMethod;
 
 public class ccClass {
 	private final String name;
 	private final String access;
 	private final boolean isStatic;
+	private ArrayList<ccConstructor> constructors;
 	private ArrayList<ccMethod> methods;
 	
 	public ccClass(String clName, String clAccess){
@@ -14,17 +14,23 @@ public class ccClass {
 		access = clAccess;
 		isStatic = false;
 		methods = new ArrayList<ccMethod>();
+		constructors = new ArrayList<ccConstructor>();
 	}
 	public ccClass(String clName, String clAccess, boolean clIsStatic){
 		name = clName;
 		access = clAccess;
 		isStatic = clIsStatic;
 		methods = new ArrayList<ccMethod>();
+		constructors = new ArrayList<ccConstructor>();
 	}
 	
 	/** Adds method to class's list of methods */
 	public void addMethod(ccMethod method){
 		methods.add(method);
+	}
+	/** Adds constructor to class's list of constructors */
+	public void addConstructor(ccConstructor constructor){
+		constructors.add(constructor);
 	}
 	
 	/** Gets the name of the class. Of course. */
@@ -51,7 +57,23 @@ public class ccClass {
 			if(methods.get(i).getName() == s)
 				return methods.get(i);
 		}
-		return new ccMethod("METHOD NOT FOUND", "", "", new String[0]);
+		return new ccMethod("METHOD NOT FOUND");
+	}
+	/**
+	 * Searches for and returns constructor named s.
+	 * If the desired constructor is not found, it returns a dummy constructor with the name "CONSTRUCTOR NOT FOUND".
+	 * This method was built under the assumption that we could be overloading constructors,
+	 * I'm still not totally sure how that's gonna work.
+	 * 
+	 * @param s Name of desired constructor.
+	 * @return The constructor with name s.
+	 */
+	public ccConstructor getConstructor(String s){
+		for(int i = 0; i < constructors.size(); i++){
+			if(constructors.get(i).getName() == s)
+				return constructors.get(i);
+		}
+		return new ccConstructor("CONSTRUCTOR NOT FOUND");
 	}
 	/**
 	 * If you know the index of the method you want, somehow, then this is a marginally faster way to get it.
@@ -62,6 +84,36 @@ public class ccClass {
 	public ccMethod getMethodAtIndex(int i){
 		return methods.get(i);
 	}
+	/**
+	 * If you know the index of the constructor you want, somehow, then this is a marginally faster way to get it.
+	 * This method was built under the assumption that we could be overloading constructors,
+	 * I'm still not totally sure how that's gonna work.
+	 * 
+	 * @param i Index of desired constructor.
+	 * @return The constructor at index i.
+	 */
+	public ccConstructor getConstructorAtIndex(int i){
+		return constructors.get(i);
+	}
 	
+	public String toString(){
+		String s = access + " class Name:\"" + name + "\" Static:" + isStatic + " Constructors:";
+		if(constructors.size() > 0){
+			for(int i = 0; i < constructors.size(); i++){
+				s += "\r\t" + constructors.get(i);
+			}
+			s += "\r";
+		}
+		else s += "none";
+		s += " Methods:";
+		if(methods.size() > 0){
+			for(int i = 0; i < methods.size(); i++){
+				s += "\r\t" + methods.get(i);
+			}
+		}
+		else s += "none";
+		
+		return s;
+	}
 	
 }
