@@ -1,4 +1,4 @@
-package Trans;
+package oop;
 
 
 
@@ -28,13 +28,13 @@ import xtc.lang.JavaFiveParser;
  */
 
 /**
- * @author user
+ * @author Justin Bernegger
  *
  */
 public class DependencyMaster extends xtc.util.Tool {
 	
 	private HashSet<String> filesFound;
-	private String fileDirectory;
+	private String directoryName;
 	
 
 	public DependencyMaster() {
@@ -54,7 +54,11 @@ public class DependencyMaster extends xtc.util.Tool {
 	 */
 	public HashSet<String> getDependencies(String fileName){
 		HashSet<String> filesToTranslate = new HashSet<String>();
-		fileDirectory = (new File(fileName).getParent() + '/');
+		
+		//Sets the uppermost directory to search - the directory above the package
+		String packageName = (new File(fileName).getParent());
+		directoryName = packageName.substring(0,((packageName.lastIndexOf('/'))));
+		
 		findDependencies(fileName, filesToTranslate);
 		return filesToTranslate;
 	}
@@ -84,11 +88,30 @@ public class DependencyMaster extends xtc.util.Tool {
 	public void process(Node node) {
 		new Visitor() {
 			
-			//If the qualified identifier is a class within the original file's directory, add its absolute path to filesFound
+			private HashSet<String> packagesToSearch = new HashSet<String>();
+			
+			public void visitPackageDeclaration(GNode n){
+				packagesToSearch.add('/' + n.getNode(1).getString(0));
+			}
+			
 			public void visitQualifiedIdentifier(GNode n){
-				String fileName = fileDirectory + n.getString(n.size()-1)+".java";
-				if(new File(fileName).exists()){
-					filesFound.add(fileName);
+				//If the identifier has a package name, add it to packagesToSearch
+				if (n.size()>1){
+					int i = 0;
+					String packageName = "";
+					while(i<n.size()-1){
+						packageName = packageName + '/' + n.getString(i);
+						i++;
+					}
+					
+					packagesToSearch.add(packageName);
+				}
+				//Search through known packages for a file matching the identifier
+				for(String s : packagesToSearch){
+					String fileName = directoryName + s + '/' + n.getString(n.size()-1)+".java";
+					if(new File(fileName).exists()){
+						filesFound.add(fileName);
+					}
 				}
 			}
 			
