@@ -4,12 +4,15 @@ import java.util.LinkedList;
 
 public class vTableClass {
 	String classname;
+	String modifier;
 	LinkedList<String> namespace;
 	//String struct;
 	vTableClass superclass;  //may even want to give a vTableClass reference as the superclass
 	LinkedList<vTableMethodLayoutLine> vMethodLayout;
 	LinkedList<vTableLayoutLine> vTableLayout;
 	LinkedList<vTableAddressLine> vTableAddress;
+	LinkedList<vClassConstructor> vClassConstructors;
+	LinkedList<String> dataLayout;
 	
 	//create a new linked list of vClassConstructors
 	
@@ -17,26 +20,40 @@ public class vTableClass {
 	vTableLayoutLine currentlayout;
 	vTableAddressLine currentaddress;
 	
-	boolean writeable = true;
+	boolean writeable;
 	
-	public vTableClass(String classnamable, vTableClass parenting){
+	public vTableClass(String classnamable){
+		writeable = true;
 		classname = classnamable;
-		if(parenting == null){
-			superclass = null;
-		}
-		else{
-			superclass = parenting;
-		}
+		superclass = null;
 	
 		//struct = "struct " + "__" + struct;
 		vMethodLayout = new LinkedList<vTableMethodLayoutLine>();
 		vTableLayout = new LinkedList<vTableLayoutLine>();
 		vTableAddress = new LinkedList<vTableAddressLine>();
+		vClassConstructors = new LinkedList<vClassConstructor>();
 		namespace = new LinkedList<String>();
+		dataLayout = new LinkedList<String>();
 	}
 	
 	public void setNoWrite(){
 		writeable = false;
+	}
+	
+	public void setModifier(String mod){
+		modifier = mod;
+	}
+	
+	public void addSuperClass(vTableClass parenting){
+		superclass = parenting;
+	}
+	
+	public void addNameSpace(String s){
+		namespace.add(s);
+	}
+	
+	public void addDataLayout(String s){
+		dataLayout.add(s);
 	}
 	
 	//Create a new vTableMethodLayoutLine
@@ -127,7 +144,18 @@ public class vTableClass {
 	public void printLines(){
 		System.out.print("struct " + "__" + classname + "{ \r");
 		System.out.print("__" + classname + "_VT*" + " __vptr;\r\r");
-		System.out.print("__" + classname + "();\r\r");
+		
+		while(!dataLayout.isEmpty()){
+			System.out.print(dataLayout.pop());
+		}
+		
+		//the constructors
+		//System.out.print("__" + classname + "();\r\r");  the basic constructor, no arguments
+		while(!vClassConstructors.isEmpty()){
+			vClassConstructor constructor = vClassConstructors.pop();
+			constructor.printLine();
+		}
+		
 		while(!vMethodLayout.isEmpty()){
 			vTableMethodLayoutLine current = vMethodLayout.pop();
 			current.printLine();

@@ -60,7 +60,8 @@ public class ASTGenerator extends xtc.util.Tool {
   public void init() {
     super.init();
     runtime.
-    bool("printJavaAST", "printJavaAST", false, "Print Java AST.");
+    bool("printJavaAST", "printJavaAST", false, "Print Java AST.").
+    bool("returnJavaAST", "returnJavaAST", false, "Return an AST");
   }
 
   public Node parse(Reader in, File file) throws IOException, ParseException {
@@ -71,14 +72,19 @@ public class ASTGenerator extends xtc.util.Tool {
   }
 
   public void process(Node node) {
-	  AST = node;
-	    if (runtime.test("printJavaAST")) {
-	        runtime.console().format(node).pln().flush();
-	    }
+	  //runtime.console().format(node).pln().flush();
+	  this.AST = node;
   }
   
-  public Node generateAST(String[] args){
-	  run(args);
+  public Node generateAST(String arg){
+	  //System.out.println("ready");
+		try {
+			process(arg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	  return AST;
   }
 }

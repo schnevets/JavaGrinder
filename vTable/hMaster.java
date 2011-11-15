@@ -11,9 +11,6 @@ import xtc.tree.Visitor;
 
 import xtc.tree.Visitor;
 
-//note to self, change the createline methods in the layout objects to obsolete, move functionality
-//to the printline methods instead, see the notes in each of the append methods in vTableClass
-
 public class hMaster {
 	LinkedList<vTableClass> classes;
 	HashSet<String> classlist;
@@ -37,13 +34,16 @@ public class hMaster {
 			translate(currentfilename);
 		}
 		
+		//do not use for now
+		/*
 		while(!(waitqueue.isEmpty())){
 			translate(waitqueue.pop());
 		}
+		*/
 	}
 	
 	public void hardIncludeJavaLangObject(){
-		vTableClass javaobject = new vTableClass("Object", null);
+		vTableClass javaobject = new vTableClass("Object");
 		javaobject.setNoWrite();
 		hardIncludeJavaLangMethod(javaobject);
 		hardIncludeJavaLangTable(javaobject);
@@ -150,9 +150,10 @@ public class hMaster {
 	//likely solution would be to keep a list of all classes belonging to the current file
 	public void translate(String sourcefile){
 		//String[] args = {"-printJavaAST",sourcefile};
-		String[] args = {sourcefile};
-		Node sourceAST = new ASTGenerator().generateAST(args);
-		
+		//String[] args = {"-returnJavaAST", sourcefile};
+		Node sourceAST = new ASTGenerator().generateAST(sourcefile);
+		//System.out.println(sourceAST.isEmpty());
+		final String currentsource = sourcefile;
 		new Visitor() {
 			//class variables
 			vTableClass currentclass;
@@ -160,6 +161,10 @@ public class hMaster {
 			vTableAddressLine currentaddress;
 			vTableMethodLayoutLine currentmethod;
 			vTableForwardDeclarations forwarddeclarations;
+			LinkedList<String> namespace;
+			boolean missingsuper;
+			String dataLayout;
+			String operation;
 			
 			/**
 			 * Possible Parents: None
@@ -168,7 +173,16 @@ public class hMaster {
 			 * @param n GNode from the parser
 			 */
 			public void visitCompilationUnit(GNode n){
-				visit(n);
+				//System.out.println("made it");
+				namespace = new LinkedList<String>();
+				for(Object o : n){
+					if (o instanceof Node){ 
+						missingsuper = false;
+						dispatch((Node)o);
+					}
+				}
+				//visit(n);
+				//currentclass.printLines();
 			}    		
 
 			/**
@@ -179,7 +193,11 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitIntegerLiteral(GNode n){
-				
+				String returnable = n.getString(0);
+//				if(operation.equals("dataLayout")){
+//					dataLayout = dataLayout + returnable;
+//				}
+				visit(n);
 			}
 
 			/**
@@ -188,8 +206,9 @@ public class hMaster {
 			 * 
 			 * @param n
 			 */
-			public void visitBooleanLiteral(GNode n){	
-				
+			public void visitBooleanLiteral(GNode n){
+				String returnable = n.getString(0);
+				visit(n);
 			}
 
 			/**
@@ -199,7 +218,8 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFloatingPointLiteral(GNode n){
-				
+				String returnable = n.getString(0);
+				visit(n);
 			}
 
 			/**
@@ -209,7 +229,8 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitStringLiteral(GNode n){
-				
+				String returnable = n.getString(0);
+				visit(n);
 			}
 			
 			/**
@@ -217,6 +238,9 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFieldDeclaration(GNode n){
+				if(operation.equals("dataLayout")){
+					dataLayout = "";
+				}
 				visit(n);
 			}
 
@@ -227,7 +251,7 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitVoidType(GNode n){
-
+				visit(n);
 			}
 			
 			/**
@@ -249,6 +273,17 @@ public class hMaster {
 			 */
 			public void visitPrimitiveType(GNode n){
 				String returntype = n.getString(0);
+				//naming checks
+				if(returntype.equals("boolean")){
+					returntype = "bool";
+				}
+				else if(returntype.equals("int")){
+					returntype = "int32_t";
+				}
+				
+				if(operation.equals("dataLayout")){
+					dataLayout = dataLayout + returntype + " ";
+				}
 			}
 
 			/**
@@ -259,7 +294,7 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitPrimaryIdentifier(GNode n){
-
+				visit(n);
 			}
 
 			/**
@@ -270,7 +305,14 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitQualifiedIdentifier(GNode n){
-				String returntype = n.getString(0);
+				String returnable = n.getString(0);
+				
+				if(operation.equals("Extension")){
+					addSuperClass(returnable);
+				}
+				else if(operation.equals("dataLayout")){
+					dataLayout = dataLayout + returnable + " ";
+				}
 			}
 
 			/**
@@ -292,7 +334,14 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitModifier(GNode n){
-
+				String returnable = n.getString(0);
+				if(operation.equals("ClassDeclaration")){
+					currentclass.setModifier(returnable);
+				}
+				else if(operation.equals("dataLayout")){
+					dataLayout = dataLayout + returnable;
+				}
+				visit(n);
 			}
 
 			/**
@@ -315,6 +364,18 @@ public class hMaster {
 			 */
 			public void visitDeclarator(GNode n){
 				String addable = n.getString(0); 
+				if(operation.equals("dataLayout")){
+					dataLayout = dataLayout + addable;
+//					if(!(n.getNode(2) == null)){
+//						dataLayout = dataLayout + "=";
+//					}
+				}
+				visit(n);
+				if(operation.equals("dataLayout")){
+					dataLayout = dataLayout + ";\r";
+					currentclass.addDataLayout(dataLayout);
+					//System.out.print("added datalayout " + dataLayout);
+				}
 			}
 
 			/**
@@ -324,7 +385,9 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitClassBody(GNode n){
-
+				operation = "dataLayout";
+				System.out.println("Message: started on classbody " + currentclass.classname);
+				visit(n);
 			}
 
 			/**
@@ -334,7 +397,9 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitConstructorDeclaration(GNode n){
-
+				operation = "Constructor";
+				visit(n);
+				operation = "dataLayout";
 			}
 			
 			/**
@@ -386,25 +451,22 @@ public class hMaster {
 				visit(n);
 			}
 			
-			/**
-			 * Possible Parents: CompilationUnit
-			 * Writes to Elements: includesCC, includesH
-			 * 
-			 * @param n
-			 */
-			public void visitImportDeclaration(GNode n){
-				
+			public void visitExtension(GNode n){
+				operation = "Extension";
+				visit(n);
 			}
 			
 			/**
-			 * Possible Parents: CompilationUnit
-			 * Writes to Elements: namespaceCC, namespaceH
-			 * 
-			 * 
+			 * Retreive the namespaces for the class
 			 * @param n
 			 */
 			public void visitPackageDeclaration(GNode n){
-								
+				//System.out.println("package seen");
+				Node qualifier = n.getNode(1);
+				for(Object o : qualifier){
+					//System.out.println((String)o);
+					namespace.add((String)o);
+				}
 			}
 
 			/**
@@ -414,15 +476,68 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitClassDeclaration(GNode n){
+				if(classlist.contains(n.getString(1))){
+					System.out.println("Message: already did this class");
+					return;
+				}
+				currentclass = new vTableClass(n.getString(1));
+				System.out.println("Message: created new class" + currentclass.classname);
+				Iterator<String> iterate = namespace.iterator();
+				while(iterate.hasNext()){
+					String spacable = iterate.next();
+					currentclass.addNameSpace(spacable);
+					System.out.println("Message: found namespace " + spacable);
+				}
 				
+				//missingsuper = false;  //set in compilationunit instead
+				
+				//if there is no explicit extension node, then inherits Object by default
+				if(n.getNode(3) == null){
+					addSuperClass("Object");
+					System.out.println("Message: added Object inheritance");
+					System.out.println("Message: missingsuper test " + missingsuper);
+				}
+				//System.out.println("classname is " + n.getString(1));
+				
+				operation = "ClassDeclaration";
+				visit(n);
+				if(missingsuper == true){
+					System.out.println("Message: missing superclass");
+					return;
+				}
+				else{
+					//eventually add currentclass to the classlist and to the classes linked list
+				}
+				//System.out.println("missingsuper test = " + missingsuper);
+				
+				currentclass.printLines();
 			}
 
 			public void visitArguments(GNode n){
 				visit(n);
-				
 			}
-			public void visitMethodDeclaration(GNode n){					
-
+			
+			public void visitMethodDeclaration(GNode n){
+				operation = "Method";
+				visit(n);
+			}
+			
+			public void addSuperClass(String s){
+				if(classlist.contains(s)){
+					Iterator iterate = classes.iterator();
+					while(iterate.hasNext()){
+						vTableClass classy = (vTableClass) iterate.next();
+						if(classy.classname.equals(s)){
+							currentclass.addSuperClass(classy);
+							break;
+						}
+					}
+				}
+				//add to the queue
+				else{
+					waitqueue.add(currentsource);
+					missingsuper = true;
+				}
 			}
 			
 			/**
@@ -430,7 +545,14 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+				//System.out.println("test");
+				for (Object o : n)
+					if(missingsuper == true){
+						return;
+					}
+					else if (o instanceof Node){ 
+						dispatch((Node)o);
+					}
 			}
 		}.dispatch(sourceAST);
 
