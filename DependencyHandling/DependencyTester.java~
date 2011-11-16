@@ -1,0 +1,10 @@
+package Trans;
+
+public class DependencyTester {
+
+	public static void main(String[] args) {
+		System.out.println((new DependencyMaster()).getDependencies("/home/Fall11/OOPS/JavaGrinder/DependencyHandling/basicTest.java").toString());
+	}
+
+	
+}

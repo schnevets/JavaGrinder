@@ -14,7 +14,6 @@ public class classAndMethodCreator extends Visitor {
 	LinkedList<String> modifierList;
 	String[] argumentType;
 	String[] argumentName;
-	LinkedList<Object> BlockText;
 	
 	public classAndMethodCreator(LinkedList<ccClass> clist){
 		classList = clist;
@@ -91,7 +90,6 @@ public class classAndMethodCreator extends Visitor {
 			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
-		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
 		currentClass.addMethod(new ccMethod(name, access, returnType, argumentType, argumentName, isStatic));
 	}
 	
@@ -100,20 +98,6 @@ public class classAndMethodCreator extends Visitor {
 			if (s instanceof String)
 				modifierList.add((String)s);
 		}
-	}
-
-	
-	/**visitBlock
-	 * A block is always visited after a method. This class creates a ccBlock, which will eventually 
-	 * consist of the method's "guts" and be added to the ccMethod in the form of a list or other straightforward
-	 * structure
-	 * 
-	 * Problem: visitBlock will assemble cc code, but we need to assign that block to the current method. The quick solution is to 
-	 * add a parameter to addMethod. Anyone have any other insight?
-	 */
-	public void visitBlock (GNode n){
-		ccBlock latestBlock = new ccBlock(n);
-		BlockText = new LinkedList<Object>();		
 	}
 	
 	public void visit(Node n) {
