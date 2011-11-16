@@ -93,7 +93,7 @@ public class classAndMethodCreator extends Visitor {
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
-		currentClass.addMethod(new ccMethod(name, access, returnType, argumentType, argumentName, isStatic, latestBlock));
+		currentClass.addMethod(new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic, latestBlock));
 	}
 	
 	public void visitModifier(GNode n){

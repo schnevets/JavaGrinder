@@ -10,7 +10,7 @@ class ccBlock extends Visitor{
 	String newline;
 	Boolean equalsUsed=false;
 	
-
+	public ccBlock(){}
 	public ccBlock(GNode n) {
 		visit(n);
 	}

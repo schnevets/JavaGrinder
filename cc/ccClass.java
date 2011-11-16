@@ -57,7 +57,7 @@ public class ccClass {
 			if(methods.get(i).getName() == s)
 				return methods.get(i);
 		}
-		return new ccMethod("METHOD NOT FOUND");
+		return new ccMethod("METHOD NOT FOUND", this);
 	}
 	/**
 	 * Searches for and returns constructor named s.
