@@ -3,7 +3,8 @@ package oop;
 import xtc.tree.GNode;
 
 public class ccMethod {
-	private final String name;
+	private String name;
+	private final ccClass parentClass;
 	private final String access;
 	private final String returnType;
 	private final String[] parameterType;
@@ -12,8 +13,9 @@ public class ccMethod {
 	private final ccBlock block;
 	
 	// The first constructor only makes dummy methods, and will not actually be used
-	public ccMethod(String mName){
+	public ccMethod(String mName, ccClass mClass){
 		name = mName;
+		parentClass = mClass;
 		access = "";
 		returnType = "";
 		parameterType = new String[0];
@@ -21,8 +23,9 @@ public class ccMethod {
 		isStatic = false;
 		block = new ccBlock();
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, ccBlock blk){
+	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, ccBlock blk){
 		name = mName;
+		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
 		parameterType = mparameterType;
@@ -30,8 +33,9 @@ public class ccMethod {
 		isStatic = false;
 		block = blk;
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic, ccBlock blk){
+	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic, ccBlock blk){
 		name = mName;
+		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
 		parameterType = mparameterType;
@@ -40,10 +44,31 @@ public class ccMethod {
 		block = blk;
 	}
 
+	public void mangleName(){
+		name = parentClass + "__" + name;
+		for (int i = 0; i < parameterType.length; i++){
+			name += "__" + parameterType[i];
+		}
+	}
+	
 	public String getName(){
 		return name;
 	}
 	
+	public String cppDeclaration(){
+		String decl = "";
+		if(isStatic){
+			return decl;
+		}
+		else{
+			decl = ccHelper.convertType(returnType) + " " + parentClass + "::" + name  + "(";
+			for (int i = 0; i < parameterType.length; i++){
+				if(i != 0) decl += ", ";
+				decl += parameterType[i] + " " + parameterName[i];
+			}
+			return decl;
+		}
+	}
 	public String toString(){
 		String s = "" + access + " method Name:\"" + name + "\" Return Type:\"" + returnType + "\" Parameters:(";
 		for (int i = 0; i < parameterType.length; i++){
