@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.DependencyHandling;
 
 
 
@@ -55,9 +55,8 @@ public class DependencyMaster extends xtc.util.Tool {
 	public HashSet<String> getDependencies(String fileName){
 		HashSet<String> filesToTranslate = new HashSet<String>();
 		
-		//Sets the uppermost directory to search - the directory above the package
-		String packageName = (new File(fileName).getParent());
-		directoryName = packageName.substring(0,((packageName.lastIndexOf('/'))));
+		//Sets the uppermost directory to search
+		directoryName = (new File(fileName).getParent() + "/");
 		
 		findDependencies(fileName, filesToTranslate);
 		return filesToTranslate;
@@ -88,30 +87,11 @@ public class DependencyMaster extends xtc.util.Tool {
 	public void process(Node node) {
 		new Visitor() {
 			
-			private HashSet<String> packagesToSearch = new HashSet<String>();
-			
-			public void visitPackageDeclaration(GNode n){
-				packagesToSearch.add('/' + n.getNode(1).getString(0));
-			}
-			
 			public void visitQualifiedIdentifier(GNode n){
-				//If the identifier has a package name, add it to packagesToSearch
-				if (n.size()>1){
-					int i = 0;
-					String packageName = "";
-					while(i<n.size()-1){
-						packageName = packageName + '/' + n.getString(i);
-						i++;
-					}
-					
-					packagesToSearch.add(packageName);
-				}
-				//Search through known packages for a file matching the identifier
-				for(String s : packagesToSearch){
-					String fileName = directoryName + s + '/' + n.getString(n.size()-1)+".java";
-					if(new File(fileName).exists()){
-						filesFound.add(fileName);
-					}
+				String fileName = directoryName + n.getString(n.size()-1)+".java";
+				System.out.println(fileName);
+				if(new File(fileName).exists()){
+					filesFound.add(fileName);
 				}
 			}
 			
