@@ -15,6 +15,7 @@ public class classAndMethodCreator extends Visitor {
 	String[] argumentType;
 	String[] argumentName;
 	LinkedList<Object> BlockText;
+	ccBlock latestBlock;
 	
 	public classAndMethodCreator(LinkedList<ccClass> clist){
 		classList = clist;
@@ -92,7 +93,7 @@ public class classAndMethodCreator extends Visitor {
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
-		currentClass.addMethod(new ccMethod(name, access, returnType, argumentType, argumentName, isStatic));
+		currentClass.addMethod(new ccMethod(name, access, returnType, argumentType, argumentName, isStatic, latestBlock));
 	}
 	
 	public void visitModifier(GNode n){
@@ -112,8 +113,8 @@ public class classAndMethodCreator extends Visitor {
 	 * add a parameter to addMethod. Anyone have any other insight?
 	 */
 	public void visitBlock (GNode n){
-		ccBlock latestBlock = new ccBlock(n);
-		BlockText = new LinkedList<Object>();		
+		latestBlock = new ccBlock(n);
+//		BlockText = new LinkedList<Object>();		
 	}
 	
 	public void visit(Node n) {

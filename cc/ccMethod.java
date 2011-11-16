@@ -1,5 +1,7 @@
 package oop;
 
+import xtc.tree.GNode;
+
 public class ccMethod {
 	private final String name;
 	private final String access;
@@ -7,6 +9,7 @@ public class ccMethod {
 	private final String[] parameterType;
 	private final String[] parameterName;
 	private final boolean isStatic;
+	private final ccBlock block;
 	
 	// The first constructor only makes dummy methods, and will not actually be used
 	public ccMethod(String mName){
@@ -16,22 +19,25 @@ public class ccMethod {
 		parameterType = new String[0];
 		parameterName = new String[0];
 		isStatic = false;
+		block = new ccBlock();
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName){
+	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, ccBlock blk){
 		name = mName;
 		access = mAccess;
 		returnType = mReturnType;
 		parameterType = mparameterType;
 		parameterName = mparameterName;
 		isStatic = false;
+		block = blk;
 	}
-	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic){
+	public ccMethod(String mName, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic, ccBlock blk){
 		name = mName;
 		access = mAccess;
 		returnType = mReturnType;
 		parameterType = mparameterType;
 		parameterName = mparameterName;
 		isStatic = mIsStatic;
+		block = blk;
 	}
 
 	public String getName(){
@@ -47,5 +53,4 @@ public class ccMethod {
 		s += ") Static:" + isStatic;
 		return s;
 	}
-	
 }
