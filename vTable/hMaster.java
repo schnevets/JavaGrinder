@@ -16,8 +16,8 @@ public class hMaster {
 	HashSet<String> classlist;
 	
 	LinkedList<String> waitqueue;
-	
-	//used by cc translator
+	LinkedList<vTableClass> fileprint;
+	//used by cc translator for method overloading
 	HashSet<String> namechanges;
 	
 	public hMaster(HashSet dependencies){
@@ -40,6 +40,10 @@ public class hMaster {
 			translate(waitqueue.pop());
 		}
 		*/
+		//setup a file
+		//write the forward declarations in the saved namespace
+		//write the rest
+		//includes
 	}
 	
 	public void hardIncludeJavaLangObject(){
@@ -140,10 +144,21 @@ public class hMaster {
 	
 	//temporary testing platform for hMaster
 	public static void main(String[] args){
-		HashSet<String> set = new HashSet<String>();
-		set.add(args[0]); //testing one file for now so we can get away with this
-		
+		DependencyMaster dependsource = new DependencyMaster();
+		//System.out.println(args[0]);
+		HashSet<String> set = dependsource.getDependencies(args[0]);//new HashSet<String>();
+		//set.add(args[0]); //testing one file for now so we can get away with this
+		//Iterator iterate = set.iterator();
+		//System.out.println(iterate.next());
+		//System.out.println(iterate.next());
 		hMaster tester = new hMaster(set);
+	}
+	
+	public void printFile(){
+		Iterator<vTableClass> iterate = fileprint.iterator();
+		while(iterate.hasNext()){
+			iterate.next().printLines();
+		}
 	}
 	
 	//question, how to sort out which classes belong to which file
@@ -152,14 +167,16 @@ public class hMaster {
 		//String[] args = {"-printJavaAST",sourcefile};
 		//String[] args = {"-returnJavaAST", sourcefile};
 		Node sourceAST = new ASTGenerator().generateAST(sourcefile);
+		fileprint = new LinkedList<vTableClass>();
 		//System.out.println(sourceAST.isEmpty());
 		final String currentsource = sourcefile;
+		final String newhfile = sourcefile.replace(".java", ".h");
 		new Visitor() {
 			//class variables
 			vTableClass currentclass;
-			vTableLayoutLine currentlayout;
-			vTableAddressLine currentaddress;
-			vTableMethodLayoutLine currentmethod;
+			//vTableLayoutLine currentlayout;
+			//vTableAddressLine currentaddress;
+			//vTableMethodLayoutLine currentmethod;
 			vTableForwardDeclarations forwarddeclarations;
 			LinkedList<String> namespace;
 			boolean missingsuper;
@@ -175,14 +192,16 @@ public class hMaster {
 			public void visitCompilationUnit(GNode n){
 				//System.out.println("made it");
 				namespace = new LinkedList<String>();
+				forwarddeclarations = new vTableForwardDeclarations();
 				for(Object o : n){
 					if (o instanceof Node){ 
 						missingsuper = false;
 						dispatch((Node)o);
 					}
 				}
+				//if there are no explicit constructors then add the default constructor...if needed, check that
+				//implement this property in the vTableClass printline method instead of here
 				//visit(n);
-				//currentclass.printLines();
 			}    		
 
 			/**
@@ -251,6 +270,9 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitVoidType(GNode n){
+				if(operation.equals("Method")){
+					currentclass.appendMethod("ReturnType", "Void");
+				}
 				visit(n);
 			}
 			
@@ -284,6 +306,17 @@ public class hMaster {
 				if(operation.equals("dataLayout")){
 					dataLayout = dataLayout + returntype + " ";
 				}
+				else if(operation.equals("Constructor")){
+					dataLayout = dataLayout + returntype + " ";
+				}
+				else if(operation.equals("Method")){
+					currentclass.appendMethod("ReturnType", returntype);
+					currentclass.appendTableLayout("ReturnType", returntype);
+				}
+				else if(operation.equals("MethodParameter")){
+					currentclass.appendMethod("Parameters", returntype);
+					currentclass.appendTableLayout("Parameters", returntype);
+				}
 			}
 
 			/**
@@ -313,6 +346,17 @@ public class hMaster {
 				else if(operation.equals("dataLayout")){
 					dataLayout = dataLayout + returnable + " ";
 				}
+				else if(operation.equals("Constructor")){
+					dataLayout = dataLayout + returnable + " ";
+				}
+				else if(operation.equals("Method")){
+					currentclass.appendMethod("ReturnType", returnable);
+					currentclass.appendTableLayout("ReturnType", returnable);
+				}
+				else if(operation.equals("MethodParameter")){
+					currentclass.appendMethod("Parameters", returnable);
+					currentclass.appendTableLayout("Parameters", returnable);
+				}
 			}
 
 			/**
@@ -323,6 +367,9 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitModifiers(GNode n){
+				if(operation.equals("Constructor")){
+					
+				}
 				visit(n);
 			}
 
@@ -339,7 +386,16 @@ public class hMaster {
 					currentclass.setModifier(returnable);
 				}
 				else if(operation.equals("dataLayout")){
-					dataLayout = dataLayout + returnable;
+					//dataLayout = dataLayout + returnable + " ";
+					if(returnable.equals("final")){
+						dataLayout = dataLayout + "const ";
+					}
+				}
+				else if(operation.equals("Constructor") && returnable.equals("final")){
+					dataLayout = dataLayout + "const" + " ";
+				}
+				else if(operation.equals("Method")){
+					currentclass.appendMethod("Modifier",returnable);
 				}
 				visit(n);
 			}
@@ -386,7 +442,7 @@ public class hMaster {
 			 */
 			public void visitClassBody(GNode n){
 				operation = "dataLayout";
-				System.out.println("Message: started on classbody " + currentclass.classname);
+				//System.out.println("Message: started on classbody " + currentclass.classname);
 				visit(n);
 			}
 
@@ -398,7 +454,10 @@ public class hMaster {
 			 */
 			public void visitConstructorDeclaration(GNode n){
 				operation = "Constructor";
+				dataLayout = "";
+				currentclass.newConstructor();
 				visit(n);
+				currentclass.addConstructor();
 				operation = "dataLayout";
 			}
 			
@@ -410,9 +469,11 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFormalParameters(GNode n){
+					operation = "MethodParameter";
 					int i = 0;
 					for(Object o: n){
 						if (o instanceof Node){
+							dataLayout = "";
 							dispatch((Node)o);
 						}
 						i++;
@@ -426,11 +487,16 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFormalParameter(GNode n){
-				for(Object o: n){
-					if (o instanceof Node){
-						dispatch((Node)o);
-					}
-				}			
+//				for(Object o: n){
+//					if (o instanceof Node){
+//						dispatch((Node)o);
+//					}
+//				}			
+				if(operation.equals("Constructor")){
+					dispatch(n.getNode(0)); dispatch(n.getNode(1));
+					dataLayout = dataLayout + n.getString(3);
+					currentclass.appendConstructor(dataLayout);
+				}
 			}
 			
 			/**
@@ -463,6 +529,7 @@ public class hMaster {
 			public void visitPackageDeclaration(GNode n){
 				//System.out.println("package seen");
 				Node qualifier = n.getNode(1);
+				operation = "PackageDeclaration";
 				for(Object o : qualifier){
 					//System.out.println((String)o);
 					namespace.add((String)o);
@@ -477,16 +544,16 @@ public class hMaster {
 			 */
 			public void visitClassDeclaration(GNode n){
 				if(classlist.contains(n.getString(1))){
-					System.out.println("Message: already did this class");
+					//System.out.println("Message: already did this class");
 					return;
 				}
 				currentclass = new vTableClass(n.getString(1));
-				System.out.println("Message: created new class" + currentclass.classname);
+				//System.out.println("Message: created new class" + currentclass.classname);
 				Iterator<String> iterate = namespace.iterator();
 				while(iterate.hasNext()){
 					String spacable = iterate.next();
 					currentclass.addNameSpace(spacable);
-					System.out.println("Message: found namespace " + spacable);
+					//System.out.println("Message: found namespace " + spacable);
 				}
 				
 				//missingsuper = false;  //set in compilationunit instead
@@ -494,15 +561,21 @@ public class hMaster {
 				//if there is no explicit extension node, then inherits Object by default
 				if(n.getNode(3) == null){
 					addSuperClass("Object");
-					System.out.println("Message: added Object inheritance");
-					System.out.println("Message: missingsuper test " + missingsuper);
+					//System.out.println("Message: added Object inheritance");
+					//System.out.println("Message: missingsuper test " + missingsuper);
 				}
 				//System.out.println("classname is " + n.getString(1));
 				
+				forwarddeclarations.addForwardDeclaration(currentclass.classname);
+				forwarddeclarations.addForwardVTable(currentclass.classname);
+				forwarddeclarations.addTypeDeclarations(currentclass.classname);
+				
 				operation = "ClassDeclaration";
+				
 				visit(n);
+				
 				if(missingsuper == true){
-					System.out.println("Message: missing superclass");
+					//System.out.println("Message: missing superclass");
 					return;
 				}
 				else{
@@ -510,7 +583,10 @@ public class hMaster {
 				}
 				//System.out.println("missingsuper test = " + missingsuper);
 				
-				currentclass.printLines();
+				//currentclass.printLines();
+				classlist.add(currentclass.classname);
+				classes.add(currentclass);
+				fileprint.add(currentclass);
 			}
 
 			public void visitArguments(GNode n){
@@ -519,7 +595,20 @@ public class hMaster {
 			
 			public void visitMethodDeclaration(GNode n){
 				operation = "Method";
-				visit(n);
+				if(!(n.getString(3).equals(("main")))){
+					currentclass.newMethodLayout();
+					currentclass.appendMethod("MethodName", n.getString(3));
+					currentclass.newTableAddress();
+					currentclass.appendAddress("MethodName", n.getString(3));
+					currentclass.appendAddress("ClassName", currentclass.classname);
+					currentclass.newTableLayout();
+					currentclass.appendTableLayout("MethodName", n.getString(3));
+					currentclass.appendTableLayout("ReferenceType", currentclass.classname);
+					visit(n);
+					currentclass.addMethod();
+					currentclass.addTableAddress();
+					currentclass.addTableLayout();
+				}
 			}
 			
 			public void addSuperClass(String s){
@@ -555,6 +644,7 @@ public class hMaster {
 					}
 			}
 		}.dispatch(sourceAST);
-
+		
+		printFile();
 	}
 }	

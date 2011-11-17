@@ -1,5 +1,5 @@
-package oop;
-
+package oop.crapstacker;
+import oop.crapstackers.*;
 public class TestCase1 {
 	public static void main (String args []){
 		float floater = 6.02e23f;
@@ -11,10 +11,12 @@ public class TestCase1 {
 		int grand = stacker + 10;
 		//grand = stacker - 10;
 		grand = stacker * 10;
+		TestCase2 crossfiletest = new TestCase2();
 		//grand = stacker / 10 * 10;
 		//grand = stacker % 10;
-		Tester testing = new Tester(grand);
-		testing.createStuff(grand, doubler);
+		//Tester testing = new Tester(grand);
+		//testing.createStuff(grand, doubler);
+		crossfiletest.createStuff(grand, doubler);
 		if(true){
 			for(;;){
 				break;
@@ -38,7 +40,7 @@ public class TestCase1 {
 		}
 		while(test<3);
 		System.out.println(grand);
-		System.out.println(testing.wobbles);
+		System.out.println(crossfiletest.wobbles);
 		System.out.println(stringer);
 		System.out.println("Finished all the things!");
 	}

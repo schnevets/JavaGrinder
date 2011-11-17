@@ -1,5 +1,6 @@
 package oop;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class vTableClass {
@@ -19,6 +20,7 @@ public class vTableClass {
 	vTableMethodLayoutLine currentmethod;
 	vTableLayoutLine currentlayout;
 	vTableAddressLine currentaddress;
+	vClassConstructor currentconstructor;
 	
 	boolean writeable;
 	
@@ -46,6 +48,34 @@ public class vTableClass {
 	
 	public void addSuperClass(vTableClass parenting){
 		superclass = parenting;
+		copysupertable();
+	}
+	
+	public void copysupertable(){
+		Iterator<vTableMethodLayoutLine> methoditerate = superclass.vMethodLayout.iterator();
+		Iterator<vTableAddressLine> addressiterate = superclass.vTableAddress.iterator();
+		Iterator<vTableLayoutLine> layoutiterate = superclass.vTableLayout.iterator();
+		
+		while(methoditerate.hasNext()){
+			currentlayout = layoutiterate.next();
+			currentlayout.setReferenceType(this.classname);
+			currentaddress = addressiterate.next();
+			if(currentaddress.methodname.equals("__isa")){
+				currentaddress.setClassName(this.classname);
+				vTableLayout.add(currentlayout);
+				vTableAddress.add(currentaddress);
+			}
+			else{
+				currentmethod = methoditerate.next();
+				currentmethod.setReferenceType(this.classname);
+				currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
+						+ currentmethod.referencetype + currentmethod.parameters + "))");
+				
+				vTableLayout.add(currentlayout);
+				vTableAddress.add(currentaddress);
+				vMethodLayout.add(currentmethod);
+			}
+		}
 	}
 	
 	public void addNameSpace(String s){
@@ -54,6 +84,18 @@ public class vTableClass {
 	
 	public void addDataLayout(String s){
 		dataLayout.add(s);
+	}
+	
+	public void newConstructor(){
+		currentconstructor = new vClassConstructor(this);
+	}
+	
+	public void appendConstructor(String s){
+		currentconstructor.addParameter(s);
+	}
+	
+	public void addConstructor(){
+		vClassConstructors.add(currentconstructor);
 	}
 	
 	//Create a new vTableMethodLayoutLine
@@ -142,12 +184,19 @@ public class vTableClass {
 	}
 	
 	public void printLines(){
+		Iterator<String> iterate = namespace.iterator();
+		while(iterate.hasNext()){
+			System.out.print("namespace " + iterate.next() + "{\r");
+		}
+		
 		System.out.print("struct " + "__" + classname + "{ \r");
-		System.out.print("__" + classname + "_VT*" + " __vptr;\r\r");
+		System.out.print("__" + classname + "_VT*" + " __vptr;\r");
 		
 		while(!dataLayout.isEmpty()){
 			System.out.print(dataLayout.pop());
 		}
+		
+		System.out.print("\r");
 		
 		//the constructors
 		//System.out.print("__" + classname + "();\r\r");  the basic constructor, no arguments
@@ -177,6 +226,13 @@ public class vTableClass {
 			current.printLine();
 		}
 		System.out.print("\r};\r");
+		
+		iterate = namespace.iterator();
+		while(iterate.hasNext()){
+			iterate.next();
+			System.out.print("}\r");
+		}
+		System.out.print("\r");
 	}
 	
 }
