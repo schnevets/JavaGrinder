@@ -8,16 +8,29 @@ public class vTableMethodLayoutLine {
 	String referencetype;
 	int parametercount;
 	String vTableLine;
+	String visibility;
 	
 	vTableClass parent;
 	
 	public vTableMethodLayoutLine(vTableClass parentable){
 		parent = parentable;
 		parametercount = 0;
+		modifier = "";
+		returntype = "";
+		methodname = "";
+		parameters = "";
+		referencetype = "";
+		visibility = "";
 	}
 	
 	public void setModifer(String modifiable){
-		modifier = modifiable;
+		if(modifiable.equals("final")){
+			modifier = "const";
+		}
+		else if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
+			visibility = modifiable;
+		}
+		//modifier = modifiable;
 	}
 	
 	public void setReturnType(String returntypable){
@@ -56,7 +69,7 @@ public class vTableMethodLayoutLine {
 	*/
 	
 	public void printLine(){
-		vTableLine = modifier + " " + returntype + " " + methodname + "(" + referencetype;
+		vTableLine = "static " + modifier + " " + returntype + " " + methodname + "(" + referencetype;
 		if (parametercount > 0){
 			vTableLine = vTableLine + parameters;
 		}
