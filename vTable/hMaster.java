@@ -35,11 +35,11 @@ public class hMaster {
 		}
 		
 		//do not use for now
-		/*
+		
 		while(!(waitqueue.isEmpty())){
 			translate(waitqueue.pop());
 		}
-		*/
+		
 		//setup a file
 		//write the forward declarations in the saved namespace
 		//write the rest
@@ -469,7 +469,10 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFormalParameters(GNode n){
-					operation = "MethodParameter";
+					if(!operation.equals("Constructor")){
+						operation = "MethodParameter";
+					}
+					
 					int i = 0;
 					for(Object o: n){
 						if (o instanceof Node){
@@ -492,9 +495,9 @@ public class hMaster {
 //						dispatch((Node)o);
 //					}
 //				}			
+				dispatch(n.getNode(0)); dispatch(n.getNode(1));
+				dataLayout = dataLayout + n.getString(3);
 				if(operation.equals("Constructor")){
-					dispatch(n.getNode(0)); dispatch(n.getNode(1));
-					dataLayout = dataLayout + n.getString(3);
 					currentclass.appendConstructor(dataLayout);
 				}
 			}
@@ -598,6 +601,7 @@ public class hMaster {
 				if(!(n.getString(3).equals(("main")))){
 					currentclass.newMethodLayout();
 					currentclass.appendMethod("MethodName", n.getString(3));
+					currentclass.appendMethod("ReferenceType", currentclass.classname);
 					currentclass.newTableAddress();
 					currentclass.appendAddress("MethodName", n.getString(3));
 					currentclass.appendAddress("ClassName", currentclass.classname);
