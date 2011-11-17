@@ -93,9 +93,55 @@ public class vTableClass {
 	public void appendConstructor(String s){
 		currentconstructor.addParameter(s);
 	}
-	
+
 	public void addConstructor(){
 		vClassConstructors.add(currentconstructor);
+	}
+	
+	public void checkOverride(){
+		int index = 0;
+		boolean override = false;
+		try{
+			//if(command.equals("Method")){
+				while(true){
+					vTableMethodLayoutLine scanline = vMethodLayout.get(index);
+					if(scanline.methodname.equals(currentmethod.methodname) && scanline.parameters.equals(currentmethod.parameters)){
+						vMethodLayout.remove(index);
+						vTableLayout.remove(index + 1);
+						vTableAddress.remove(index + 1);
+						override = true;
+						break;
+					}
+					index++;
+				}
+			//}
+			//else if(command.equals("TableLayout")){
+			//index = index + 1;
+
+			//while(true){
+				//vTableLayoutLine scanline = vTableLayout.get(index);
+				//if(scanline.methodname.equals(currentlayout.methodname) && scanline.parameters.equals(currentmethod.parameters)){
+					//vTableLayout.remove(index);
+					//vTableAddress.remove(index);
+					//break;
+				//}
+				//index++;
+			//}
+			//}
+			//else if(command.equals("Address")){
+//				while(true){
+//					vTableAddressLine scanline = vTableAddress.get(index);
+//					if(scanline.methodname.equals(currentaddress.methodname)){
+//						
+//						break;
+//					}
+//					index++;
+//				}
+//			}
+		}
+		catch(Exception e){
+			
+		}
 	}
 	
 	//Create a new vTableMethodLayoutLine
@@ -104,6 +150,7 @@ public class vTableClass {
 	}
 	
 	public void addMethod(){
+		checkOverride();
 		vMethodLayout.add(currentmethod);
 	}
 	
@@ -134,6 +181,7 @@ public class vTableClass {
 	}
 	
 	public void addTableLayout(){
+		//checkOverride("TableLayout");
 		vTableLayout.add(currentlayout);
 	}
 	
@@ -163,6 +211,7 @@ public class vTableClass {
 	}
 	
 	public void addTableAddress(){
+		//checkOverride("Address");
 		vTableAddress.add(currentaddress);
 	}
 	
