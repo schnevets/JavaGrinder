@@ -20,5 +20,9 @@ public class ccExpression extends Visitor{
 		line = new ccStatement(n).publish();
 		System.out.println(line);					//line should be added to ccBlock
 	}
+	
+	public String publish(){
+		return line;
+	}
 
 }

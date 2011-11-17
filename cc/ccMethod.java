@@ -1,5 +1,7 @@
 package oop;
 
+import java.util.LinkedList;
+
 import xtc.tree.GNode;
 
 public class ccMethod {
@@ -55,20 +57,26 @@ public class ccMethod {
 		return name;
 	}
 	
-	public String cppDeclaration(){
+	public String publishDeclaration(){
 		String decl = "";
 		if(isStatic){
 			return decl;
 		}
 		else{
-			decl = ccHelper.convertType(returnType) + " " + parentClass + "::" + name  + "(";
+			decl = ccHelper.convertType(returnType) + " " + parentClass.getName() + "::" + name  + "(";
 			for (int i = 0; i < parameterType.length; i++){
 				if(i != 0) decl += ", ";
 				decl += parameterType[i] + " " + parameterName[i];
 			}
+			decl += ")";
 			return decl;
 		}
 	}
+	
+	public LinkedList<String> publishBlock(){
+		return block.publish();
+	}
+	
 	public String toString(){
 		String s = "" + access + " method Name:\"" + name + "\" Return Type:\"" + returnType + "\" Parameters:(";
 		for (int i = 0; i < parameterType.length; i++){
