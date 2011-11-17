@@ -115,7 +115,7 @@ public class ccClass {
 			}
 		}
 		else s += "none";
-		
+
 		return s;
 	}
 	

@@ -8,17 +8,14 @@ public class ccExpression extends Visitor{
 	String line;
 	
 	public ccExpression(GNode n){
-		System.out.println(n);
 		dispatch((GNode)n.get(0));
 	}
 	
 	public void visitExpression(GNode n){
 		line = new ccStatement(n).publish();
-		System.out.println(line);					//line should be added to ccBlock
 	}
 	public void visitCallExpression(GNode n){
 		line = new ccStatement(n).publish();
-		System.out.println(line);					//line should be added to ccBlock
 	}
 	
 	public String publish(){
