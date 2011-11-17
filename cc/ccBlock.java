@@ -14,6 +14,8 @@ import xtc.tree.Visitor;
 
 
 class ccBlock extends Visitor{
+	public ccBlock(){
+	}
 
 	public ccBlock(GNode n) {
 		visit(n);
@@ -39,7 +41,7 @@ class ccBlock extends Visitor{
 	}
 
 	public void visitBlock(GNode n){
-		System.out.println(n);
+//		System.out.println(n);
 		ccBlock blockStatement = new ccBlock(n);
 	}
 	

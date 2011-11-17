@@ -10,7 +10,7 @@ public class ccMethod {
 	private final String[] parameterType;
 	private final String[] parameterName;
 	private final boolean isStatic;
-	private final ccBlock block;
+	private ccBlock block;
 	
 	// The first constructor only makes dummy methods, and will not actually be used
 	public ccMethod(String mName, ccClass mClass){

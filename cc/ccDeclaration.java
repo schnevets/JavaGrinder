@@ -13,7 +13,10 @@ public class ccDeclaration {
 	public ccDeclaration(GNode n) {
 		modifiers = extract((GNode)n.get(0));
 		types = extract((GNode)n.get(1));
+		if(types == "boolean")
+			types = "bool";
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
+		System.out.println(this.publish());					//To be added to ccBlock
 	}
 	
 	/*
