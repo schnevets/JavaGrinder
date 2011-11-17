@@ -161,7 +161,7 @@ public class ccMaster extends Visitor {
 	 */
 	public void visitBlock (GNode n){
 		latestBlock = new ccBlock(n);
-//		BlockText = new LinkedList<Object>();		
+		BlockText = new LinkedList<Object>();		
 	}
 	
 	public void visit(Node n) {

@@ -15,7 +15,15 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitCallExpression(GNode n){
-		visit(n);
+		if(n.getString(2).contains("print")){
+			line+="cout << ";
+			dispatch(n.getGeneric(3));
+			if(n.getString(2).equals("println")){
+				line+=" << endl";
+			}
+		}
+		else
+			visit(n);
 		line+=";";
 	}
 	
@@ -39,7 +47,50 @@ public class ccStatement extends Visitor{
 	public void visitBooleanLiteral(GNode n){
 		line+=(String) n.get(0);		
 	}
-
+	
+	public void visitBlock(GNode n){
+		ccBlock blockStatement = new ccBlock(n);
+	}
+	public void visitConditionalStatement(GNode n){
+		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")";
+//		System.out.println(line);
+	}
+	public void visitForStatement(GNode n){
+		line = "for(";
+		dispatch(n.getGeneric(0));
+		line+=")";
+		ccExpression inside = new ccExpression(n.getGeneric(1));					//declaring a ccExpression, will eventually make ccStatement method to construct
+	}
+	public void visitBasicForControl(GNode n){
+		visit(n);
+	}
+	public void visitBreakStatement(GNode n){
+		line = "break;";
+	}
+	public void visitWhileStatement(GNode n){
+		line = "while("+new ccStatement((GNode)n.get(0)).publish()+")";
+//		System.out.println(line);
+	}
+	public void visitDeclarator(GNode n){
+		line+=n.getString(0);
+		if(n.getNode(1)==null)
+			line+="=";
+		else
+			line+=n.getString(1);
+		dispatch(n.getGeneric(2));
+		line+=";";
+	}
+	public void visitRelationalExpression(GNode n){
+		visit(n);
+		line+=";";
+	}
+	public void visitArguments(GNode n){
+		visit(n);
+	}
+	
+	public void visitSelectionExpression(GNode n){
+		visit(n);
+	}
 	public void visitPrimaryIdentifier(GNode n){
 		line+=(String) n.get(0)+" ";		
 	}

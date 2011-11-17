@@ -16,7 +16,7 @@ public class ccDeclaration {
 		if(types == "boolean")
 			types = "bool";
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
-		System.out.println(this.publish());					//To be added to ccBlock
+//		System.out.println(this.publish());					//To be added to ccBlock
 	}
 	
 	/*

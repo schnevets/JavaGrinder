@@ -74,6 +74,7 @@ public class ccMethod {
 	}
 	
 	public LinkedList<String> publishBlock(){
+//		System.out.println(block.blockLines);
 		return block.publish();
 	}
 	
