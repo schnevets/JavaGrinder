@@ -19,7 +19,6 @@ public class ccMaster extends Visitor {
 	private LinkedList<String> modifierList;
 	private String[] argumentType;
 	private String[] argumentName;
-	private LinkedList<Object> BlockText;
 	private ccBlock latestBlock;
 	
 	
@@ -50,7 +49,7 @@ public class ccMaster extends Visitor {
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			for(int j=0; j < classList.get(i).getMethodCount(); j++){
-				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + "{\n");
+				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + " {\n");
 				blockLines = classList.get(i).getMethodAtIndex(j).publishBlock();
 				while(!blockLines.isEmpty()){
 					out.write(blockLines.remove(0));
