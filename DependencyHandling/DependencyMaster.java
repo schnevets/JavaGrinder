@@ -1,4 +1,4 @@
-package oop.JavaGrinder.DependencyHandling;
+package oop;
 
 
 
@@ -56,7 +56,7 @@ public class DependencyMaster extends xtc.util.Tool {
 		HashSet<String> filesToTranslate = new HashSet<String>();
 		
 		//Sets the uppermost directory to search
-		directoryName = (new File(fileName).getParent() + "/");
+		directoryName = (new File(fileName).getParentFile().getParent() + "/");
 		
 		findDependencies(fileName, filesToTranslate);
 		return filesToTranslate;
@@ -85,14 +85,47 @@ public class DependencyMaster extends xtc.util.Tool {
 	}
 
 	public void process(Node node) {
+		
 		new Visitor() {
 			
-			public void visitQualifiedIdentifier(GNode n){
-				String fileName = directoryName + n.getString(n.size()-1)+".java";
-				System.out.println(fileName);
-				if(new File(fileName).exists()){
-					filesFound.add(fileName);
+			private HashSet<String> subDirectories;
+			
+			public void visitCompilationUnit(GNode n){
+				subDirectories = new HashSet<String>();
+				subDirectories.add(directoryName);
+				visit(n);
+			}
+			
+			public void visitPackageDeclaration(GNode n){
+				String packageName = new String("");
+				for (Object o : n.getNode(1)) if (o instanceof String){
+					packageName = packageName + o + "/";
 				}
+				subDirectories.add(directoryName + packageName);
+				visit(n);
+			}
+			
+			public void visitImportDeclaration(GNode n){
+				String packageName = new String("");
+				for (Object o : n.getNode(1)) if (o instanceof String){
+					packageName = packageName + o + "/";
+				}
+				if(n.get(2)==null){
+					packageName = packageName.substring(0, packageName.lastIndexOf('/'));
+					packageName = packageName.substring(0, packageName.lastIndexOf('/'));
+				}
+				subDirectories.add(directoryName + packageName);
+				visit(n);
+			}
+			
+			public void visitQualifiedIdentifier(GNode n){
+				for (String s : subDirectories){
+					String fileName = s + n.getString(n.size()-1)+".java";
+					if(new File(fileName).exists()){
+						filesFound.add(fileName);
+					}
+				}
+				visit(n);
 			}
 			
 			public void visit(Node n) {
