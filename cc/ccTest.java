@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -83,14 +84,10 @@ public class ccTest extends xtc.util.Tool {
 		}
 
 		if (runtime.test("translate")) {
-			ccMaster ccm = new ccMaster();
-			ccm.dispatch(node);
-			try{
-				ccm.publishToFiles();
-			} catch (IOException e){
-				e.printStackTrace();
-			}
-			
+			String s = "TestCase0.java";
+			HashSet hi = new HashSet();
+			hi.add(s);
+			ccMaster ccm = new ccMaster(hi, hi);
 		}
 	}
 

@@ -4,12 +4,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
-import xtc.util.Pair;
+//import xtc.util.Pair;
+//import xtc.util.Melon;
+//import xtc.util.Grape;
 
 public class ccMaster extends Visitor {
 	
@@ -20,11 +24,24 @@ public class ccMaster extends Visitor {
 	private String[] argumentType;
 	private String[] argumentName;
 	private ccBlock latestBlock;
+	private HashSet mangleNames;
 	
 	
-	public ccMaster(){
-		modifierList = new LinkedList<String>();
-		classList = new LinkedList<ccClass>();
+	public ccMaster(HashSet dependencies, HashSet mangleList){
+		Iterator iterate = dependencies.iterator();
+		ASTGenerator ast = new ASTGenerator();
+		mangleNames = mangleList;
+		while (iterate.hasNext()){
+			modifierList = new LinkedList<String>();
+			classList = new LinkedList<ccClass>();
+			String nextFile = (String)iterate.next();
+			this.dispatch(ast.generateAST(nextFile));
+			try{
+				this.publishToFiles();
+			} catch (IOException e){
+				e.printStackTrace();
+			}
+		}
 	}
 	/**
 	 * Printy Thingy
@@ -160,7 +177,6 @@ public class ccMaster extends Visitor {
 	 */
 	public void visitBlock (GNode n){
 		latestBlock = new ccBlock(n);
-		BlockText = new LinkedList<Object>();		
 	}
 	
 	public void visit(Node n) {
