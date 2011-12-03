@@ -73,7 +73,7 @@ public class ccClass {
 			if(constructors.get(i).getName() == s)
 				return constructors.get(i);
 		}
-		return new ccConstructor("CONSTRUCTOR NOT FOUND");
+		return new ccConstructor("CONSTRUCTOR NOT FOUND", this);
 	}
 	public int getMethodCount(){
 		return methods.size();

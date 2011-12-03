@@ -74,15 +74,14 @@ public class ccMaster extends Visitor {
 			file = new File(classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
-//			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
-//				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
-//				blockLines = classList.get(i).getConstructorAtIndex(j).publishBlock();
-//				while(!blockLines.isEmpty()){
-//					out.write(blockLines.remove(0));
-//				}
-//				out.write("}\n");
-//				out.close();
-//			}
+			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
+				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
+				blockLines = classList.get(i).getConstructorAtIndex(j).publishBlock();
+				while(!blockLines.isEmpty()){
+					out.write(blockLines.remove(0));
+				}
+				out.write("}\n");
+			}
 			for(int j=0; j < classList.get(i).getMethodCount(); j++){
 				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + " {\n");
 				blockLines = classList.get(i).getMethodAtIndex(j).publishBlock();
@@ -90,8 +89,8 @@ public class ccMaster extends Visitor {
 					out.write(blockLines.remove(0));
 				}
 				out.write("}\n");
-				out.close();
 			}
+			out.close();
 		}
 	}
 	
@@ -142,7 +141,9 @@ public class ccMaster extends Visitor {
 			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
-		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName));
+		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
+		
+		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass, latestBlock));
 	}
 	public void visitMethodDeclaration(GNode n){
 		String name = (String)n.getString(3);
