@@ -23,9 +23,8 @@ public class ccMethod {
 		parameterType = new String[0];
 		parameterName = new String[0];
 		isStatic = false;
-		block = new ccBlock();
 	}
-	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, ccBlock blk){
+	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName){
 		name = mName;
 		parentClass = mClass;
 		access = mAccess;
@@ -33,9 +32,8 @@ public class ccMethod {
 		parameterType = mparameterType;
 		parameterName = mparameterName;
 		isStatic = false;
-		block = blk;
 	}
-	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic, ccBlock blk){
+	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic){
 		name = mName;
 		parentClass = mClass;
 		access = mAccess;
@@ -43,9 +41,12 @@ public class ccMethod {
 		parameterType = mparameterType;
 		parameterName = mparameterName;
 		isStatic = mIsStatic;
-		block = blk;
 	}
 
+	public void setBlock(ccBlock blk){
+		block = blk;
+	}
+	
 	public void mangleName(){
 		name = parentClass + "__" + name;
 		for (int i = 0; i < parameterType.length; i++){

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ public class ccMaster extends Visitor {
 	private String[] argumentName;
 	private ccBlock latestBlock;
 	private HashSet mangleNames;
+	private HashMap<String, String> variables;
 	
 	
 	public ccMaster(Node NODE /*HashSet dependencies, HashSet mangleList*/){
@@ -41,9 +43,9 @@ public class ccMaster extends Visitor {
 //		ASTGenerator ast = new ASTGenerator();
 //		mangleNames = mangleList;
 //		while (iterate.hasNext()){
-//		modifierList = new LinkedList<String>();
-//		classList = new LinkedList<ccClass>();
-//		String nextFile = (String)iterate.next();
+//			modifierList = new LinkedList<String>();
+//			classList = new LinkedList<ccClass>();
+//			String nextFile = (String)iterate.next();
 //			this.dispatch(ast.generateAST(nextFile));
 //			try{
 //				this.publishToFiles();
@@ -106,6 +108,56 @@ public class ccMaster extends Visitor {
 
 	public void visitCompilationUnit(GNode n){
 		visit(n);
+		/* It's the glorious visitor-within-a-visitor that makes the blocks! It's the blocker! */
+		new Visitor() {
+			private int constructorCounter;
+			private int methodCounter;
+			
+			public void visitClassDeclaration(GNode n){
+				String name = (String)n.getString(1);
+				for(int i=0; i < classList.size(); i++){
+					if(name == classList.get(i).getName()){
+						currentClass = classList.get(i);
+					}
+				}
+				constructorCounter = 0;
+				methodCounter = 0;
+				visit(n);
+				addDefaultMethods(currentClass);
+			}
+			public void visitConstructorDeclaration(GNode n){
+				visit(n);
+				currentClass.getConstructorAtIndex(constructorCounter).setBlock(latestBlock);
+				constructorCounter++;
+			}
+			
+			public void visitMethodDeclaration(GNode n){
+				String name = (String)n.getString(3);
+				visit(n);
+				if(name.matches("main")){
+					mainMethod.setBlock(latestBlock);
+				}
+				else{
+					currentClass.getMethodAtIndex(methodCounter).setBlock(latestBlock);
+					methodCounter++;
+				}
+			}
+			public void visitBlock (GNode n){
+				latestBlock = new ccBlock(n);
+			}
+			
+			public void addDefaultMethods(ccClass clas){
+				ccManualBlock deleteBlock = new ccManualBlock();
+				deleteBlock.addCustomLine("  delete __this;");
+				System.out.println(deleteBlock.publish().toString());
+				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
+				clas.addMethod(delete);
+			}
+			
+			public void visit(Node n) {
+				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+			}
+		}.dispatch(n);
 	}
 	public void visitClassDeclaration(GNode n){
 		String name = (String)n.getString(1);
@@ -123,9 +175,6 @@ public class ccMaster extends Visitor {
 		modifierList.clear();
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
-		
-		addDefaultMethods(currentClass);
-		
 		visit(n);
 	}
 	public void visitConstructorDeclaration(GNode n){
@@ -145,9 +194,7 @@ public class ccMaster extends Visitor {
 			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
-		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
-		
-		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass, latestBlock));
+		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass));
 	}
 	public void visitMethodDeclaration(GNode n){
 		String name = (String)n.getString(3);
@@ -176,12 +223,11 @@ public class ccMaster extends Visitor {
 			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
-		visit(n);							//After the method's meta-info is collected, n visits the block, where the "guts" are assembled"
 		if(name.matches("main")){
-			mainMethod = new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic, latestBlock);
+			mainMethod = new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic);
 		}
 		else{
-			currentClass.addMethod(new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic, latestBlock));
+			currentClass.addMethod(new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic));
 		}
 	}
 	public void visitModifier(GNode n){
@@ -190,25 +236,7 @@ public class ccMaster extends Visitor {
 				modifierList.add((String)s);
 		}
 	}
-	/**visitBlock
-	 * A block is always visited after a method. This class creates a ccBlock, which will eventually 
-	 * consist of the method's "guts" and be added to the ccMethod in the form of a list or other straightforward
-	 * structure
-	 * 
-	 * Problem: visitBlock will assemble cc code, but we need to assign that block to the current method. The quick solution is to 
-	 * add a parameter to addMethod. Anyone have any other insight?
-	 */
-	public void visitBlock (GNode n){
-		latestBlock = new ccBlock(n);
-	}
-	
-	public void addDefaultMethods(ccClass clas){
-		ccManualBlock deleteBlock = new ccManualBlock();
-		deleteBlock.addCustomLine("  delete __this;");
-		System.out.println(deleteBlock.publish().toString());
-		ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
-		clas.addMethod(delete);
-	}
+
 	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);

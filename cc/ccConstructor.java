@@ -18,12 +18,15 @@ public class ccConstructor {
 		parameterType = new String[0];
 		parameterName = new String[0];
 	}
-	public ccConstructor(String conName, String conAccess, String[] pType, String[] pName, ccClass mClass, ccBlock blk){
+	public ccConstructor(String conName, String conAccess, String[] pType, String[] pName, ccClass mClass){
 		name = conName;
 		parentClass = mClass;
 		access = conAccess;
 		parameterType = pType;
 		parameterName = pName;
+	}
+	
+	public void setBlock(ccBlock blk){
 		block = blk;
 	}
 	
@@ -41,7 +44,7 @@ public class ccConstructor {
 		decl += ")";
 		return decl;
 	}
-	
+
 	public LinkedList<String> publishBlock(){
 		return block.publish();
 	}
