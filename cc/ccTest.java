@@ -84,10 +84,7 @@ public class ccTest extends xtc.util.Tool {
 		}
 
 		if (runtime.test("translate")) {
-			String s = "TestCase0.java";
-			HashSet hi = new HashSet();
-			hi.add(s);
-			ccMaster ccm = new ccMaster(hi, hi);
+			ccMaster ccm = new ccMaster(node);
 		}
 	}
 

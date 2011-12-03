@@ -78,6 +78,9 @@ public class ccClass {
 	public int getMethodCount(){
 		return methods.size();
 	}
+	public int getConstructorCount(){
+		return constructors.size();
+	}
 	/**
 	 * If you know the index of the method you want, somehow, then this is a marginally faster way to get it.
 	 * 
