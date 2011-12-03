@@ -1,6 +1,7 @@
 package oop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ccClass {
 	private final String name;
@@ -8,13 +9,12 @@ public class ccClass {
 	private final boolean isStatic;
 	private ArrayList<ccConstructor> constructors;
 	private ArrayList<ccMethod> methods;
+	private HashMap<String, String> fields;
 	
 	public ccClass(String clName, String clAccess){
 		name = clName;
 		access = clAccess;
 		isStatic = false;
-		methods = new ArrayList<ccMethod>();
-		constructors = new ArrayList<ccConstructor>();
 	}
 	public ccClass(String clName, String clAccess, boolean clIsStatic){
 		name = clName;
@@ -22,6 +22,7 @@ public class ccClass {
 		isStatic = clIsStatic;
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
+		fields = new HashMap<String, String>();
 	}
 	
 	/** Adds method to class's list of methods */
@@ -31,6 +32,16 @@ public class ccClass {
 	/** Adds constructor to class's list of constructors */
 	public void addConstructor(ccConstructor constructor){
 		constructors.add(constructor);
+	}
+	
+	/** Adds field to class's hashmap of fields */
+	public void addField(String name, String type){
+		fields.put(name, type);
+	}
+	
+	/** Gets field hashmap */
+	public HashMap getFields(){
+		return fields;
 	}
 	
 	/** Gets the name of the class. Of course. */
@@ -62,8 +73,9 @@ public class ccClass {
 	/**
 	 * Searches for and returns constructor named s.
 	 * If the desired constructor is not found, it returns a dummy constructor with the name "CONSTRUCTOR NOT FOUND".
-	 * This method was built under the assumption that we could be overloading constructors,
-	 * I'm still not totally sure how that's gonna work.
+	 *
+	 * ****************THIS METHOD IS CURRENTLY WORTHLESS!!!!!******************
+	 * ****IT'S HERE SIMPLY BECAUSE I MAY NEED IT AND FIX IT LATER!!!!!!!!!*****
 	 * 
 	 * @param s Name of desired constructor.
 	 * @return The constructor with name s.
@@ -92,8 +104,6 @@ public class ccClass {
 	}
 	/**
 	 * If you know the index of the constructor you want, somehow, then this is a marginally faster way to get it.
-	 * This method was built under the assumption that we could be overloading constructors,
-	 * I'm still not totally sure how that's gonna work.
 	 * 
 	 * @param i Index of desired constructor.
 	 * @return The constructor at index i.

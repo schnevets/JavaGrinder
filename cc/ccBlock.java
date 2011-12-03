@@ -6,6 +6,7 @@ package oop;
  * ccStatement.
  */
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import xtc.tree.GNode;
@@ -16,16 +17,21 @@ import xtc.tree.Visitor;
 class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
+	private HashMap<String, String> variables;
 	
 	public ccBlock(){
 	}
 
-	public ccBlock(GNode n) {
+	public ccBlock(GNode n, HashMap var) {
 		blockLines = new LinkedList<String>();
+		variables = var;
 		visit(n);
 	}
 
 	public void visitFieldDeclaration(GNode n){
+		String name = (String)n.getNode(2).getNode(0).getString(0);
+		String type = (String)n.getNode(1).getNode(0).getString(0);
+		variables.put(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n);
 		blockLines.add("  " + declarationStatement.publish() + "\n");
 	}
@@ -39,7 +45,7 @@ class ccBlock extends Visitor{
 
 	public void visitBlock(GNode n){
 //		System.out.println(n);
-		ccBlock blockStatement = new ccBlock(n);
+		ccBlock blockStatement = new ccBlock(n, variables);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");

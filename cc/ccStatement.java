@@ -48,9 +48,9 @@ public class ccStatement extends Visitor{
 		line+=(String) n.get(0);		
 	}
 	
-	public void visitBlock(GNode n){
-		ccBlock blockStatement = new ccBlock(n);
-	}
+//	public void visitBlock(GNode n){
+//		ccBlock blockStatement = new ccBlock(n);
+//	}
 	public void visitConditionalStatement(GNode n){
 		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")";
 //		System.out.println(line);

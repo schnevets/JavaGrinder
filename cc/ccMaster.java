@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,7 +25,6 @@ public class ccMaster extends Visitor {
 	private String[] argumentName;
 	private ccBlock latestBlock;
 	private HashSet mangleNames;
-	private HashMap<String, String> variables;
 	
 	
 	public ccMaster(Node NODE /*HashSet dependencies, HashSet mangleList*/){
@@ -123,7 +121,7 @@ public class ccMaster extends Visitor {
 				constructorCounter = 0;
 				methodCounter = 0;
 				visit(n);
-				addDefaultMethods(currentClass);
+//				addDefaultMethods(currentClass);
 			}
 			public void visitConstructorDeclaration(GNode n){
 				visit(n);
@@ -143,16 +141,16 @@ public class ccMaster extends Visitor {
 				}
 			}
 			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n);
+				latestBlock = new ccBlock(n, currentClass.getFields());
 			}
 			
-			public void addDefaultMethods(ccClass clas){
-				ccManualBlock deleteBlock = new ccManualBlock();
-				deleteBlock.addCustomLine("  delete __this;");
-				System.out.println(deleteBlock.publish().toString());
-				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
-				clas.addMethod(delete);
-			}
+//			public void addDefaultMethods(ccClass clas){
+//				ccManualBlock deleteBlock = new ccManualBlock();
+//				deleteBlock.addCustomLine("  delete __this;");
+//				System.out.println(deleteBlock.publish().toString());
+//				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
+//				clas.addMethod(delete);
+//			}
 			
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
@@ -176,6 +174,11 @@ public class ccMaster extends Visitor {
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
 		visit(n);
+	}
+	public void visitFieldDeclaration(GNode n){
+		String name = (String)n.getNode(2).getNode(0).getString(0);
+		String type = (String)n.getNode(1).getNode(0).getString(0);
+		currentClass.addField(name, type);
 	}
 	public void visitConstructorDeclaration(GNode n){
 		String name = (String)n.getString(2);
