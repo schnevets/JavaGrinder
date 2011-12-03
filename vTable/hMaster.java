@@ -1,7 +1,10 @@
 
 package oop;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,7 +28,6 @@ public class hMaster {
 		waitqueue = new LinkedList<String>();
 		classlist = new HashSet<String>();
 		hardIncludeJavaLangObject();
-		
 		Iterator iterate = dependencies.iterator();
 		
 		while(iterate.hasNext()){
@@ -142,24 +144,17 @@ public class hMaster {
 		*/
 	}
 	
-	//temporary testing platform for hMaster
-	public static void main(String[] args){
-		DependencyMaster dependsource = new DependencyMaster();
-		//System.out.println(args[0]);
-		HashSet<String> set = dependsource.getDependencies(args[0]);//new HashSet<String>();
-		//set.add(args[0]); //testing one file for now so we can get away with this
-		//Iterator iterate = set.iterator();
-		//System.out.println(iterate.next());
-		//System.out.println(iterate.next());
-		hMaster tester = new hMaster(set);
-	}
-	
-	public void printFile(){
-		Iterator<vTableClass> iterate = fileprint.iterator();
-		while(iterate.hasNext()){
-			iterate.next().printLines();
-		}
-	}
+//	//temporary testing platform for hMaster
+//	public static void main(String[] args){
+//		DependencyMaster dependsource = new DependencyMaster();
+//		//System.out.println(args[0]);
+//		HashSet<String> set = dependsource.getDependencies(args[0]);//new HashSet<String>();
+//		//set.add(args[0]); //testing one file for now so we can get away with this
+//		//Iterator iterate = set.iterator();
+//		//System.out.println(iterate.next());
+//		//System.out.println(iterate.next());
+//		hMaster tester = new hMaster(set);
+//	}
 	
 	//question, how to sort out which classes belong to which file
 	//likely solution would be to keep a list of all classes belonging to the current file
@@ -168,20 +163,46 @@ public class hMaster {
 		//String[] args = {"-returnJavaAST", sourcefile};
 		Node sourceAST = new ASTGenerator().generateAST(sourcefile);
 		fileprint = new LinkedList<vTableClass>();
+		final File file = new File(sourcefile.replace(".java", ".h"));
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//System.out.println(sourceAST.isEmpty());
 		final String currentsource = sourcefile;
 		final String newhfile = sourcefile.replace(".java", ".h");
 		new Visitor() {
 			//class variables
 			vTableClass currentclass;
-			//vTableLayoutLine currentlayout;
-			//vTableAddressLine currentaddress;
-			//vTableMethodLayoutLine currentmethod;
 			vTableForwardDeclarations forwarddeclarations;
 			LinkedList<String> namespace;
 			boolean missingsuper;
 			String dataLayout;
 			String operation;
+			
+			public void printFile(File file){
+				//Iterator<vTableClass> iterate = fileprint.iterator();
+				FileWriter writee;
+				BufferedWriter writer = null;
+				try {
+					writee = new FileWriter(file);
+					writer = new BufferedWriter(writee);
+					forwarddeclarations.writefile(writer);
+					while(!fileprint.isEmpty()){
+						vTableClass classy = fileprint.pop();
+						classy.resolveOverloads();
+						//System.out.println("printing the class " + classy.classname);
+						//classy.printLines();
+						classy.writeFile(writer);	
+						//System.out.println("finished printing the class " + classy.classname);
+					}
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 			
 			/**
 			 * Possible Parents: None
@@ -202,6 +223,7 @@ public class hMaster {
 				//if there are no explicit constructors then add the default constructor...if needed, check that
 				//implement this property in the vTableClass printline method instead of here
 				//visit(n);
+				printFile(file);
 			}    		
 
 			/**
@@ -288,7 +310,7 @@ public class hMaster {
 
 			/**
 			 * Possible Parents: Type
-			 * Writes to Elements: No
+			 * Writes to Elements: NoAlert("Program ended with balance of " + AccountBalance());
 			 * 
 			 * primitive type specific, ex int, double, float, etc.
 			 * @param n
@@ -301,6 +323,9 @@ public class hMaster {
 				}
 				else if(returntype.equals("int")){
 					returntype = "int32_t";
+				}
+				else if(returntype.equals("void")){
+					returntype = "Void";
 				}
 				
 				if(operation.equals("dataLayout")){
@@ -339,6 +364,9 @@ public class hMaster {
 			 */
 			public void visitQualifiedIdentifier(GNode n){
 				String returnable = n.getString(0);
+				if(returnable.equals("void")){
+					returnable = "Void";
+				}
 				
 				if(operation.equals("Extension")){
 					addSuperClass(returnable);
@@ -649,6 +677,6 @@ public class hMaster {
 			}
 		}.dispatch(sourceAST);
 		
-		printFile();
+		//printFile(file);
 	}
 }	

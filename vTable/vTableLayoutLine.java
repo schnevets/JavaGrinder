@@ -1,5 +1,10 @@
 package oop;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+
 /*
  * VTableLayout line can be broken up into several parts
  * return type (*methodname) (parameters)
@@ -21,13 +26,17 @@ public class vTableLayoutLine{
 	String parameters;
 	String referencetype;
 	String vTableLine;
+	boolean overloaded;
 	int parametercount = 0;
 	
 	vTableClass parent;
+	vTableAddressLine matchingaddress;
+	vTableMethodLayoutLine matchingmethod;
 	
 	public vTableLayoutLine(vTableClass parentable){
 		parent = parentable;
 		parameters = ",";
+		overloaded = false;
 	}
 	
 	public void setReturnType(String returnable){
@@ -58,6 +67,15 @@ public class vTableLayoutLine{
 			parameters = parameters + "," + parameter;
 			parametercount++;
 		}
+	}
+	
+	public void setOverload(){
+		overloaded = true;
+	}
+	
+	public void setMatching(vTableAddressLine address, vTableMethodLayoutLine method){
+		matchingaddress = address;
+		matchingmethod = method;
 	}
 	
 	/*
@@ -93,10 +111,45 @@ public class vTableLayoutLine{
 		vTableLine = vTableLine + "; \r";
 	}
 	*/
-	
+	public void writeFile(BufferedWriter writer){
+		if(returntype == null)
+			returntype = "Void";
+		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
+		
+		if (methodname.equals("__isa")){
+			vTableLine = vTableLine + methodname;
+		}
+		else{
+			if(overloaded == true){
+				vTableLine = vTableLine + "(*" + methodname + "_" + parameters.replace(",", "_") + ") ";
+			}
+			else{
+				vTableLine = vTableLine + "(*" + methodname + ") ";
+			}
+			vTableLine = vTableLine + "(" + referencetype;
+			
+			if (parametercount > 0){
+				vTableLine = vTableLine + parameters;
+			}
+			vTableLine = vTableLine + ")";
+		}
+		
+		vTableLine = vTableLine + "; \r";
+		
+		try {
+			//FileWriter writee = new FileWriter(file);
+			//BufferedWriter writer = new BufferedWriter(writee);
+			writer.write(vTableLine);
+			writer.flush();
+			//writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void printLine(){
 		if(returntype == null)
-			returntype = "void";
+			returntype = "Void";
 		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
 		
 		if (methodname.equals("__isa")){

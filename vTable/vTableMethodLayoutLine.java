@@ -1,5 +1,10 @@
 package oop;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+
 public class vTableMethodLayoutLine {
 	String modifier;
 	String returntype;
@@ -9,12 +14,17 @@ public class vTableMethodLayoutLine {
 	int parametercount;
 	String vTableLine;
 	String visibility;
+	boolean overloaded;
+	String namemanglename;
 	
 	vTableClass parent;
+	vTableLayoutLine matchinglayout;
+	vTableAddressLine matchingaddress;
 	
 	public vTableMethodLayoutLine(vTableClass parentable){
 		parent = parentable;
 		parametercount = 0;
+		overloaded = false;
 		modifier = "";
 		returntype = "";
 		methodname = "";
@@ -57,6 +67,17 @@ public class vTableMethodLayoutLine {
 		
 	}
 	
+	public void setOverload(){
+		overloaded = true;
+		matchinglayout.setOverload();
+		matchingaddress.setOverload();
+	}
+	
+	public void setMatching(vTableLayoutLine layout, vTableAddressLine address){
+		matchinglayout = layout;
+		matchingaddress = address;
+	}
+	
 	//obsolete method
 	/*
 	public void createVTableLine(){
@@ -67,9 +88,42 @@ public class vTableMethodLayoutLine {
 		vTableLine = vTableLine + "); \r";
 	}
 	*/
+	public void writeFile(BufferedWriter writer){
+		if(overloaded == true){
+			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "_" + 
+			parameters.replace(",", "_") + "(" + referencetype;
+		}
+		else{
+			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "(" + referencetype;
+		}
+		
+		if (parametercount > 0){
+			vTableLine = vTableLine + parameters;
+		}
+		vTableLine = vTableLine + "); \r";
+		
+		try {
+			//File file = new File("/home/user/xtc/src/xtc/JavaGrinder/TestCase1.crazy");
+			//file.createNewFile();
+			//FileWriter writee = new FileWriter(file);
+			writer.write(vTableLine);
+			writer.flush();
+			//writer2.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public void printLine(){
-		vTableLine = "static " + modifier + " " + returntype + " " + methodname + "(" + referencetype;
+		if(overloaded == true){
+			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "_" + 
+			parameters.replace(",", "_") + "(" + referencetype;
+		}
+		else{
+			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "(" + referencetype;
+		}
+		
 		if (parametercount > 0){
 			vTableLine = vTableLine + parameters;
 		}

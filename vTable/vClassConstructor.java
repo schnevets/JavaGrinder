@@ -1,5 +1,10 @@
 package oop;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class vClassConstructor {
 	String parameters;
 	
@@ -17,6 +22,25 @@ public class vClassConstructor {
 		else{
 			parameters = parameters + ", " + param;
 		}
+	}
+	public void writeFile(BufferedWriter writer){
+		try {
+			//FileWriter writee = new FileWriter(file);
+			//BufferedWriter writer = new BufferedWriter(writee);
+			writer.write("__" + parent.classname + "(");
+			if (parameters == null){
+				writer.write(");\r");
+			}
+			else{
+				writer.write(parameters + ");\r");
+			}
+			writer.flush();
+			//writer.closhe();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 	
 	public void printLine(){

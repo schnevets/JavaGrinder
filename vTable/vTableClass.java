@@ -1,5 +1,10 @@
 package oop;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -7,7 +12,7 @@ public class vTableClass {
 	String classname;
 	String modifier;
 	LinkedList<String> namespace;
-	//String struct;
+	HashSet<String> overloadedmethods;
 	vTableClass superclass;  //may even want to give a vTableClass reference as the superclass
 	LinkedList<vTableMethodLayoutLine> vMethodLayout;
 	LinkedList<vTableLayoutLine> vTableLayout;
@@ -36,6 +41,7 @@ public class vTableClass {
 		vClassConstructors = new LinkedList<vClassConstructor>();
 		namespace = new LinkedList<String>();
 		dataLayout = new LinkedList<String>();
+		overloadedmethods = new HashSet<String>();
 	}
 	
 	public void setNoWrite(){
@@ -102,7 +108,9 @@ public class vTableClass {
 		int index = 0;
 		boolean override = false;
 		try{
-			//if(command.equals("Method")){
+			//note that eventually the while loop will run into an index out of bounds error
+			//but the exception will be caught in the try catch loop, effectively breaking from the loop
+			//whether an override or not an override
 				while(true){
 					vTableMethodLayoutLine scanline = vMethodLayout.get(index);
 					if(scanline.methodname.equals(currentmethod.methodname) && scanline.parameters.equals(currentmethod.parameters)){
@@ -114,34 +122,63 @@ public class vTableClass {
 					}
 					index++;
 				}
-			//}
-			//else if(command.equals("TableLayout")){
-			//index = index + 1;
-
-			//while(true){
-				//vTableLayoutLine scanline = vTableLayout.get(index);
-				//if(scanline.methodname.equals(currentlayout.methodname) && scanline.parameters.equals(currentmethod.parameters)){
-					//vTableLayout.remove(index);
-					//vTableAddress.remove(index);
-					//break;
-				//}
-				//index++;
-			//}
-			//}
-			//else if(command.equals("Address")){
-//				while(true){
-//					vTableAddressLine scanline = vTableAddress.get(index);
-//					if(scanline.methodname.equals(currentaddress.methodname)){
-//						
-//						break;
-//					}
-//					index++;
-//				}
-//			}
 		}
 		catch(Exception e){
-			
+			//nothing doin, intentional exception for when an index out of bounds error occurs (meaning no override found)
 		}
+	}
+	
+	public void checkOverload(){
+		int index = 0;
+		boolean overload = false;
+		try{
+			//note that eventually the while loop will run into an index out of bounds error
+			//but the exception will be caught in the try catch loop, effectively breaking from the loop
+			//whether an override or not an override
+				while(true){
+					vTableMethodLayoutLine scanline = vMethodLayout.get(index);
+					if(scanline.methodname.equals(currentmethod.methodname)){
+						scanline.setOverload();
+						if(!scanline.parent.equals(this.superclass)){
+							superclass.addOverload(scanline.methodname);
+						}
+						superclass.addOverload(currentmethod.methodname);
+						currentmethod.setOverload();
+						currentlayout.setOverload();
+						currentaddress.setOverload();
+						overloadedmethods.add(currentmethod.methodname);
+						overload = true;
+						break;
+					}
+					index++;
+				}
+		}
+		catch(Exception e){
+			//nothing doin, intentional exception for when an index out of bounds error occurs (meaning no override found)
+		}
+	}
+	
+	public void addOverload(String name){
+		overloadedmethods.add(name);
+	}
+	
+	public void resolveOverloads(){
+		//this method is called right before printing to resolve overloaded methods and the other objects
+		//needed to be edited because of them
+		Iterator iterate = vMethodLayout.iterator();
+		while(iterate.hasNext()){
+			vTableMethodLayoutLine current = (vTableMethodLayoutLine)iterate.next();
+			if(overloadedmethods.contains(current.methodname)){
+				current.setOverload();  //this setOverload method cascades to the matching tablelayout and address lines
+			}
+		}
+//		iterate = vTableLayout.iterator();
+//		while(iterate.hasNext()){
+//			vTableLayoutLine current = (vTableLayoutLine)iterate.next();
+//			if(current.matchingmethod.overloaded == true || overloadedmethods.contains(current.methodname)){
+//				current.setOverload();
+//			}
+//		}
 	}
 	
 	//Create a new vTableMethodLayoutLine
@@ -149,9 +186,22 @@ public class vTableClass {
 		currentmethod = new vTableMethodLayoutLine(this);
 	}
 	
+	//note that by the time this method is called, all of the related method
+	//entries will have been assembled as well so they are finalized in terms of visitors
+	//includes currentaddress, currentmethod, and currentlayout
 	public void addMethod(){
-		checkOverride();
+		setMatching();
+		checkOverride();  
+		checkOverload();
 		vMethodLayout.add(currentmethod);
+	}
+	
+	public void setMatching(){
+		if(currentlayout != null && currentmethod != null && currentaddress != null){
+			currentmethod.setMatching(currentlayout, currentaddress);
+			currentaddress.setMatching(currentlayout, currentmethod);
+			currentlayout.setMatching(currentaddress, currentmethod);
+		}
 	}
 	
 	public void appendMethod(String command, String arg){
@@ -232,6 +282,74 @@ public class vTableClass {
 		}
 	}
 	
+	public void writeFile(BufferedWriter writer){
+		try {
+			//FileWriter writee = new FileWriter(file);
+			//BufferedWriter writer = new BufferedWriter(writee);
+			
+			Iterator<String> iterate = namespace.iterator();
+			while(iterate.hasNext()){
+				writer.write("namespace " + iterate.next() + "{\r");
+			}
+			writer.write("struct " + "__" + classname + "{ \r");
+			writer.write("__" + classname + "_VT*" + " __vptr;\r");
+			
+			while(!dataLayout.isEmpty()){
+				writer.write(dataLayout.pop());
+			}
+			
+			writer.write("\r");
+			//writer.flush();
+			//writer.close();
+			//the constructors
+			//writer.write("__" + classname + "();\r\r");  the basic constructor, no arguments
+			while(!vClassConstructors.isEmpty()){
+				vClassConstructor constructor = vClassConstructors.pop();
+				constructor.writeFile(writer);
+			}
+			
+			while(!vMethodLayout.isEmpty()){
+				vTableMethodLayoutLine current = vMethodLayout.pop();
+				current.writeFile(writer);
+			}
+			//writer = new BufferedWriter(writee);
+			writer.write("\r");
+			writer.write("static Class __class(); \r\r");
+			writer.write("static " + "__" + classname +"_VT _vtable;\r");
+			writer.write("};\r\r");
+			
+			writer.write("struct __" + classname + "_VT { \r");
+			//writer.close();
+			while(!vTableLayout.isEmpty()){
+				vTableLayoutLine current = vTableLayout.pop();
+				current.writeFile(writer);
+			}
+			//writer = new BufferedWriter(writee);
+			writer.write("\r");
+			writer.write("__" + classname + "_VT()\r:  ");
+			//writer.close();
+			while(!vTableAddress.isEmpty()){
+				vTableAddressLine current = vTableAddress.pop();
+				current.writeFile(writer);
+			}
+			//writer = new BufferedWriter(writee);
+			writer.write("{}\r};\r");
+			//writer.close();
+			iterate = namespace.iterator();
+			while(iterate.hasNext()){
+				iterate.next();
+				writer.write("}\r");
+			}
+			//writer = new BufferedWriter(writee);
+			writer.write("\r");
+			writer.flush();
+			//writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void printLines(){
 		Iterator<String> iterate = namespace.iterator();
 		while(iterate.hasNext()){
@@ -274,7 +392,7 @@ public class vTableClass {
 			vTableAddressLine current = vTableAddress.pop();
 			current.printLine();
 		}
-		System.out.print("\r};\r");
+		System.out.print("{}\r};\r");
 		
 		iterate = namespace.iterator();
 		while(iterate.hasNext()){
