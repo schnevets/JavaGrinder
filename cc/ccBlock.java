@@ -67,7 +67,7 @@ class ccBlock extends Visitor{
 	}
 	public void visitReturnStatement(GNode n){
 		ccStatement whileLine = new ccStatement(n);
-		blockLines.add("  return" + whileLine.line + "\n");
+		blockLines.add("  return " + whileLine.line + "\n");
 	}
 		
 	public LinkedList<String> publish() {
