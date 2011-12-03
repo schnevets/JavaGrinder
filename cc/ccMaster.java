@@ -82,6 +82,7 @@ public class ccMaster extends Visitor {
 				}
 				out.write("}\n");
 			}
+			
 			for(int j=0; j < classList.get(i).getMethodCount(); j++){
 				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + " {\n");
 				blockLines = classList.get(i).getMethodAtIndex(j).publishBlock();
@@ -122,6 +123,9 @@ public class ccMaster extends Visitor {
 		modifierList.clear();
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
+		
+		addDefaultMethods(currentClass);
+		
 		visit(n);
 	}
 	public void visitConstructorDeclaration(GNode n){
@@ -196,6 +200,14 @@ public class ccMaster extends Visitor {
 	 */
 	public void visitBlock (GNode n){
 		latestBlock = new ccBlock(n);
+	}
+	
+	public void addDefaultMethods(ccClass clas){
+		ccManualBlock deleteBlock = new ccManualBlock();
+		deleteBlock.addCustomLine("  delete __this;");
+		System.out.println(deleteBlock.publish().toString());
+		ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
+		clas.addMethod(delete);
 	}
 	
 	public void visit(Node n) {
