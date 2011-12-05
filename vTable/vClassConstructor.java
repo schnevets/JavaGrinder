@@ -7,12 +7,14 @@ import java.io.IOException;
 
 public class vClassConstructor {
 	String parameters;
+	String visibility;
 	
 	vTableClass parent;
 	
 	public vClassConstructor(vTableClass parentable){
 		parameters = null;
 		parent = parentable;
+		visibility = "public";
 	}
 	
 	public void addParameter(String param){
@@ -23,6 +25,11 @@ public class vClassConstructor {
 			parameters = parameters + ", " + param;
 		}
 	}
+	
+	public void setVisibility(String visible){
+		visibility = visible;
+	}
+	
 	public void writeFile(BufferedWriter writer){
 		try {
 			//FileWriter writee = new FileWriter(file);

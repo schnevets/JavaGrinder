@@ -21,12 +21,13 @@ public class hMaster {
 	LinkedList<String> waitqueue;
 	LinkedList<vTableClass> fileprint;
 	//used by cc translator for method overloading
-	HashSet<String> namechanges;
+	HashSet<String> overloads;
 	
 	public hMaster(HashSet dependencies){
 		classes = new LinkedList<vTableClass>();
 		waitqueue = new LinkedList<String>();
 		classlist = new HashSet<String>();
+		overloads = new HashSet<String>();
 		hardIncludeJavaLangObject();
 		Iterator iterate = dependencies.iterator();
 		
@@ -60,10 +61,19 @@ public class hMaster {
 		classlist.add("Object"); //classlist.add("Class"); classlist.add("String");
 	}
 	
+	//static void __delete(__Object*); declaration
+	//void (*__delete)(__Object*); layout
+	//__delete(&__Object::__delete),  address
 	public void hardIncludeJavaLangTable(vTableClass javaobject){
 		javaobject.newTableLayout();
 		javaobject.appendTableLayout("ReturnType", "Class");
 		javaobject.appendTableLayout("MethodName", "__isa");
+		javaobject.appendTableLayout("ReferenceType", "Object");
+		javaobject.addTableLayout();
+		javaobject.newTableLayout();
+		javaobject.appendTableLayout("ReturnType", "void");
+		javaobject.appendTableLayout("MethodName", "__delete");
+		javaobject.appendTableLayout("ReferenceType", "Object*");
 		javaobject.addTableLayout();
 		javaobject.newTableLayout();
 		javaobject.appendTableLayout("ReferenceType", "Object");
@@ -95,6 +105,10 @@ public class hMaster {
 		javaobject.addTableAddress();
 		javaobject.newTableAddress();
 		javaobject.appendAddress("ClassName", "Object");
+		javaobject.appendAddress("MethodName", "__delete");
+		javaobject.addTableAddress();
+		javaobject.newTableAddress();
+		javaobject.appendAddress("ClassName", "Object");
 		javaobject.appendAddress("MethodName", "hashCode");
 		javaobject.addTableAddress();
 		javaobject.newTableAddress();
@@ -112,6 +126,12 @@ public class hMaster {
 	}
 	
 	public void hardIncludeJavaLangMethod(vTableClass javaobject){
+		javaobject.newMethodLayout();
+		javaobject.appendMethod("Modifier", "static");
+		javaobject.appendMethod("MethodName", "__delete");
+		javaobject.appendMethod("ReturnType", "void");
+		javaobject.appendMethod("ReferenceType", "Object*");
+		javaobject.addMethod();
 		javaobject.newMethodLayout();
 		javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "hashCode");
@@ -192,6 +212,10 @@ public class hMaster {
 					forwarddeclarations.writefile(writer);
 					while(!fileprint.isEmpty()){
 						vTableClass classy = fileprint.pop();
+						Iterator classiterate = classy.overloadedmethods.iterator();
+						while(classiterate.hasNext()){
+							overloads.add(classy.classname + "^" + (String)classiterate.next());
+						}
 						classy.resolveOverloads();
 						//System.out.println("printing the class " + classy.classname);
 						//classy.printLines();
@@ -293,7 +317,7 @@ public class hMaster {
 			 */
 			public void visitVoidType(GNode n){
 				if(operation.equals("Method")){
-					currentclass.appendMethod("ReturnType", "Void");
+					currentclass.appendMethod("ReturnType", "void");
 				}
 				visit(n);
 			}
@@ -324,9 +348,9 @@ public class hMaster {
 				else if(returntype.equals("int")){
 					returntype = "int32_t";
 				}
-				else if(returntype.equals("void")){
-					returntype = "Void";
-				}
+//				else if(returntype.equals("void")){
+//					returntype = "Void";
+//				}
 				
 				if(operation.equals("dataLayout")){
 					dataLayout = dataLayout + returntype + " ";
@@ -364,9 +388,9 @@ public class hMaster {
 			 */
 			public void visitQualifiedIdentifier(GNode n){
 				String returnable = n.getString(0);
-				if(returnable.equals("void")){
-					returnable = "Void";
-				}
+//				if(returnable.equals("void")){
+//					returnable = "Void";
+//				}
 				
 				if(operation.equals("Extension")){
 					addSuperClass(returnable);
@@ -421,6 +445,9 @@ public class hMaster {
 				}
 				else if(operation.equals("Constructor") && returnable.equals("final")){
 					dataLayout = dataLayout + "const" + " ";
+				}
+				else if(operation.equals("Constructor") && returnable.equals("private")){
+					currentclass.currentconstructor.setVisibility("private");
 				}
 				else if(operation.equals("Method")){
 					currentclass.appendMethod("Modifier",returnable);

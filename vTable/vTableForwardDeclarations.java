@@ -28,7 +28,7 @@ public class vTableForwardDeclarations {
 	}
 	
 	public void addTypeDeclarations(String type){
-		String addition = "typedef " + "__" + type + "* " + type + ";";
+		String addition = "typedef " + " __rt::Ptr<__" + type + "> " + type + ";";
 		typedeclarations.add(addition);
 		//System.out.println(addition);
 	}

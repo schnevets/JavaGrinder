@@ -12,7 +12,7 @@ public class Main {
 		//System.out.println(iterate.next());
 		//System.out.println(iterate.next());
 		hMaster tester = new hMaster(set);
-		
+		HashSet<String> overloadedmethods = tester.overloads;
 		//placeholder for cc stuffs
 	}
 }
