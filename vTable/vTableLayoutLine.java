@@ -113,7 +113,7 @@ public class vTableLayoutLine{
 	*/
 	public void writeFile(BufferedWriter writer){
 		if(returntype == null)
-			returntype = "Void";
+			returntype = "void";
 		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
 		
 		if (methodname.equals("__isa")){
@@ -149,7 +149,7 @@ public class vTableLayoutLine{
 	}
 	public void printLine(){
 		if(returntype == null)
-			returntype = "Void";
+			returntype = "void";
 		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
 		
 		if (methodname.equals("__isa")){

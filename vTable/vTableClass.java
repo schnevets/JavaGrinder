@@ -66,8 +66,14 @@ public class vTableClass {
 			currentlayout = layoutiterate.next();
 			currentlayout.setReferenceType(this.classname);
 			currentaddress = addressiterate.next();
-			if(currentaddress.methodname.equals("__isa")){
+			if(currentaddress.methodname.equals("__isa") || currentaddress.methodname.equals("__delete")){
 				currentaddress.setClassName(this.classname);
+				if(currentaddress.methodname.equals("__delete")){
+					currentmethod = methoditerate.next();
+					currentlayout.setReferenceType(this.classname);
+					currentmethod.setReferenceType(this.classname);
+					vMethodLayout.add(currentmethod);
+				}
 				vTableLayout.add(currentlayout);
 				vTableAddress.add(currentaddress);
 			}
