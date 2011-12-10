@@ -40,6 +40,7 @@ public class hMaster {
 		//do not use for now
 		
 		while(!(waitqueue.isEmpty())){
+			System.out.println("waitqueue is not empty");
 			translate(waitqueue.pop(), hostDirectory);
 		}
 		
@@ -52,6 +53,12 @@ public class hMaster {
 	public void hardIncludeJavaLangObject(){
 		vTableClass javaobject = new vTableClass("Object");
 		javaobject.setNoWrite();
+		javaobject.addIncludes("<stdint.h>");
+		javaobject.addIncludes("<string>");
+		javaobject.addIncludes("<iostream>");
+		javaobject.addIncludes("<cstring>");
+		javaobject.addIncludes("\"ptr.h\"");
+		
 		hardIncludeJavaLangMethod(javaobject);
 		hardIncludeJavaLangTable(javaobject);
 		hardIncludeJavaLangAddress(javaobject);
@@ -131,12 +138,14 @@ public class hMaster {
 		javaobject.appendMethod("MethodName", "__delete");
 		javaobject.appendMethod("ReturnType", "void");
 		javaobject.appendMethod("ReferenceType", "Object*");
+		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
 		javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "hashCode");
 		javaobject.appendMethod("ReturnType", "int32_t");
 		javaobject.appendMethod("ReferenceType", "Object");
+		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
 		javaobject.appendMethod("Modifier", "static");
@@ -144,18 +153,21 @@ public class hMaster {
 		javaobject.appendMethod("ReturnType", "bool");
 		javaobject.appendMethod("ReferenceType", "Object");
 		javaobject.appendMethod("Parameters", "Object");
+		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
 		javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "getClass");
 		javaobject.appendMethod("ReturnType", "Class");
 		javaobject.appendMethod("ReferenceType", "Object");
+		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
 		javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "toString");
 		javaobject.appendMethod("ReturnType", "String");
 		javaobject.appendMethod("ReferenceType", "Object");
+		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		
 		/*
@@ -183,53 +195,75 @@ public class hMaster {
 		//String[] args = {"-returnJavaAST", sourcefile};
 		Node sourceAST = new ASTGenerator().generateAST(sourcefile);
 		fileprint = new LinkedList<vTableClass>();
-		String hostPath = hostDirectory.getAbsolutePath();
-		File leadfile = new File(sourcefile);
-		String formatedFile = leadfile.getName();
-		final File file = new File(hostPath + "/" + formatedFile.replace(".java", ".h"));
-		try {
-			file.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		final String hostPath = hostDirectory.getAbsolutePath();
+//		final File leadfile = new File(sourcefile);
+//		String formatedFile = leadfile.getName();
+//		final File file = new File(hostPath + "/" + formatedFile.replace(".java", ".h"));
+//		try {
+//			file.createNewFile();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		//System.out.println(sourceAST.isEmpty());
 		final String currentsource = sourcefile;
 		final String newhfile = sourcefile.replace(".java", ".h");
 		new Visitor() {
 			//class variables
 			vTableClass currentclass;
-			vTableForwardDeclarations forwarddeclarations;
 			LinkedList<String> namespace;
 			boolean missingsuper;
 			String dataLayout;
 			String operation;
 			
-			public void printFile(File file){
+			public void printClass(File file, vTableClass classy){
 				//Iterator<vTableClass> iterate = fileprint.iterator();
 				FileWriter writee;
 				BufferedWriter writer = null;
 				try {
 					writee = new FileWriter(file);
 					writer = new BufferedWriter(writee);
-					forwarddeclarations.writefile(writer);
-					while(!fileprint.isEmpty()){
-						vTableClass classy = fileprint.pop();
-						Iterator classiterate = classy.overloadedmethods.iterator();
-						while(classiterate.hasNext()){
-							overloads.add(classy.classname + "^" + (String)classiterate.next());
-						}
-						classy.resolveOverloads();
-						//System.out.println("printing the class " + classy.classname);
-						//classy.printLines();
-						classy.writeFile(writer);	
-						//System.out.println("finished printing the class " + classy.classname);
+					//forwarddeclarations.writefile(writer);
+					Iterator classiterate = classy.overloadedmethods.iterator();
+					while(classiterate.hasNext()){
+						overloads.add(classy.classname + "^" + (String)classiterate.next());
 					}
+					classy.resolveOverloads();
+					//System.out.println("printing the class " + classy.classname);
+					//classy.printLines();
+					classy.writeFile(writer);	
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
+			
+			//potentially outdated
+//			public void printFile(File file){
+//				//Iterator<vTableClass> iterate = fileprint.iterator();
+//				FileWriter writee;
+//				BufferedWriter writer = null;
+//				try {
+//					writee = new FileWriter(file);
+//					writer = new BufferedWriter(writee);
+//					forwarddeclarations.writefile(writer);
+//					while(!fileprint.isEmpty()){
+//						vTableClass classy = fileprint.pop();
+//						Iterator classiterate = classy.overloadedmethods.iterator();
+//						while(classiterate.hasNext()){
+//							overloads.add(classy.classname + "^" + (String)classiterate.next());
+//						}
+//						classy.resolveOverloads();
+//						//System.out.println("printing the class " + classy.classname);
+//						//classy.printLines();
+//						classy.writeFile(writer);	
+//						//System.out.println("finished printing the class " + classy.classname);
+//					}
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
 			
 			/**
 			 * Possible Parents: None
@@ -240,7 +274,6 @@ public class hMaster {
 			public void visitCompilationUnit(GNode n){
 				//System.out.println("made it");
 				namespace = new LinkedList<String>();
-				forwarddeclarations = new vTableForwardDeclarations();
 				for(Object o : n){
 					if (o instanceof Node){ 
 						missingsuper = false;
@@ -250,7 +283,7 @@ public class hMaster {
 				//if there are no explicit constructors then add the default constructor...if needed, check that
 				//implement this property in the vTableClass printline method instead of here
 				//visit(n);
-				printFile(file);
+				//printFile(file);
 			}    		
 
 			/**
@@ -261,7 +294,7 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitIntegerLiteral(GNode n){
-				String returnable = n.getString(0);
+				String returnable = ccHelper.convertType(n.getString(0));
 //				if(operation.equals("dataLayout")){
 //					dataLayout = dataLayout + returnable;
 //				}
@@ -275,7 +308,7 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitBooleanLiteral(GNode n){
-				String returnable = n.getString(0);
+				String returnable = ccHelper.convertType(n.getString(0));
 				visit(n);
 			}
 
@@ -286,7 +319,7 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitFloatingPointLiteral(GNode n){
-				String returnable = n.getString(0);
+				String returnable = ccHelper.convertType(n.getString(0));
 				visit(n);
 			}
 
@@ -343,14 +376,14 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitPrimitiveType(GNode n){
-				String returntype = n.getString(0);
+				String returntype = ccHelper.convertType(n.getString(0));
 				//naming checks
-				if(returntype.equals("boolean")){
-					returntype = "bool";
-				}
-				else if(returntype.equals("int")){
-					returntype = "int32_t";
-				}
+//				if(returntype.equals("boolean")){
+//					returntype = "bool";
+//				}
+//				else if(returntype.equals("int")){
+//					returntype = "int32_t";
+//				}
 //				else if(returntype.equals("void")){
 //					returntype = "Void";
 //				}
@@ -407,14 +440,14 @@ public class hMaster {
 				else if(operation.equals("Method")){
 					currentclass.appendMethod("ReturnType", returnable);
 					currentclass.appendTableLayout("ReturnType", returnable);
-					System.out.println("returntype " + returnable + " for " + currentclass.currentmethod.methodname);
-					System.out.println("for node " + n.hashCode());
+					//System.out.println("returntype " + returnable + " for " + currentclass.currentmethod.methodname);
+					//System.out.println("for node " + n.hashCode());
 				}
 				else if(operation.equals("MethodParameter")){
 					currentclass.appendMethod("Parameters", returnable);
 					currentclass.appendTableLayout("Parameters", returnable);
-					System.out.println("parameter " + returnable + " for " + currentclass.currentmethod.methodname);
-					System.out.println("for node " + n.hashCode());
+					//System.out.println("parameter " + returnable + " for " + currentclass.currentmethod.methodname);
+					//System.out.println("for node " + n.hashCode());
 				}
 			}
 
@@ -635,9 +668,10 @@ public class hMaster {
 				}
 				//System.out.println("classname is " + n.getString(1));
 				
-				forwarddeclarations.addForwardDeclaration(currentclass.classname);
-				forwarddeclarations.addForwardVTable(currentclass.classname);
-				forwarddeclarations.addTypeDeclarations(currentclass.classname);
+				currentclass.addForwardDeclaration(currentclass.classname);
+//				forwarddeclarations.addForwardDeclaration(currentclass.classname);
+//				forwarddeclarations.addForwardVTable(currentclass.classname);
+//				forwarddeclarations.addTypeDeclarations(currentclass.classname);
 				
 				operation = "ClassDeclaration";
 				
@@ -656,6 +690,15 @@ public class hMaster {
 				classlist.add(currentclass.classname);
 				classes.add(currentclass);
 				fileprint.add(currentclass);
+				
+				File file = new File(hostPath + "/" + currentclass.classname + ".h");
+				try {
+					file.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				printClass(file, currentclass);
 			}
 
 			public void visitArguments(GNode n){
@@ -682,11 +725,14 @@ public class hMaster {
 			}
 			
 			public void addSuperClass(String s){
+				//System.out.println("currentclass " + currentclass.classname);
 				if(classlist.contains(s)){
+					//System.out.println("classlist contains " + s);
 					Iterator iterate = classes.iterator();
 					while(iterate.hasNext()){
 						vTableClass classy = (vTableClass) iterate.next();
 						if(classy.classname.equals(s)){
+							//System.out.println("Found desired superclass " + classy.classname);
 							currentclass.addSuperClass(classy);
 							break;
 						}
@@ -694,6 +740,7 @@ public class hMaster {
 				}
 				//add to the queue
 				else{
+					//System.out.println("classlist does not contains " + s);
 					waitqueue.add(currentsource);
 					missingsuper = true;
 				}

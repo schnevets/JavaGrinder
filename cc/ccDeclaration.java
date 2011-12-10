@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -13,8 +13,7 @@ public class ccDeclaration {
 	public ccDeclaration(GNode n) {
 		modifiers = extract((GNode)n.get(0));
 		types = extract((GNode)n.get(1));
-		if(types == "boolean")
-			types = "bool";
+		types = new ccHelper().convertType(types);
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
 //		System.out.println(this.publish());					//To be added to ccBlock
 	}

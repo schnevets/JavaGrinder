@@ -29,8 +29,14 @@ public class ccMethod {
 		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
-		parameterType = mparameterType;
-		parameterName = mparameterName;
+		parameterType = new String[mparameterType.length + 1];
+		parameterType[0] = parentClass.getName();
+		parameterName = new String[mparameterName.length + 1];
+		parameterName[0] = "__this";
+		for(int i=1; i<parameterType.length; i++){
+			parameterType[i] = mparameterType[i - 1];
+			parameterName[i] = mparameterName[i - 1];
+		}
 		isStatic = false;
 	}
 	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic){
@@ -38,8 +44,14 @@ public class ccMethod {
 		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
-		parameterType = mparameterType;
-		parameterName = mparameterName;
+		parameterType = new String[mparameterType.length + 1];
+		parameterType[0] = parentClass.getName();
+		parameterName = new String[mparameterName.length + 1];
+		parameterName[0] = "__this";
+		for(int i=1; i<parameterType.length; i++){
+			parameterType[i] = mparameterType[i - 1];
+			parameterName[i] = mparameterName[i - 1];
+		}
 		isStatic = mIsStatic;
 	}
 
@@ -60,7 +72,7 @@ public class ccMethod {
 	
 	public String publishDeclaration(){
 		String decl = "";
-		decl = access + " " + ccHelper.convertType(returnType) + " " + parentClass.getName() + "::" + name  + "(";
+		decl = access + " " + ccHelper.convertType(returnType) + " " + parentClass.get_Name() + "::" + name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
 			decl += parameterType[i] + " " + parameterName[i];
