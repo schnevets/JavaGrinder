@@ -14,6 +14,11 @@ public class ccStatement extends Visitor{
 		visit(n);
 		line+=";";
 	}
+	public void visitReturnStatement(GNode n){
+		line += "return ";
+		visit(n);
+		line+=";";
+	}
 	public void visitCallExpression(GNode n){
 		if(n.getString(2).contains("print")){
 			line+="cout << ";
