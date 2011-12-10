@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,11 +10,13 @@ public class ccClass {
 	private ArrayList<ccConstructor> constructors;
 	private ArrayList<ccMethod> methods;
 	private HashMap<String, String> fields;
+	private ArrayList<String> packageNames;
 	
 	public ccClass(String clName, String clAccess){
 		name = clName;
 		access = clAccess;
 		isStatic = false;
+		packageNames = new ArrayList<String>();
 	}
 	public ccClass(String clName, String clAccess, boolean clIsStatic){
 		name = clName;
@@ -23,6 +25,7 @@ public class ccClass {
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
 		fields = new HashMap<String, String>();
+		packageNames = new ArrayList<String>();
 	}
 	
 	/** Adds method to class's list of methods */
@@ -37,6 +40,12 @@ public class ccClass {
 	/** Adds field to class's hashmap of fields */
 	public void addField(String name, String type){
 		fields.put(name, type);
+	}
+	/** Sets the name of the class' package */
+	public void addPackage(String[] currentPackage){
+		for(String s : currentPackage){
+		packageNames.add(s);
+		}
 	}
 	
 	/** Gets field hashmap */
@@ -59,6 +68,10 @@ public class ccClass {
 	/** Static? (y/n) */
 	public boolean getIsStatic(){
 		return isStatic;
+	}
+	/** Gets the name of the class' package */
+	public ArrayList<String> getPackage(){
+		return packageNames;
 	}
 	/**
 	 * Searches for and returns method named s.

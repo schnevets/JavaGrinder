@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,6 +26,7 @@ public class ccMaster extends Visitor {
 	private ccBlock latestBlock;
 	private HashSet mangleNames;
 	private File directory;
+	private String[] currentPackage;
 	
 	
 	public ccMaster(HashSet dependencies, HashSet mangleList, File dir){
@@ -83,9 +84,16 @@ public class ccMaster extends Visitor {
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			
+			//includes
 			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			out.write("#include \"java_lang.h\"\n");
-			out.write("namespace " + classList.get(i).getName() + "{\n");
+			
+			//namspaces
+			int packageNumber = classList.get(i).getPackage().size();
+			for(int q = 0; q < packageNumber; q++){
+				out.write("namespace " + classList.get(i).getPackage().get(q)+ "{\n");
+			}
+			
 			
 			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
 				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
@@ -102,6 +110,11 @@ public class ccMaster extends Visitor {
 				while(!blockLines.isEmpty()){
 					out.write(blockLines.remove(0));
 				}
+				out.write("}\n");
+			}
+			
+			//namespace brackets
+			for(int q = 1; q < packageNumber; q++){
 				out.write("}\n");
 			}
 			
@@ -136,7 +149,7 @@ public class ccMaster extends Visitor {
 				constructorCounter = 0;
 				methodCounter = 0;
 				visit(n);
-//				addDefaultMethods(currentClass);
+				addDefaultMethods(currentClass);
 			}
 			public void visitConstructorDeclaration(GNode n){
 				visit(n);
@@ -162,7 +175,6 @@ public class ccMaster extends Visitor {
 			public void addDefaultMethods(ccClass clas){
 				ccManualBlock deleteBlock = new ccManualBlock();
 				deleteBlock.addCustomLine("  delete __this;");
-				System.out.println(deleteBlock.publish().toString());
 				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
 				delete.setBlock(deleteBlock);
 				clas.addMethod(delete);
@@ -189,8 +201,18 @@ public class ccMaster extends Visitor {
 		modifierList.clear();
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
+		currentClass.addPackage(currentPackage);
 		visit(n);
 	}
+	
+	public void visitPackageDeclaration(GNode n){
+		Node qualifiedIdentifier = n.getNode(1);
+		currentPackage = new String[qualifiedIdentifier.size()];
+		for(int i = 0; i < qualifiedIdentifier.size(); i++){
+			currentPackage[i] = (qualifiedIdentifier.getString(i));
+		}
+	}
+	
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
