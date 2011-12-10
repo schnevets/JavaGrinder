@@ -30,6 +30,7 @@ import xtc.lang.JavaFiveParser;
 public class DependencyMaster extends xtc.util.Tool {
 	
 	private HashSet<String> qualifiedFileNames;
+	public String currentFileName;
 	
 	public DependencyMaster() {
 	}
@@ -61,6 +62,7 @@ public class DependencyMaster extends xtc.util.Tool {
 		}
 		for(String s : args){
 			try {
+				currentFileName = s;
 				process(s);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -84,7 +86,7 @@ public class DependencyMaster extends xtc.util.Tool {
 				}
 			}
 			catch(FileNotFoundException e){
-				System.out.println("File " + s + "cannot be found.");
+				System.out.println("File required for translation: " + s + "cannot be found.");
 				e.printStackTrace();
 			}	
 		}
@@ -128,7 +130,7 @@ public class DependencyMaster extends xtc.util.Tool {
 					}
 				}
 				catch(ClassNotFoundException e){
-					System.out.println("Class " + (n.getString(n.size()-1)) + " not found in argument list." );
+					System.out.println("Error in " + currentFileName + ": Class " + (n.getString(n.size()-1)) + " not found in argument list." );
 					//e.printStackTrace();
 				}
 				visit(n);
