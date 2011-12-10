@@ -12,7 +12,6 @@ public class ccStatement extends Visitor{
 	}
 	public void visitExpression(GNode n){
 		visit(n);
-		line+=";";
 	}
 	public void visitReturnStatement(GNode n){
 		line += "return ";
@@ -27,14 +26,9 @@ public class ccStatement extends Visitor{
 				line+=" << endl";
 			}
 		}
-		else
+		else	
 			visit(n);
-		line+=";";
 	}
-	
-//	public void visitConditionalStatement(GNode n){
-//		System.out.println(n);
-//	}
 	
 	public void visitMultiplicativeExpression(GNode n){
 		visit(n);
@@ -53,21 +47,29 @@ public class ccStatement extends Visitor{
 		line+=(String) n.get(0);		
 	}
 	
-//	public void visitBlock(GNode n){
-//		ccBlock blockStatement = new ccBlock(n);
-//	}
+	public void visitBlock(GNode n){
+		ccBlock blockStatement = new ccBlock(n);
+		while (!blockStatement.blockLines.isEmpty())
+			line += blockStatement.blockLines.remove()+"\n";
+	}
 	public void visitConditionalStatement(GNode n){
 		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")";
-//		System.out.println(line);
+		System.out.println(line);
 	}
 	public void visitForStatement(GNode n){
 		line = "for(";
 		dispatch(n.getGeneric(0));
-		line+=")";
-		ccExpression inside = new ccExpression(n.getGeneric(1));					//declaring a ccExpression, will eventually make ccStatement method to construct
+		line+=")\n";
+		dispatch(n.getGeneric(1));
 	}
 	public void visitBasicForControl(GNode n){
-		visit(n);
+		dispatch(n.getNode(0));
+		dispatch(n.getNode(1));
+		dispatch(n.getNode(2));
+		dispatch(n.getNode(3));
+		line+=";";
+		dispatch(n.getNode(4));
+		line+=";";
 	}
 	public void visitBreakStatement(GNode n){
 		line = "break;";
@@ -87,6 +89,9 @@ public class ccStatement extends Visitor{
 	}
 	public void visitRelationalExpression(GNode n){
 		visit(n);
+	}
+	public void visitExpressionStatement(GNode n){
+		visit(n);
 		line+=";";
 	}
 	public void visitArguments(GNode n){
@@ -95,6 +100,7 @@ public class ccStatement extends Visitor{
 	
 	public void visitSelectionExpression(GNode n){
 		visit(n);
+		line+=";";
 	}
 	public void visitPrimaryIdentifier(GNode n){
 		line+=(String) n.get(0)+" ";		

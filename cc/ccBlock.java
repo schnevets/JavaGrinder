@@ -28,6 +28,13 @@ class ccBlock extends Visitor{
 		visit(n);
 	}
 
+	public ccBlock(GNode n) {
+		blockLines = new LinkedList<String>();
+		blockLines.add("{");
+		visit(n);
+		blockLines.add("}");
+	}
+
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
@@ -44,7 +51,7 @@ class ccBlock extends Visitor{
 	}
 
 	public void visitBlock(GNode n){
-//		System.out.println(n);
+		System.out.println(n);
 		ccBlock blockStatement = new ccBlock(n, variables);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
