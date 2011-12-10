@@ -33,7 +33,9 @@ public class TestMaster {
 		testArray[19] = currentDir + "NestedClassTest.java";
 		testArray[20] = currentDir + "ArrayTest.java";
 		
+		String[] testMe = new String[1];
 		for(int i = 0; i < testArray.length; i++){
+			testMe[i] = testArray[i];
 			JavaGrinder jg = new JavaGrinder(testArray);
 			System.out.println("!!! " + testArray[i] + " done.");
 		}
