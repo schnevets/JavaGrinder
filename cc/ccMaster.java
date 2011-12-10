@@ -25,9 +25,10 @@ public class ccMaster extends Visitor {
 	private String[] argumentName;
 	private ccBlock latestBlock;
 	private HashSet mangleNames;
+	private File directory;
 	
 	
-	public ccMaster(HashSet dependencies, HashSet mangleList){
+	public ccMaster(HashSet dependencies, HashSet mangleList, File dir){
 //		modifierList = new LinkedList<String>();
 //		classList = new LinkedList<ccClass>();
 //		this.dispatch(NODE);
@@ -40,6 +41,7 @@ public class ccMaster extends Visitor {
 		Iterator iterate = dependencies.iterator();
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
+		directory = dir;
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			classList = new LinkedList<ccClass>();
@@ -59,7 +61,7 @@ public class ccMaster extends Visitor {
 	 */
 	public void publishToFiles() throws IOException{
 		LinkedList<String> blockLines;
-		File file = new File("main.cc");
+		File file = new File(directory.getAbsolutePath() + "/main.cc");
 		FileWriter fw = new FileWriter(file);
 		BufferedWriter out = new BufferedWriter(fw);
 		if(mainMethod!=null){
@@ -73,7 +75,7 @@ public class ccMaster extends Visitor {
 		out.close();
 		
 		for(int i=0; i < classList.size(); i++){
-			file = new File(classList.get(i).getName() + ".cc");
+			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			
