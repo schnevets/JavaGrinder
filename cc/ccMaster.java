@@ -61,18 +61,22 @@ public class ccMaster extends Visitor {
 	 */
 	public void publishToFiles() throws IOException{
 		LinkedList<String> blockLines;
-		File file = new File(directory.getAbsolutePath() + "/main.cc");
-		FileWriter fw = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fw);
+		File file;
+		FileWriter fw;
+		BufferedWriter out;
 		if(mainMethod!=null){
+			file = new File(directory.getAbsolutePath() + "/main.cc");
+			fw = new FileWriter(file);
+			out = new BufferedWriter(fw);
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){
 				out.write(blockLines.remove(0));
 			}
+			out.write("}\n");
+			out.close();
 		}
-		out.write("}\n");
-		out.close();
+		
 		
 		for(int i=0; i < classList.size(); i++){
 			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
