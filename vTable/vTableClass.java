@@ -53,6 +53,7 @@ public class vTableClass {
 	}
 	
 	public void addSuperClass(vTableClass parenting){
+		//System.out.println("adding superclass " + parenting.classname);
 		superclass = parenting;
 		copysupertable();
 	}
@@ -64,14 +65,15 @@ public class vTableClass {
 		
 		while(methoditerate.hasNext()){
 			currentlayout = layoutiterate.next();
-			currentlayout.setReferenceType(this.classname);
+			currentlayout.setReferenceType(classname);
 			currentaddress = addressiterate.next();
 			if(currentaddress.methodname.equals("__isa") || currentaddress.methodname.equals("__delete")){
-				currentaddress.setClassName(this.classname);
+				currentaddress.setClassName(classname);
+				System.out.println("copying specialmethod " + currentaddress.methodname);
 				if(currentaddress.methodname.equals("__delete")){
 					currentmethod = methoditerate.next();
-					currentlayout.setReferenceType(this.classname);
-					currentmethod.setReferenceType(this.classname);
+					//currentlayout.setReferenceType(this.classname);
+					currentmethod.setReferenceType(classname);
 					vMethodLayout.add(currentmethod);
 				}
 				vTableLayout.add(currentlayout);
@@ -80,7 +82,8 @@ public class vTableClass {
 			else{
 				currentmethod = methoditerate.next();
 				if(currentmethod.visibility.equals("public")){
-					currentmethod.setReferenceType(this.classname);
+					//System.out.println("copying supermethod " + superclass.classname + currentmethod.methodname);
+					currentmethod.setReferenceType(classname);
 					currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
 						+ currentmethod.referencetype + currentmethod.parameters + "))");
 				
@@ -229,6 +232,9 @@ public class vTableClass {
 		else if(command.equals("Parameters")){
 			currentmethod.setParameters(arg);
 		}
+		else if(command.equals("ObjectVisiblity")){
+			currentmethod.setVisiblity(arg);
+		}
 		else{
 			System.out.println("Invalid command " + command);
 		}
@@ -303,8 +309,9 @@ public class vTableClass {
 			writer.write("struct " + "__" + classname + "{ \r");
 			writer.write("__" + classname + "_VT*" + " __vptr;\r");
 			
-			while(!dataLayout.isEmpty()){
-				writer.write(dataLayout.pop());
+			iterate = dataLayout.iterator();
+			while(iterate.hasNext()){
+				writer.write(iterate.next());
 			}
 			
 			writer.write("\r");
@@ -312,13 +319,15 @@ public class vTableClass {
 			//writer.close();
 			//the constructors
 			//writer.write("__" + classname + "();\r\r");  the basic constructor, no arguments
-			while(!vClassConstructors.isEmpty()){
-				vClassConstructor constructor = vClassConstructors.pop();
+			Iterator<vClassConstructor> constructorIterate = vClassConstructors.iterator();
+			while(constructorIterate.hasNext()){
+				vClassConstructor constructor = constructorIterate.next();
 				constructor.writeFile(writer);
 			}
 			
-			while(!vMethodLayout.isEmpty()){
-				vTableMethodLayoutLine current = vMethodLayout.pop();
+			Iterator<vTableMethodLayoutLine> methodIterate = vMethodLayout.iterator();
+			while(methodIterate.hasNext()){
+				vTableMethodLayoutLine current = methodIterate.next();
 				current.writeFile(writer);
 			}
 			//writer = new BufferedWriter(writee);
@@ -329,16 +338,18 @@ public class vTableClass {
 			
 			writer.write("struct __" + classname + "_VT { \r");
 			//writer.close();
-			while(!vTableLayout.isEmpty()){
-				vTableLayoutLine current = vTableLayout.pop();
+			Iterator<vTableLayoutLine> tableIterate = vTableLayout.iterator();
+			while(tableIterate.hasNext()){
+				vTableLayoutLine current = tableIterate.next();
 				current.writeFile(writer);
 			}
 			//writer = new BufferedWriter(writee);
 			writer.write("\r");
 			writer.write("__" + classname + "_VT()\r:  ");
 			//writer.close();
-			while(!vTableAddress.isEmpty()){
-				vTableAddressLine current = vTableAddress.pop();
+			Iterator<vTableAddressLine> addressIterate = vTableAddress.iterator();
+			while(addressIterate.hasNext()){
+				vTableAddressLine current = addressIterate.next();
 				current.writeFile(writer);
 			}
 			//writer = new BufferedWriter(writee);
