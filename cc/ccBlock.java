@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 
 /*
@@ -33,7 +33,7 @@ class ccBlock extends Visitor{
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		variables.put(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n);
-		blockLines.add("  " + declarationStatement.publish() + "\n");
+		blockLines.add(" " + declarationStatement.publish() + "\n");
 	}
 
 	
