@@ -211,7 +211,7 @@ public class ccMaster extends Visitor {
 	}
 	public void visitMethodDeclaration(GNode n){
 		String name = (String)n.getString(3);
-		String access = "public";
+		String access = "protected";
 		String returnType = "void";
 		boolean isStatic = false;
 		dispatch(n.getNode(0));

@@ -60,18 +60,16 @@ public class ccMethod {
 	
 	public String publishDeclaration(){
 		String decl = "";
+		decl = access + " " + ccHelper.convertType(returnType) + " " + parentClass.getName() + "::" + name  + "(";
+		for (int i = 0; i < parameterType.length; i++){
+			if(i != 0) decl += ", ";
+			decl += parameterType[i] + " " + parameterName[i];
+		}
+		decl += ")";
 		if(isStatic){
-			return decl;
+			decl += " const";
 		}
-		else{
-			decl = ccHelper.convertType(returnType) + " " + parentClass.getName() + "::" + name  + "(";
-			for (int i = 0; i < parameterType.length; i++){
-				if(i != 0) decl += ", ";
-				decl += parameterType[i] + " " + parameterName[i];
-			}
-			decl += ")";
-			return decl;
-		}
+		return decl;
 	}
 	
 	public LinkedList<String> publishBlock(){
