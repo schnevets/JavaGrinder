@@ -34,9 +34,8 @@ public class TestMaster {
 		testArray[20] = currentDir + "ArrayTest.java";
 		
 		for(int i = 0; i < testArray.length; i++){
-			ASTGenerator ast = new ASTGenerator();
-			ccMaster ccm = new ccMaster(ast.generateAST(testArray[i]));
-			System.out.println(testArray[i]);
+			JavaGrinder jg = new JavaGrinder(testArray);
+			System.out.println("!!! " + testArray[i] + " done.");
 		}
 	}
 	

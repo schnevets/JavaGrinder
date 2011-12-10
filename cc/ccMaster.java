@@ -27,30 +27,30 @@ public class ccMaster extends Visitor {
 	private HashSet mangleNames;
 	
 	
-	public ccMaster(Node NODE /*HashSet dependencies, HashSet mangleList*/){
-		modifierList = new LinkedList<String>();
-		classList = new LinkedList<ccClass>();
-		this.dispatch(NODE);
-		try{
-			this.publishToFiles();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-		
-//		Iterator iterate = dependencies.iterator();
-//		ASTGenerator ast = new ASTGenerator();
-//		mangleNames = mangleList;
-//		while (iterate.hasNext()){
-//			modifierList = new LinkedList<String>();
-//			classList = new LinkedList<ccClass>();
-//			String nextFile = (String)iterate.next();
-//			this.dispatch(ast.generateAST(nextFile));
-//			try{
-//				this.publishToFiles();
-//			} catch (IOException e){
-//				e.printStackTrace();
-//			}
+	public ccMaster(HashSet dependencies, HashSet mangleList){
+//		modifierList = new LinkedList<String>();
+//		classList = new LinkedList<ccClass>();
+//		this.dispatch(NODE);
+//		try{
+//			this.publishToFiles();
+//		} catch (IOException e){
+//			e.printStackTrace();
 //		}
+		
+		Iterator iterate = dependencies.iterator();
+		ASTGenerator ast = new ASTGenerator();
+		mangleNames = mangleList;
+		while (iterate.hasNext()){
+			modifierList = new LinkedList<String>();
+			classList = new LinkedList<ccClass>();
+			String nextFile = (String)iterate.next();
+			this.dispatch(ast.generateAST(nextFile));
+			try{
+				this.publishToFiles();
+			} catch (IOException e){
+				e.printStackTrace();
+			}
+		}
 	}
 	/**
 	 * Printy Thingy
