@@ -36,7 +36,7 @@ public class ccConstructor {
 	
 	public String publishDeclaration(){
 		String decl = "";
-		decl = parentClass.getName() + "::" + name  + "(";
+		decl = parentClass.get_Name() + "::" + name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
 			decl += parameterType[i] + " " + parameterName[i];

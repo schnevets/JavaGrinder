@@ -72,7 +72,7 @@ public class ccMethod {
 	
 	public String publishDeclaration(){
 		String decl = "";
-		decl = access + " " + ccHelper.convertType(returnType) + " " + parentClass.get_Name() + "::" + name  + "(";
+		decl = access + ": " + ccHelper.convertType(returnType) + " " + parentClass.get_Name() + "::" + name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
 			decl += parameterType[i] + " " + parameterName[i];
