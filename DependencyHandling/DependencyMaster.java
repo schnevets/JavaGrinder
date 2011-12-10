@@ -54,7 +54,7 @@ public class DependencyMaster extends xtc.util.Tool {
 		qualifiedFileNames.add("Object");
 		for(String s : args){
 			if (s.contains("/")){
-				qualifiedFileNames.add(s.substring(s.lastIndexOf('/'),s.indexOf(".java")));
+				qualifiedFileNames.add(s.substring(s.lastIndexOf('/')+1,s.indexOf(".java")));
 			}
 			else{
 				qualifiedFileNames.add(s.substring(0,s.indexOf(".java")));
