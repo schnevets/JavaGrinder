@@ -1,9 +1,6 @@
-package oop.Tests;
+package oop;
 
 import java.io.File;
-
-import oop.DependencyMaster;
-import oop.ccTest;
 
 
 
@@ -12,7 +9,7 @@ public class TestMaster {
 	String[] testArray;
 	
 	public TestMaster() {
-		String currentDir = "/home/user/xtc/src/Translator/src/oop/Tests/";
+		String currentDir = "";
 		testArray = new String[21];
 		testArray[0] = currentDir + "CompileTest.java";
 		testArray[1] = currentDir + "ConstructorTest.java";
@@ -36,12 +33,9 @@ public class TestMaster {
 		testArray[19] = currentDir + "NestedClassTest.java";
 		testArray[20] = currentDir + "ArrayTest.java";
 		
-		for(int i = 3; i < testArray.length; i++){
-			ccTest runt = new ccTest();
-			String[] args = new String[2];
-			args[0] = "-translate";
-			args[1] = testArray[i];
-			runt.run(args);
+		for(int i = 0; i < testArray.length; i++){
+			ASTGenerator ast = new ASTGenerator();
+			ccMaster ccm = new ccMaster(ast.generateAST(testArray[i]));
 			System.out.println(testArray[i]);
 		}
 	}
