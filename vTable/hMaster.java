@@ -53,6 +53,12 @@ public class hMaster {
 	public void hardIncludeJavaLangObject(){
 		vTableClass javaobject = new vTableClass("Object");
 		javaobject.setNoWrite();
+		javaobject.addIncludes("<stdint.h>");
+		javaobject.addIncludes("<string>");
+		javaobject.addIncludes("<iostream>");
+		javaobject.addIncludes("<cstring>");
+		javaobject.addIncludes("\"ptr.h\"");
+		
 		hardIncludeJavaLangMethod(javaobject);
 		hardIncludeJavaLangTable(javaobject);
 		hardIncludeJavaLangAddress(javaobject);
@@ -205,7 +211,6 @@ public class hMaster {
 		new Visitor() {
 			//class variables
 			vTableClass currentclass;
-			vTableForwardDeclarations forwarddeclarations;
 			LinkedList<String> namespace;
 			boolean missingsuper;
 			String dataLayout;
@@ -218,7 +223,7 @@ public class hMaster {
 				try {
 					writee = new FileWriter(file);
 					writer = new BufferedWriter(writee);
-					forwarddeclarations.writefile(writer);
+					//forwarddeclarations.writefile(writer);
 					Iterator classiterate = classy.overloadedmethods.iterator();
 					while(classiterate.hasNext()){
 						overloads.add(classy.classname + "^" + (String)classiterate.next());
@@ -269,7 +274,6 @@ public class hMaster {
 			public void visitCompilationUnit(GNode n){
 				//System.out.println("made it");
 				namespace = new LinkedList<String>();
-				forwarddeclarations = new vTableForwardDeclarations();
 				for(Object o : n){
 					if (o instanceof Node){ 
 						missingsuper = false;
@@ -664,9 +668,10 @@ public class hMaster {
 				}
 				//System.out.println("classname is " + n.getString(1));
 				
-				forwarddeclarations.addForwardDeclaration(currentclass.classname);
-				forwarddeclarations.addForwardVTable(currentclass.classname);
-				forwarddeclarations.addTypeDeclarations(currentclass.classname);
+				currentclass.addForwardDeclaration(currentclass.classname);
+//				forwarddeclarations.addForwardDeclaration(currentclass.classname);
+//				forwarddeclarations.addForwardVTable(currentclass.classname);
+//				forwarddeclarations.addTypeDeclarations(currentclass.classname);
 				
 				operation = "ClassDeclaration";
 				

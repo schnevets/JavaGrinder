@@ -12,12 +12,14 @@ public class vTableClass {
 	String classname;
 	String modifier;
 	LinkedList<String> namespace;
+	LinkedList<String> includes;
 	HashSet<String> overloadedmethods;
 	vTableClass superclass;  //may even want to give a vTableClass reference as the superclass
 	LinkedList<vTableMethodLayoutLine> vMethodLayout;
 	LinkedList<vTableLayoutLine> vTableLayout;
 	LinkedList<vTableAddressLine> vTableAddress;
 	LinkedList<vClassConstructor> vClassConstructors;
+	vTableForwardDeclarations forwarddeclarations;
 	LinkedList<String> dataLayout;
 	
 	//create a new linked list of vClassConstructors
@@ -39,10 +41,13 @@ public class vTableClass {
 		vTableLayout = new LinkedList<vTableLayoutLine>();
 		vTableAddress = new LinkedList<vTableAddressLine>();
 		vClassConstructors = new LinkedList<vClassConstructor>();
+		forwarddeclarations = new vTableForwardDeclarations();
 		namespace = new LinkedList<String>();
 		dataLayout = new LinkedList<String>();
 		overloadedmethods = new HashSet<String>();
+		includes = new LinkedList<String>();
 	}
+	
 	
 	public void setNoWrite(){
 		writeable = false;
@@ -58,10 +63,32 @@ public class vTableClass {
 		copysupertable();
 	}
 	
+	public void addForwardDeclaration(String currentclass){
+		forwarddeclarations.addForwardDeclaration(currentclass);
+		forwarddeclarations.addForwardVTable(currentclass);
+		forwarddeclarations.addTypeDeclarations(currentclass);
+	}
+	
+	public void addIncludes(String s){
+		includes.add(s);
+	}
+	
 	public void copysupertable(){
 		Iterator<vTableMethodLayoutLine> methoditerate = superclass.vMethodLayout.iterator();
 		Iterator<vTableAddressLine> addressiterate = superclass.vTableAddress.iterator();
 		Iterator<vTableLayoutLine> layoutiterate = superclass.vTableLayout.iterator();
+		Iterator<String> superincludes = superclass.includes.iterator();
+		
+		while(superincludes.hasNext()){
+			includes.add(superincludes.next());
+		}
+		
+		if(superclass.classname.equals("Object")){
+			includes.add("\"java_lang.h" + "\"");
+		}
+		else{
+			includes.add("\"" + superclass.classname + ".h" + "\"");
+		}
 		
 		while(methoditerate.hasNext()){
 			currentlayout = layoutiterate.next();
@@ -293,7 +320,7 @@ public class vTableClass {
 			currentaddress.setMethodName(arg);
 		}
 		else{
-			System.out.println("Invalid command " + command);
+			System.out.println("Invalid commawriternd " + command);
 		}
 	}
 	
@@ -301,11 +328,18 @@ public class vTableClass {
 		try {
 			//FileWriter writee = new FileWriter(file);
 			//BufferedWriter writer = new BufferedWriter(writee);
-			
-			Iterator<String> iterate = namespace.iterator();
+			Iterator<String> iterate = includes.iterator();
+			writer.write("#pragma once \r\r");
+			while(iterate.hasNext()){
+				writer.write("#include " + iterate.next() + "\r");
+			}
+			writer.write("\r");
+			iterate = namespace.iterator();
 			while(iterate.hasNext()){
 				writer.write("namespace " + iterate.next() + "{\r");
 			}
+			
+			forwarddeclarations.writefile(writer);
 			writer.write("struct " + "__" + classname + "{ \r");
 			writer.write("__" + classname + "_VT*" + " __vptr;\r");
 			
@@ -370,6 +404,7 @@ public class vTableClass {
 		}
 	}
 	
+	//outdated console printer
 	public void printLines(){
 		Iterator<String> iterate = namespace.iterator();
 		while(iterate.hasNext()){
