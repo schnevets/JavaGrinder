@@ -30,7 +30,7 @@ public class vTableMethodLayoutLine {
 		methodname = "";
 		parameters = "";
 		referencetype = "";
-		visibility = "";
+		visibility = "protected";
 	}
 	
 	public void setModifer(String modifiable){
@@ -76,6 +76,11 @@ public class vTableMethodLayoutLine {
 	public void setMatching(vTableLayoutLine layout, vTableAddressLine address){
 		matchinglayout = layout;
 		matchingaddress = address;
+	}
+	
+	public void setVisiblity(String visible){
+		if(visible.equals("private") || visible.equals("public") || visible.equals("protected"))
+			visibility = visible;
 	}
 	
 	//obsolete method

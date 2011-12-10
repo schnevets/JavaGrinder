@@ -79,13 +79,15 @@ public class vTableClass {
 			}
 			else{
 				currentmethod = methoditerate.next();
-				currentmethod.setReferenceType(this.classname);
-				currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
+				if(currentmethod.visibility.equals("public")){
+					currentmethod.setReferenceType(this.classname);
+					currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
 						+ currentmethod.referencetype + currentmethod.parameters + "))");
 				
-				vTableLayout.add(currentlayout);
-				vTableAddress.add(currentaddress);
-				vMethodLayout.add(currentmethod);
+					vTableLayout.add(currentlayout);
+					vTableAddress.add(currentaddress);
+					vMethodLayout.add(currentmethod);
+				}
 			}
 		}
 	}
@@ -216,6 +218,7 @@ public class vTableClass {
 		}
 		else if(command.equals("Modifier")){
 			currentmethod.setModifer(arg);
+			currentmethod.setVisiblity(arg);
 		}
 		else if(command.equals("ReturnType")){
 			currentmethod.setReturnType(arg);

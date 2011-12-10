@@ -23,7 +23,7 @@ public class hMaster {
 	//used by cc translator for method overloading
 	HashSet<String> overloads;
 	
-	public hMaster(HashSet dependencies){
+	public hMaster(HashSet dependencies, File hostDirectory){
 		classes = new LinkedList<vTableClass>();
 		waitqueue = new LinkedList<String>();
 		classlist = new HashSet<String>();
@@ -34,13 +34,13 @@ public class hMaster {
 		while(iterate.hasNext()){
 			String currentfilename = (String)iterate.next();
 			//File test = new File(currentfilename);
-			translate(currentfilename);
+			translate(currentfilename, hostDirectory);
 		}
 		
 		//do not use for now
 		
 		while(!(waitqueue.isEmpty())){
-			translate(waitqueue.pop());
+			translate(waitqueue.pop(), hostDirectory);
 		}
 		
 		//setup a file
@@ -178,12 +178,15 @@ public class hMaster {
 	
 	//question, how to sort out which classes belong to which file
 	//likely solution would be to keep a list of all classes belonging to the current file
-	public void translate(String sourcefile){
+	public void translate(String sourcefile, File hostDirectory){
 		//String[] args = {"-printJavaAST",sourcefile};
 		//String[] args = {"-returnJavaAST", sourcefile};
 		Node sourceAST = new ASTGenerator().generateAST(sourcefile);
 		fileprint = new LinkedList<vTableClass>();
-		final File file = new File(sourcefile.replace(".java", ".h"));
+		String hostPath = hostDirectory.getAbsolutePath();
+		File leadfile = new File(sourcefile);
+		String formatedFile = leadfile.getName();
+		final File file = new File(hostPath + "/" + formatedFile.replace(".java", ".h"));
 		try {
 			file.createNewFile();
 		} catch (IOException e) {
@@ -404,13 +407,21 @@ public class hMaster {
 				else if(operation.equals("Method")){
 					currentclass.appendMethod("ReturnType", returnable);
 					currentclass.appendTableLayout("ReturnType", returnable);
+					System.out.println("returntype " + returnable + " for " + currentclass.currentmethod.methodname);
+					System.out.println("for node " + n.hashCode());
 				}
 				else if(operation.equals("MethodParameter")){
 					currentclass.appendMethod("Parameters", returnable);
 					currentclass.appendTableLayout("Parameters", returnable);
+					System.out.println("parameter " + returnable + " for " + currentclass.currentmethod.methodname);
+					System.out.println("for node " + n.hashCode());
 				}
 			}
 
+			public void visitBlock(GNode n){
+				//nothing for now, may have to add special cases for method call chains
+			}
+			
 			/**
 			 * Possible Parents: ClassDeclaration, FieldDeclaration, ConstructorDeclaration, MethodDeclaration
 			 * Writes to Elements: No
