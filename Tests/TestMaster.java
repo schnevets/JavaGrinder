@@ -35,7 +35,7 @@ public class TestMaster {
 		
 		String[] testMe = new String[1];
 		for(int i = 0; i < testArray.length; i++){
-			testMe[i] = testArray[i];
+			testMe[0] = testArray[i];
 			JavaGrinder jg = new JavaGrinder(testArray);
 			System.out.println("!!! " + testArray[i] + " done.");
 		}
