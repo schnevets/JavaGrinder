@@ -62,10 +62,12 @@ public class ccMaster extends Visitor {
 		File file = new File("main.cc");
 		FileWriter fw = new FileWriter(file);
 		BufferedWriter out = new BufferedWriter(fw);
-		out.write(mainMethod.publishDeclaration() + "{\n");
-		blockLines = mainMethod.publishBlock();
-		while(!blockLines.isEmpty()){
-			out.write(blockLines.remove(0));
+		if(mainMethod!=null){
+			out.write(mainMethod.publishDeclaration() + "{\n");
+			blockLines = mainMethod.publishBlock();
+			while(!blockLines.isEmpty()){
+				out.write(blockLines.remove(0));
+			}
 		}
 		out.write("}\n");
 		out.close();
@@ -74,6 +76,11 @@ public class ccMaster extends Visitor {
 			file = new File(classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
+			
+			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
+			out.write("#include \"java_lang.h\"\n");
+			out.write("namespace " + classList.get(i).getName() + "{\n");
+			
 			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
 				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
 				blockLines = classList.get(i).getConstructorAtIndex(j).publishBlock();
@@ -91,6 +98,8 @@ public class ccMaster extends Visitor {
 				}
 				out.write("}\n");
 			}
+			
+			out.write("}\n");
 			out.close();
 		}
 	}
@@ -144,13 +153,14 @@ public class ccMaster extends Visitor {
 				latestBlock = new ccBlock(n, currentClass.getFields());
 			}
 			
-//			public void addDefaultMethods(ccClass clas){
-//				ccManualBlock deleteBlock = new ccManualBlock();
-//				deleteBlock.addCustomLine("  delete __this;");
-//				System.out.println(deleteBlock.publish().toString());
-//				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0], deleteBlock);
-//				clas.addMethod(delete);
-//			}
+			public void addDefaultMethods(ccClass clas){
+				ccManualBlock deleteBlock = new ccManualBlock();
+				deleteBlock.addCustomLine("  delete __this;");
+				System.out.println(deleteBlock.publish().toString());
+				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
+				delete.setBlock(deleteBlock);
+				clas.addMethod(delete);
+			}
 			
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
