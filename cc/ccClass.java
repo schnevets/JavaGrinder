@@ -48,6 +48,10 @@ public class ccClass {
 	public String getName(){
 		return name;
 	}
+	/** Gets the name of the class with '__' before it. Yep. A whole class just for that. */
+	public String get_Name(){
+		return "__" + name;
+	}
 	/** Gets the access level of the class (Public, Private, Protected) */
 	public String getAccess(){
 		return access;
