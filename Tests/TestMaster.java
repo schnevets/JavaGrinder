@@ -1,6 +1,9 @@
 package oop;
 
 import java.io.File;
+import java.io.IOException;
+
+import oop.JavaGrinder.RequiredFileNotFoundException;
 
 
 
@@ -33,7 +36,13 @@ public class TestMaster {
 		testArray[19] = currentDir + "NestedClassTest.java";
 		testArray[20] = currentDir + "ArrayTest.java";
 
-		JavaGrinder jg = new JavaGrinder(testArray);
+		try{
+			JavaGrinder jg = new JavaGrinder(testArray);
+		} catch (RequiredFileNotFoundException e){
+			System.out.println(e.fileName + " not found. It's required.");
+		} catch(IOException e){
+			System.out.println("While copying pre-made files: " + e);
+		}
 	}
 	
 	
