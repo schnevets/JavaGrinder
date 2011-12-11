@@ -8,6 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import oop.ccClass;
+import oop.ccManualBlock;
+import oop.ccMethod;
+
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -70,11 +74,29 @@ public class ccMaster extends Visitor {
 			file = new File(directory.getAbsolutePath() + "/main.cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
+			
+			//includes
+			for(int i=0; i < classList.size(); i++){
+				out.write("include \"" + classList.get(i).get_Name() + ".cc\"\n");
+			}
+			
+			//namespaces
+			int packageNumber = classList.get(0).getPackage().size();
+			for(int q = 0; q < packageNumber; q++){
+				out.write("namespace " + classList.get(0).getPackage().get(q)+ "{\n");
+			}
+			
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){
 				out.write(blockLines.remove(0));
 			}
+			
+			//namespace brackets
+			for(int q = 1; q < packageNumber; q++){
+				out.write("}\n");
+			}
+			
 			out.write("}\n");
 			out.close();
 		}
@@ -187,6 +209,7 @@ public class ccMaster extends Visitor {
 				deleteBlock.addCustomLine("  delete __this;");
 				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
 				delete.setBlock(deleteBlock);
+				delete.changeThisToPointer();
 				clas.addMethod(delete);
 			}
 			

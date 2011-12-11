@@ -59,6 +59,10 @@ public class ccMethod {
 		block = blk;
 	}
 	
+	public void changeThisToPointer(){
+		parameterType[0] = "__" + parameterType[0] + "*";
+	}
+	
 	public void mangleName(){
 		name = parentClass + "__" + name;
 		for (int i = 0; i < parameterType.length; i++){
