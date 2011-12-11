@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,6 +21,7 @@ public class ccMaster extends Visitor {
 	private ccMainMethod mainMethod;
 	private LinkedList<ccClass> classList;
 	private LinkedList<String> modifierList;
+	private LinkedList<String> setInstanceVariables;
 	private String[] argumentType;
 	private String[] argumentName;
 	private ccBlock latestBlock;
@@ -87,6 +88,7 @@ public class ccMaster extends Visitor {
 			//includes
 			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			out.write("#include \"java_lang.h\"\n");
+			out.write("#include \"ptr.h\"\n");
 			
 			//namspaces
 			int packageNumber = classList.get(i).getPackage().size();
@@ -94,6 +96,14 @@ public class ccMaster extends Visitor {
 				out.write("namespace " + classList.get(i).getPackage().get(q)+ "{\n");
 			}
 			
+			out.write("\n");
+			
+			//class variables that are set as they are declared
+			for(int j=0; j < setInstanceVariables.size(); j++){
+				out.write(setInstanceVariables.get(j) + ";\n");
+			}
+			
+			out.write("\n");
 			
 			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
 				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
@@ -186,6 +196,7 @@ public class ccMaster extends Visitor {
 		}.dispatch(n);
 	}
 	public void visitClassDeclaration(GNode n){
+		setInstanceVariables = new LinkedList<String>();
 		String name = (String)n.getString(1);
 		String access = "public";
 		boolean isStatic = false;
@@ -217,6 +228,9 @@ public class ccMaster extends Visitor {
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		currentClass.addField(name, type);
+		if(null != n.getNode(2).getNode(0).get(2)){
+			setInstanceVariables.add(currentClass.get_Name() + "::" + name + " = " + (String)n.getNode(2).getNode(0).getNode(2).getString(0));
+		}
 	}
 	public void visitConstructorDeclaration(GNode n){
 		String name = (String)n.getString(2);
