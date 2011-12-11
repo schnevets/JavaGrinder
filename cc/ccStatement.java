@@ -52,8 +52,15 @@ public class ccStatement extends Visitor{
 		while (!blockStatement.blockLines.isEmpty())
 			line += blockStatement.blockLines.remove()+"\n";
 	}
+	
 	public void visitConditionalStatement(GNode n){
-		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")";
+		System.out.println(n.size());
+		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")\n";
+		dispatch(n.getNode(1));
+		if(n.size()==3){
+			line += "\n else\n";
+			dispatch(n.getNode(2));
+		}
 		System.out.println(line);
 	}
 	public void visitForStatement(GNode n){
@@ -69,7 +76,6 @@ public class ccStatement extends Visitor{
 		dispatch(n.getNode(3));
 		line+=";";
 		dispatch(n.getNode(4));
-		line+=";";
 	}
 	public void visitBreakStatement(GNode n){
 		line = "break;";

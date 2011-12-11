@@ -17,6 +17,9 @@ public class ccExpression extends Visitor{
 	public void visitCallExpression(GNode n){
 		line = new ccStatement(n).publish();
 	}
+	public void visitPostfixExpression(GNode n){
+		line = new ccStatement(n).publish();
+	}
 	
 	public String publish(){
 		return line;
