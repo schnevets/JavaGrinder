@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -48,9 +48,9 @@ public class ccMaster extends Visitor {
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
+		classList = new LinkedList<ccClass>();
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
-			classList = new LinkedList<ccClass>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
 			try{
@@ -77,9 +77,9 @@ public class ccMaster extends Visitor {
 			
 			//includes
 			for(int i=0; i < classList.size(); i++){
-				out.write("include \"" + classList.get(i).get_Name() + ".cc\"\n");
+				out.write("include \"" + classList.get(i).getName() + ".cc\"\n");
 			}
-			
+			//System.out.println(classList.toString());
 			//namespaces
 			int packageNumber = classList.get(0).getPackage().size();
 			for(int q = 0; q < packageNumber; q++){
@@ -93,7 +93,7 @@ public class ccMaster extends Visitor {
 			}
 			
 			//namespace brackets
-			for(int q = 1; q < packageNumber; q++){
+			for(int q = 0; q < packageNumber; q++){
 				out.write("}\n");
 			}
 			
@@ -106,6 +106,7 @@ public class ccMaster extends Visitor {
 			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
+			
 			
 			//includes
 			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
