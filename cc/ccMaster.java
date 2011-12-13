@@ -247,7 +247,8 @@ public class ccMaster extends Visitor {
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		currentClass.addField(name, type);
 		if(null != n.getNode(2).getNode(0).get(2)){
-			setInstanceVariables.add(currentClass.get_Name() + "::" + name + " = " + (String)n.getNode(2).getNode(0).getNode(2).getString(0));
+			ccDeclaration declarationStatement = new ccDeclaration(n);
+	        setInstanceVariables.add(currentClass.get_Name() + "::" + " " + declarationStatement.publish() + "\n");
 		}
 	}
 	public void visitConstructorDeclaration(GNode n){
