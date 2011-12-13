@@ -48,9 +48,10 @@ public class ccMaster extends Visitor {
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
+		classList = new LinkedList<ccClass>();
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
-			classList = new LinkedList<ccClass>();
+			
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
 			try{
@@ -77,7 +78,7 @@ public class ccMaster extends Visitor {
 			
 			//includes
 			for(int i=0; i < classList.size(); i++){
-				out.write("include \"" + classList.get(i).get_Name() + ".cc\"\n");
+				out.write("include \"" + classList.get(i).getName() + ".cc\"\n");
 			}
 			
 			//namespaces
