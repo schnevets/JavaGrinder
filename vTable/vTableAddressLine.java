@@ -81,7 +81,7 @@ public class vTableAddressLine{
 			}
 			
 			if(!(typecast == null)){
-				vTableLine = vTableLine + "(" + typecast + ")"; 
+				vTableLine = vTableLine + "" + typecast + ""; 
 			}
 			
 			if(overloaded == true){
