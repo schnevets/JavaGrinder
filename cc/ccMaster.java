@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,21 +35,13 @@ public class ccMaster extends Visitor {
 	
 	
 	public ccMaster(HashSet dependencies, HashSet mangleList, File dir){
-//		modifierList = new LinkedList<String>();
-//		classList = new LinkedList<ccClass>();
-//		this.dispatch(NODE);
-//		try{
-//			this.publishToFiles();
-//		} catch (IOException e){
-//			e.printStackTrace();
-//		}
 		
 		Iterator iterate = dependencies.iterator();
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
-		classList = new LinkedList<ccClass>();
 		while (iterate.hasNext()){
+			classList = new LinkedList<ccClass>();
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
@@ -77,19 +69,19 @@ public class ccMaster extends Visitor {
 			
 			//includes
 			for(int i=0; i < classList.size(); i++){
-				out.write("include \"" + classList.get(i).getName() + ".cc\"\n");
+				out.write("#include \"" + classList.get(i).getName() + ".cc\"\n");
 			}
-			//System.out.println(classList.toString());
+
 			//namespaces
 			int packageNumber = classList.get(0).getPackage().size();
 			for(int q = 0; q < packageNumber; q++){
 				out.write("namespace " + classList.get(0).getPackage().get(q)+ "{\n");
 			}
+
 			
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
-			while(!blockLines.isEmpty()){
-				System.out.println(blockLines.get(0));
+			while(!blockLines.isEmpty()){;
 				out.write(blockLines.remove(0));
 			}
 			
@@ -100,6 +92,7 @@ public class ccMaster extends Visitor {
 			
 			out.write("}\n");
 			out.close();
+			mainMethod = null;
 		}
 		
 		
@@ -114,7 +107,7 @@ public class ccMaster extends Visitor {
 			out.write("#include \"java_lang.h\"\n");
 			out.write("#include \"ptr.h\"\n");
 			
-			//namspaces
+			//namespaces
 			int packageNumber = classList.get(i).getPackage().size();
 			for(int q = 0; q < packageNumber; q++){
 				out.write("namespace " + classList.get(i).getPackage().get(q)+ "{\n");
