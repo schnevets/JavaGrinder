@@ -48,8 +48,8 @@ public class ccMaster extends Visitor {
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
-		classList = new LinkedList<ccClass>();
 		while (iterate.hasNext()){
+			classList = new LinkedList<ccClass>();
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
