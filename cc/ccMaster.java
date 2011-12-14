@@ -165,6 +165,7 @@ public class ccMaster extends Visitor {
 		new Visitor() {
 			private int constructorCounter;
 			private int methodCounter;
+			private LinkedList<String> parameterNames;
 			
 			public void visitClassDeclaration(GNode n){
 				String name = (String)n.getString(1);
@@ -175,6 +176,7 @@ public class ccMaster extends Visitor {
 				}
 				constructorCounter = 0;
 				methodCounter = 0;
+				parameterNames = new LinkedList<String>();
 				visit(n);
 				addDefaultMethods(currentClass);
 			}
@@ -195,8 +197,13 @@ public class ccMaster extends Visitor {
 					methodCounter++;
 				}
 			}
+			
+			public void visitFormalParameter(GNode n){
+				parameterNames.add(n.getString(3));
+				System.out.println(n.getString(3));
+			}
 			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n, currentClass.getFields());
+				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames);
 			}
 			
 			public void addDefaultMethods(ccClass clas){

@@ -1,11 +1,18 @@
-package oop;
+package oop.JavaGrinder.cc;
 
+import oop.ccBlock;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
 
 public class ccStatement extends Visitor{
 	String line="";
+	private ccBlock block;
+	
+	public ccStatement(GNode n, ccBlock parent) {
+		block = parent;
+		dispatch(n);
+	}
 	
 	public ccStatement(GNode n) {
 		dispatch(n);
@@ -118,7 +125,13 @@ public class ccStatement extends Visitor{
 		line+="this->";
 	}
 	public void visitPrimaryIdentifier(GNode n){
-		line+=(String) n.get(0)+" ";		
+		if(block!=null&&!block.getLocalVariables().contains(n.get(0))){
+			line+=(String) "__this::" + n.get(0)+" ";
+		}	
+
+		else{
+			line+=(String) n.get(0)+" ";
+		}
 	}
 	
 	public  String publish() {

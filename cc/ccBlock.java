@@ -7,6 +7,7 @@ package oop.JavaGrinder.cc;
  */
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import xtc.tree.GNode;
@@ -18,17 +19,22 @@ class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
 	private HashMap<String, String> variables;
+	private LinkedList<String> localVariableNames;
 	
 	public ccBlock(){
+		localVariableNames = new LinkedList<String>();
 	}
 
-	public ccBlock(GNode n, HashMap var) {
+	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames) {
 		blockLines = new LinkedList<String>();
+		localVariableNames = new LinkedList<String>();
+		localVariableNames.addAll(parameterNames);
 		variables = var;
 		visit(n);
 	}
 
 	public ccBlock(GNode n) {
+		localVariableNames = new LinkedList<String>();
 		blockLines = new LinkedList<String>();
 		blockLines.add("{");
 		visit(n);
@@ -39,6 +45,7 @@ class ccBlock extends Visitor{
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		variables.put(name, type);
+		localVariableNames.add(name);
 		ccDeclaration declarationStatement = new ccDeclaration(n);
 		blockLines.add(" " + declarationStatement.publish() + "\n");
 	}
@@ -46,13 +53,13 @@ class ccBlock extends Visitor{
 	
 	//TODO: Next step = expression statements and all components
 	public void visitExpressionStatement(GNode n){
-		ccExpression expressionStatement = new ccExpression(n);
+		ccExpression expressionStatement = new ccExpression(n, this);
 		blockLines.add("  " + expressionStatement.publish() + "\n");
 	}
 
 	public void visitBlock(GNode n){
 		System.out.println(n);
-		ccBlock blockStatement = new ccBlock(n, variables);
+		ccBlock blockStatement = new ccBlock(n);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");
@@ -83,6 +90,10 @@ class ccBlock extends Visitor{
 		blockLines.add("  " + whileLine.line + "\n");
 	}
 		
+	public LinkedList<String> getLocalVariables(){
+		return localVariableNames;
+	}
+	
 	public LinkedList<String> publish() {
 		return blockLines;
 	}
