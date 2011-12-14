@@ -117,7 +117,7 @@ public class ccMaster extends Visitor {
 			
 			//class variables that are set as they are declared
 			for(int j=0; j < setInstanceVariables.size(); j++){
-				out.write(setInstanceVariables.get(j) + ";\n");
+				out.write(setInstanceVariables.get(j));
 			}
 			
 			out.write("\n");
@@ -243,10 +243,12 @@ public class ccMaster extends Visitor {
 	}
 	
 	public void visitFieldDeclaration(GNode n){
+		
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		currentClass.addField(name, type);
-		if(null != n.getNode(2).getNode(0).get(2)){
+		if((null != n.getNode(2).getNode(0).get(2))&&
+				("NewArrayExpression" != n.getNode(2).getNode(0).getNode(2).getName())){
 			ccDeclaration declarationStatement = new ccDeclaration(n);
 	        setInstanceVariables.add(currentClass.get_Name() + "::" + " " + declarationStatement.publish() + "\n");
 		}

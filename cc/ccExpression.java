@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import xtc.tree.GNode;
 import xtc.tree.Visitor;
@@ -22,7 +22,7 @@ public class ccExpression extends Visitor{
 	}
 	
 	public String publish(){
-		return line;
+		return line + ";";
 	}
 
 }
