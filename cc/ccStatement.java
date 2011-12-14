@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -54,13 +54,10 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitConditionalStatement(GNode n){
-		System.out.println(n.size());
-		line = "if("+new ccStatement((GNode)n.get(0)).publish()+")\n";
+		line += "if("+new ccStatement((GNode)n.get(0)).publish()+")\n";
 		dispatch(n.getNode(1));
-		if(n.size()==3){
-			line += "\n else\n";
-			dispatch(n.getNode(2));
-		}
+		line += "\n else ";
+		dispatch(n.getNode(2));
 		System.out.println(line);
 	}
 	public void visitForStatement(GNode n){
@@ -96,6 +93,16 @@ public class ccStatement extends Visitor{
 	public void visitRelationalExpression(GNode n){
 		visit(n);
 	}
+	public void visitBitwiseOrExpression(GNode n){
+		dispatch(n.getNode(0));
+		line+="|";
+		dispatch(n.getNode(1));
+	}
+	public void visitBitwiseAndExpression(GNode n){
+		dispatch(n.getNode(0));
+		line+=" & ";
+		dispatch(n.getNode(1));
+	}
 	public void visitExpressionStatement(GNode n){
 		visit(n);
 		line+=";";
@@ -106,7 +113,9 @@ public class ccStatement extends Visitor{
 	
 	public void visitSelectionExpression(GNode n){
 		visit(n);
-		line+=";";
+	}
+	public void visitThisExpression(GNode n){
+		line+="this->";
 	}
 	public void visitPrimaryIdentifier(GNode n){
 		line+=(String) n.get(0)+" ";		
