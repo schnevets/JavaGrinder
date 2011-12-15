@@ -34,7 +34,7 @@ public class vClassConstructor {
 		try {
 			//FileWriter writee = new FileWriter(file);
 			//BufferedWriter writer = new BufferedWriter(writee);
-			writer.write(parent.classname + "(");
+			writer.write("__" + parent.classname + "(");
 			if (parameters == null){
 				writer.write(");\r");
 			}

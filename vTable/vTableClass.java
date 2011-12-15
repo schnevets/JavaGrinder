@@ -1,4 +1,4 @@
-package oop.JavaGrinder.vTable;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -235,6 +235,15 @@ public class vTableClass {
 		vMethodLayout.add(currentmethod);
 	}
 	
+	public boolean checkStaticPrivate(){
+		if(currentmethod.modifier.contains("static") || currentmethod.modifier.contains("private")){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
 	public void setMatching(){
 		if(currentlayout != null && currentmethod != null && currentaddress != null){
 			currentmethod.setMatching(currentlayout, currentaddress);
@@ -357,10 +366,22 @@ public class vTableClass {
 			//writer.close();
 			//the constructors
 			//writer.write("__" + classname + "();\r\r");  the basic constructor, no arguments
+			if(vClassConstructors.isEmpty()){
+				vClassConstructor noargs = new vClassConstructor(this);
+				vClassConstructors.add(noargs);
+			}
 			Iterator<vClassConstructor> constructorIterate = vClassConstructors.iterator();
+			boolean noargcheck = false;
 			while(constructorIterate.hasNext()){
 				vClassConstructor constructor = constructorIterate.next();
+				if(constructor.parameters == null){
+					noargcheck = true;
+				}
 				constructor.writeFile(writer);
+			}
+			if(noargcheck == false){
+				vClassConstructor noargs = new vClassConstructor(this);
+				noargs.writeFile(writer);
 			}
 			
 			Iterator<vTableMethodLayoutLine> methodIterate = vMethodLayout.iterator();
