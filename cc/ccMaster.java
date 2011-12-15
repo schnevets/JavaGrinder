@@ -128,6 +128,21 @@ public class ccMaster extends Visitor {
 				out.write("}\n");
 			}
 			
+			String qualifiedPackageName = "";
+			for(int q = 0; q < packageNumber; q++){
+				qualifiedPackageName += classList.get(i).getPackage().get(q) + ".";
+			}
+			
+			//__class
+			out.write("Class " + classList.get(i).get_Name()+ "::__class() {\n" +
+		        "static Class k = \n" +
+		        "  new __Class(__rt::literal(\""+ qualifiedPackageName + classList.get(i).getName() + "\"), __rt::null());\n" +
+		        "  return k;\n" +
+		      	"}\n");
+			
+			//__vtable
+			out.write(classList.get(i).get_Name() + "_VT" + " " + classList.get(i).get_Name() + "::__vtable;\n");
+			
 			//namespace brackets
 			for(int q = 1; q < packageNumber; q++){
 				out.write("}\n");
