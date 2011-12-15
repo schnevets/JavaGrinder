@@ -11,6 +11,7 @@ public class ccClass {
 	private ArrayList<ccMethod> methods;
 	private HashMap<String, String> fields;
 	private ArrayList<String> packageNames;
+	private boolean constructorAdded;
 	
 	public ccClass(String clName, String clAccess){
 		name = clName;
@@ -24,6 +25,10 @@ public class ccClass {
 		isStatic = clIsStatic;
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
+		ccConstructor emptyCon = new ccConstructor(this.get_Name(), "public", new String[0], new String[0], this);
+		emptyCon.setBlock(new ccManualBlock());
+		constructors.add(emptyCon);
+		constructorAdded = false;
 		fields = new HashMap<String, String>();
 		packageNames = new ArrayList<String>();
 	}
@@ -34,6 +39,10 @@ public class ccClass {
 	}
 	/** Adds constructor to class's list of constructors */
 	public void addConstructor(ccConstructor constructor){
+		if(!constructorAdded){
+			constructors.remove(0);
+			constructorAdded = true;
+		}
 		constructors.add(constructor);
 	}
 	
@@ -130,6 +139,7 @@ public class ccClass {
 	}
 	
 	public String toString(){
+
 		String s = access + " class Name:\"" + name + "\" Static:" + isStatic + " Constructors:";
 		if(constructors.size() > 0){
 			for(int i = 0; i < constructors.size(); i++){

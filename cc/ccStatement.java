@@ -27,10 +27,10 @@ public class ccStatement extends Visitor{
 	}
 	public void visitCallExpression(GNode n){
 		if(n.getString(2).contains("print")){
-			line+="cout << ";
+			line+="std::cout << ";
 			dispatch(n.getGeneric(3));
 			if(n.getString(2).equals("println")){
-				line+=" << endl";
+				line+=" << std::endl";
 			}
 		}
 		else	

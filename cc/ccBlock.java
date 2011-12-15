@@ -23,6 +23,7 @@ class ccBlock extends Visitor{
 	
 	public ccBlock(){
 		localVariableNames = new LinkedList<String>();
+		blockLines = new LinkedList<String>();
 	}
 
 	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames) {
@@ -92,6 +93,10 @@ class ccBlock extends Visitor{
 		
 	public LinkedList<String> getLocalVariables(){
 		return localVariableNames;
+	}
+	
+	public void addLine(String s){
+		blockLines.add(s);
 	}
 	
 	public LinkedList<String> publish() {

@@ -76,15 +76,24 @@ public class ccMethod {
 	
 	public String publishDeclaration(){
 		String decl = "";
-		decl = access + ": " + ccHelper.convertType(returnType) + " " + parentClass.get_Name() + "::" + name  + "(";
+		if((isStatic||access.matches("private|protected"))){
+			decl = access + ": "; 
+		}
+		if(isStatic){ 
+			decl += "static ";
+		}
+			decl +=	ccHelper.convertType(returnType) + " "; 
+		if(!(isStatic||access.matches("private"))){
+			decl += parentClass.get_Name() + "::";
+		}
+		decl += name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
-			decl += parameterType[i] + " " + parameterName[i];
+			if(!(isStatic||access.matches("private")&&(i==0))){
+				decl += parameterType[i] + " " + parameterName[i];	
+			}
 		}
 		decl += ")";
-		if(isStatic){
-			decl += " const";
-		}
 		return decl;
 	}
 	

@@ -2,6 +2,7 @@ package oop.JavaGrinder.cc;
 
 public class ccMainMethod extends ccMethod {
 	
+	
 	public ccMainMethod(ccClass mClass){
 		super("main", mClass);
 	}

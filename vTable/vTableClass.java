@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.vTable;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -100,7 +100,8 @@ public class vTableClass {
 				if(currentaddress.methodname.equals("__delete")){
 					currentmethod = methoditerate.next();
 					//currentlayout.setReferenceType(this.classname);
-					currentmethod.setReferenceType(classname);
+					currentmethod.setReferenceType("__" + classname + "*");
+					currentlayout.setReferenceType("__" + classname + "*");
 					vMethodLayout.add(currentmethod);
 				}
 				vTableLayout.add(currentlayout);
@@ -340,6 +341,9 @@ public class vTableClass {
 			}
 			
 			forwarddeclarations.writefile(writer);
+			//using statements
+			writer.write("using namespace java::lang;\r\r");
+			
 			writer.write("struct " + "__" + classname + "{ \r");
 			writer.write("__" + classname + "_VT*" + " __vptr;\r");
 			
@@ -367,7 +371,7 @@ public class vTableClass {
 			//writer = new BufferedWriter(writee);
 			writer.write("\r");
 			writer.write("static Class __class(); \r\r");
-			writer.write("static " + "__" + classname +"_VT _vtable;\r");
+			writer.write("static " + "__" + classname +"_VT __vtable;\r");
 			writer.write("};\r\r");
 			
 			writer.write("struct __" + classname + "_VT { \r");

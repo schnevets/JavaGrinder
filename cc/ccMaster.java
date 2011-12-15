@@ -69,25 +69,13 @@ public class ccMaster extends Visitor {
 			
 			//includes
 			for(int i=0; i < classList.size(); i++){
-				out.write("#include \"" + classList.get(i).getName() + ".cc\"\n");
+				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			}
-
-			//namespaces
-			int packageNumber = classList.get(0).getPackage().size();
-			for(int q = 0; q < packageNumber; q++){
-				out.write("namespace " + classList.get(0).getPackage().get(q)+ "{\n");
-			}
-
 			
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){;
 				out.write(blockLines.remove(0));
-			}
-			
-			//namespace brackets
-			for(int q = 0; q < packageNumber; q++){
-				out.write("}\n");
 			}
 			
 			out.write("}\n");
@@ -200,7 +188,6 @@ public class ccMaster extends Visitor {
 			
 			public void visitFormalParameter(GNode n){
 				parameterNames.add(n.getString(3));
-				System.out.println(n.getString(3));
 			}
 			public void visitBlock (GNode n){
 				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames);

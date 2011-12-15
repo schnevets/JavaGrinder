@@ -41,7 +41,7 @@ public class ccConstructor {
 			if(i != 0) decl += ", ";
 			decl += parameterType[i] + " " + parameterName[i];
 		}
-		decl += ")";
+		decl += ") : __vptr(&__vtable)";
 		return decl;
 	}
 
