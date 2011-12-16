@@ -134,21 +134,21 @@ public class hMaster {
 	
 	public void hardIncludeJavaLangMethod(vTableClass javaobject){
 		javaobject.newMethodLayout();
-		javaobject.appendMethod("Modifier", "static");
+		//javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "__delete");
 		javaobject.appendMethod("ReturnType", "void");
 		javaobject.appendMethod("ReferenceType", "Object*");
 		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
-		javaobject.appendMethod("Modifier", "static");
+		//javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "hashCode");
 		javaobject.appendMethod("ReturnType", "int32_t");
 		javaobject.appendMethod("ReferenceType", "Object");
 		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
-		javaobject.appendMethod("Modifier", "static");
+		//javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "equals");
 		javaobject.appendMethod("ReturnType", "bool");
 		javaobject.appendMethod("ReferenceType", "Object");
@@ -156,14 +156,14 @@ public class hMaster {
 		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
-		javaobject.appendMethod("Modifier", "static");
+		//javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "getClass");
 		javaobject.appendMethod("ReturnType", "Class");
 		javaobject.appendMethod("ReferenceType", "Object");
 		javaobject.appendMethod("ObjectVisiblity", "public");
 		javaobject.addMethod();
 		javaobject.newMethodLayout();
-		javaobject.appendMethod("Modifier", "static");
+		//javaobject.appendMethod("Modifier", "static");
 		javaobject.appendMethod("MethodName", "toString");
 		javaobject.appendMethod("ReturnType", "String");
 		javaobject.appendMethod("ReferenceType", "Object");
@@ -493,9 +493,10 @@ public class hMaster {
 				else if(operation.equals("Method")){ //&& 
 					//System.out.println("method for " + returnable);
 					currentclass.appendMethod("Modifier",returnable);
-					if(returnable.equals("private")){
-						currentclass.currentconstructor.setVisibility("private");
-					}
+//					if(returnable.equals("private")){
+//						currentclass.currentconstructor.setVisibility("private");
+//					}
+					
 				}
 				visit(n);
 			}

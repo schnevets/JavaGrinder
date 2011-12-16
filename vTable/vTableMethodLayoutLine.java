@@ -15,6 +15,7 @@ public class vTableMethodLayoutLine {
 	String vTableLine;
 	String visibility;
 	boolean staticcheck;
+	boolean finalcheck;
 	boolean overloaded;
 	String namemanglename;
 	
@@ -33,6 +34,7 @@ public class vTableMethodLayoutLine {
 		referencetype = "";
 		visibility = "protected";
 		staticcheck = false;
+		finalcheck = false;
 	}
 	
 	public void setModifer(String modifiable){
@@ -41,6 +43,9 @@ public class vTableMethodLayoutLine {
 //		}
 		if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
 			visibility = modifiable;
+		}
+		else if(modifiable.equals("final")){
+			finalcheck = true;
 		}
 		else{  //most likely static
 			if(modifiable.equals("static")){
@@ -105,11 +110,11 @@ public class vTableMethodLayoutLine {
 	*/
 	public void writeFile(BufferedWriter writer){
 		if(overloaded == true){
-			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "_" + 
+			vTableLine = "static " + returntype + " " + methodname + "_" +    //removed modifier inclusion for now
 			parameters.replace(",", "_") + "(" + referencetype;
 		}
 		else{
-			vTableLine = "static " + modifier + " " + returntype + " " + methodname + "(" + referencetype;
+			vTableLine = "static " + returntype + " " + methodname + "(" + referencetype;
 		}
 		
 		if (parametercount > 0){

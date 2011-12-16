@@ -153,16 +153,25 @@ public class vTableClass {
 				while(true){
 					vTableMethodLayoutLine scanline = vMethodLayout.get(index);
 					if(scanline.methodname.equals(currentmethod.methodname) && scanline.parameters.equals(currentmethod.parameters)){
-						vMethodLayout.remove(index);
-						vTableLayout.remove(index + 1);
-						vTableAddress.remove(index + 1);
-						override = true;
-						break;
+						if(scanline.finalcheck == true){
+							throw new Exception(currentmethod.methodname + ":Invalid Override, Super Method is final");
+						}
+						else{
+							vMethodLayout.remove(index);
+							vTableLayout.remove(index + 1);
+							vTableAddress.remove(index + 1);
+							override = true;
+							break;
+						}
 					}
 					index++;
 				}
 		}
 		catch(Exception e){
+			if(e.getMessage().contains("Invalid Override")){
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
 			//nothing doin, intentional exception for when an index out of bounds error occurs (meaning no override found)
 		}
 	}
@@ -261,7 +270,7 @@ public class vTableClass {
 		else if(command.equals("Modifier")){
 			//System.out.println("method for " + currentmethod.methodname + " set to " + arg);
 			currentmethod.setModifer(arg);
-			currentmethod.setVisiblity(arg);
+			//currentmethod.setVisiblity(arg);
 		}
 		else if(command.equals("ReturnType")){
 			currentmethod.setReturnType(arg);
