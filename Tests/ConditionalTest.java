@@ -22,4 +22,8 @@ public class ConditionalTest {
 		}
 	}
 	
+	public static void main(){
+		ConditionalTest gentleman = new ConditionalTest();
+	}
+	
 }

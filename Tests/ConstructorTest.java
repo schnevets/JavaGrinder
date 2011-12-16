@@ -8,5 +8,9 @@ public class ConstructorTest {
 	public ConstructorTest(){
 		
 	}
+	
+	public static void main(){
+		ConstructorTest gentleman = new ConstructorTest();
+	}
 
 }

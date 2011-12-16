@@ -20,4 +20,8 @@ public class PrimitiveTest {
 		boolean bo = true;
 	}
 	
+	public static void main(){
+		
+	}
+	
 }

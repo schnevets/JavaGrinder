@@ -21,4 +21,9 @@ public class ParameterReturnTest {
 		return i;
 	}
 	
+	public static void main(){
+		ParameterReturnTest gentleman = new ParameterReturnTest();
+		gentleman.takeInts(1, 2);
+	}
+	
 }

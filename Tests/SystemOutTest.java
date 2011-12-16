@@ -13,4 +13,9 @@ public class SystemOutTest {
 		System.out.println(s);
 	}
 	
+	public static void main(){
+		SystemOutTest gentleman = new SystemOutTest();
+		gentleman.printThis("Cheerio!");
+	}
+	
 }

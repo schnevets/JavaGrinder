@@ -32,4 +32,12 @@ public class VariableTest {
 		final int q = i;
 	}
 	
+	public static void main(){
+		VariableTest gentleman = new VariableTest(5);
+		System.out.println(gentleman.getInstanceVariable());
+		System.out.println(gentleman.getStaticVariable());
+		System.out.println(gentleman.setVariable(2));
+		gentleman.setFinalVariable(i);
+	}
+	
 }

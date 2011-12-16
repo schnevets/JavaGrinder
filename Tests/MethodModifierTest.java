@@ -32,5 +32,13 @@ public class MethodModifierTest {
 		
 	}
 	
+	public static void main(){
+		MethodModifierTest.staticMethod();
+		MethodModifierTest gentleman = new MethodModifierTest();
+		gentleman.publicMethod();
+		gentleman.privateMethod();
+		gentleman.protectedMethod();
+		gentleman.finalMethod();
+	}
 
 }
