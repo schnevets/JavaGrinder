@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccBlock;
 import xtc.tree.GNode;
@@ -157,7 +157,7 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitNewClassExpression(GNode n){
-		line+= "__";
+		line+= "new __";
 		visit(n);
 	}
 	
