@@ -40,7 +40,7 @@ public class ccStatement extends Visitor{
 	public void visitMultiplicativeExpression(GNode n){
 		visit(n);
 	}
-
+	
 	public void visitIntegerLiteral(GNode n){
 		line+=(String) n.get(0);
 	}
@@ -132,6 +132,10 @@ public class ccStatement extends Visitor{
 		else{
 			line+=(String) n.get(0)+" ";
 		}
+	}
+	
+	public void visitNewClassExpression(GNode n){
+		line+= "new __" + n.getNode(2).getString(0) + "()";
 	}
 	
 	public  String publish() {
