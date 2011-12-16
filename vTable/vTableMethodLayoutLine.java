@@ -36,10 +36,10 @@ public class vTableMethodLayoutLine {
 	}
 	
 	public void setModifer(String modifiable){
-		if(modifiable.equals("final")){
-			modifier = "const";
-		}
-		else if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
+//		if(modifiable.equals("final")){
+//			modifier = "const";
+//		}
+		if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
 			visibility = modifiable;
 		}
 		else{  //most likely static
