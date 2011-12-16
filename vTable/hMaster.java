@@ -490,11 +490,12 @@ public class hMaster {
 				else if(operation.equals("Constructor") && returnable.equals("final")){
 					dataLayout = dataLayout + "const" + " ";
 				}
-				else if(operation.equals("Constructor") && returnable.equals("private")){
-					currentclass.currentconstructor.setVisibility("private");
-				}
-				else if(operation.equals("Method")){
+				else if(operation.equals("Method")){ //&& 
+					//System.out.println("method for " + returnable);
 					currentclass.appendMethod("Modifier",returnable);
+					if(returnable.equals("private")){
+						currentclass.currentconstructor.setVisibility("private");
+					}
 				}
 				visit(n);
 			}

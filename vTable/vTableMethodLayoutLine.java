@@ -40,6 +40,9 @@ public class vTableMethodLayoutLine {
 		else if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
 			visibility = modifiable;
 		}
+		else{
+			modifier = modifiable;
+		}
 		//modifier = modifiable;
 	}
 	

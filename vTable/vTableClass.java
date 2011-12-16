@@ -96,7 +96,7 @@ public class vTableClass {
 			currentaddress = addressiterate.next();
 			if(currentaddress.methodname.equals("__isa") || currentaddress.methodname.equals("__delete")){
 				currentaddress.setClassName(classname);
-				System.out.println("copying specialmethod " + currentaddress.methodname);
+				//System.out.println("copying specialmethod " + currentaddress.methodname);
 				if(currentaddress.methodname.equals("__delete")){
 					currentmethod = methoditerate.next();
 					//currentlayout.setReferenceType(this.classname);
@@ -236,7 +236,9 @@ public class vTableClass {
 	}
 	
 	public boolean checkStaticPrivate(){
-		if(currentmethod.modifier.contains("static") || currentmethod.modifier.contains("private")){
+		//System.out.println("checking static private of " + currentmethod.methodname);
+		//System.out.println(currentmethod.methodname + " is " + currentmethod.modifier);
+		if(currentmethod.modifier.contains("static") || currentmethod.visibility.contains("private")){
 			return true;
 		}
 		else{
@@ -257,6 +259,7 @@ public class vTableClass {
 			currentmethod.setReferenceType(arg);
 		}
 		else if(command.equals("Modifier")){
+			//System.out.println("method for " + currentmethod.methodname + " set to " + arg);
 			currentmethod.setModifer(arg);
 			currentmethod.setVisiblity(arg);
 		}
