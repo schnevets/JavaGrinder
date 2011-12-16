@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +23,7 @@ public class ccMaster extends Visitor {
 	
 	private ccClass currentClass;
 	private int classCounter;
-	private ccMainMethod mainMethod;
+	private LinkedList<ccMainMethod> mainMethodList;
 	private LinkedList<ccClass> classList;
 	private LinkedList<String> modifierList;
 	private LinkedList<String> setInstanceVariables;
@@ -42,16 +42,20 @@ public class ccMaster extends Visitor {
 		mangleNames = mangleList;
 		directory = dir;
 		classList = new LinkedList<ccClass>();
+		mainMethodList = new LinkedList<ccMainMethod>();
 		classCounter = -1;
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
-			try{
-				this.publishToFiles();
-			} catch (IOException e){
-				e.printStackTrace();
-			}
+		}
+		for(ccClass c : classList){
+			System.out.println(c.getName());
+		}
+		try{
+			this.publishToFiles();
+		} catch (IOException e){
+			e.printStackTrace();
 		}
 	}
 	/**
@@ -64,15 +68,24 @@ public class ccMaster extends Visitor {
 		File file;
 		FileWriter fw;
 		BufferedWriter out;
-		if(mainMethod!=null){
-			file = new File(directory.getAbsolutePath() + "/main_" + mainMethod.getParentClass() + ".cc");
+		for(ccMainMethod mainMethod : mainMethodList){
+			file = new File(directory.getAbsolutePath() + "/main_" + mainMethod.getParentClass().getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			
 			//includes
 			for(int i=0; i < classList.size(); i++){
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
+				System.out.println(classList.get(i).getName());	
 			}
+
+			//usingNameSpace
+			String usingNameSpace = "using namespace ";
+			for(int i = 0; i<mainMethod.getParentClass().getPackage().size(); i++){
+				if(i>0){usingNameSpace += "::";}
+				usingNameSpace += mainMethod.getParentClass().getPackage().get(i);
+			}
+			out.write(usingNameSpace + ";\n");
 			
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
@@ -82,7 +95,6 @@ public class ccMaster extends Visitor {
 			
 			out.write("}\n");
 			out.close();
-			mainMethod = null;
 		}
 		
 		
@@ -155,8 +167,8 @@ public class ccMaster extends Visitor {
 		}
 	}
 	
-	public ccMainMethod getMainMethod(){
-		return mainMethod;
+	public LinkedList<ccMainMethod> getMainMethodList(){
+		return mainMethodList;
 	}
 	
 	public LinkedList<ccClass> getClassList(){
@@ -196,7 +208,7 @@ public class ccMaster extends Visitor {
 				String name = (String)n.getString(3);
 				visit(n);
 				if(name.matches("main")){
-					mainMethod.setBlock(latestBlock);
+					mainMethodList.getLast().setBlock(latestBlock);
 				}
 				else{
 					currentClass.getMethodAtIndex(methodCounter).setBlock(latestBlock);
@@ -312,7 +324,7 @@ public class ccMaster extends Visitor {
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		if(name.matches("main")){
-			mainMethod = new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic);
+			mainMethodList.add(new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic));
 		}
 		else{
 			ccMethod newMethod = new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic);

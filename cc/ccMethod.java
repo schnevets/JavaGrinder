@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -93,14 +93,14 @@ public class ccMethod {
 		return true;
 	}
 	
-	public String getParentClass(){
-		return parentClass.getName();
+	public ccClass getParentClass(){
+		return parentClass;
 	}
 	
 	public String publishDeclaration(){
 		String decl = "";
 		if((isStatic||access.matches("private|protected"))){
-			decl = access + ": "; 
+		//	decl = access + ": "; 
 		}
 		if(isStatic){ 
 			decl += "static ";
