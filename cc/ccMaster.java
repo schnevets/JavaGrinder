@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,6 +22,7 @@ import xtc.tree.Visitor;
 public class ccMaster extends Visitor {
 	
 	private ccClass currentClass;
+	private int classCounter;
 	private ccMainMethod mainMethod;
 	private LinkedList<ccClass> classList;
 	private LinkedList<String> modifierList;
@@ -40,8 +41,9 @@ public class ccMaster extends Visitor {
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
+		classList = new LinkedList<ccClass>();
+		classCounter = -1;
 		while (iterate.hasNext()){
-			classList = new LinkedList<ccClass>();
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
@@ -72,15 +74,6 @@ public class ccMaster extends Visitor {
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			}
 			
-			//namespace
-			int packageSize = classList.get(0).getPackage().size();
-			String usingNameSpace = "using namespace ";
-			for(int q = 0; q < packageSize; q++){
-				if(q>0){usingNameSpace += "::";}
-				usingNameSpace += classList.get(0).getPackage().get(q);
-			}
-			out.write(usingNameSpace + ";\n");
-				
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){;
@@ -93,7 +86,7 @@ public class ccMaster extends Visitor {
 		}
 		
 		
-		for(int i=0; i < classList.size(); i++){
+		for(int i=classCounter; i < classList.size(); i++){
 			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
@@ -105,8 +98,8 @@ public class ccMaster extends Visitor {
 			out.write("#include \"ptr.h\"\n");
 			
 			//namespaces
-			int packageSize = classList.get(i).getPackage().size();
-			for(int q = 0; q < packageSize; q++){
+			int packageNumber = classList.get(i).getPackage().size();
+			for(int q = 0; q < packageNumber; q++){
 				out.write("namespace " + classList.get(i).getPackage().get(q)+ "{\n");
 			}
 			
@@ -138,7 +131,7 @@ public class ccMaster extends Visitor {
 			}
 			
 			String qualifiedPackageName = "";
-			for(int q = 0; q < packageSize; q++){
+			for(int q = 0; q < packageNumber; q++){
 				qualifiedPackageName += classList.get(i).getPackage().get(q) + ".";
 			}
 			
@@ -153,7 +146,7 @@ public class ccMaster extends Visitor {
 			out.write(classList.get(i).get_Name() + "_VT" + " " + classList.get(i).get_Name() + "::__vtable;\n");
 			
 			//namespace brackets
-			for(int q = 1; q < packageSize; q++){
+			for(int q = 1; q < packageNumber; q++){
 				out.write("}\n");
 			}
 			
@@ -180,6 +173,7 @@ public class ccMaster extends Visitor {
 			private LinkedList<String> parameterNames;
 			
 			public void visitClassDeclaration(GNode n){
+				classCounter++;
 				String name = (String)n.getString(1);
 				for(int i=0; i < classList.size(); i++){
 					if(name == classList.get(i).getName()){
@@ -214,7 +208,7 @@ public class ccMaster extends Visitor {
 				parameterNames.add(n.getString(3));
 			}
 			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames);
+				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList);
 			}
 			
 			public void addDefaultMethods(ccClass clas){
@@ -321,7 +315,13 @@ public class ccMaster extends Visitor {
 			mainMethod = new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic);
 		}
 		else{
-			currentClass.addMethod(new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic));
+			ccMethod newMethod = new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic);
+			Iterator manIterate = mangleNames.iterator();
+			while (manIterate.hasNext()){
+				String mangleTest = currentClass.getName() + "^" + name;
+				if(manIterate.next().toString().contains(mangleTest))	newMethod.mangleName();
+			}
+			currentClass.addMethod(newMethod);
 		}
 	}
 	public void visitModifier(GNode n){

@@ -110,7 +110,7 @@ public class vTableMethodLayoutLine {
 	*/
 	public void writeFile(BufferedWriter writer){
 		if(overloaded == true){
-			vTableLine = "static " + returntype + " " + methodname +  //removed modifier inclusion for now
+			vTableLine = "static " + returntype + " " + methodname + "_" +    //removed modifier inclusion for now
 			parameters.replace(",", "_") + "(" + referencetype;
 		}
 		else{

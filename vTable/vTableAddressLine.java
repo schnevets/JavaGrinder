@@ -74,7 +74,7 @@ public class vTableAddressLine{
 		}
 		else{
 			if(overloaded == true){
-				vTableLine = ", \r" + methodname + matchingmethod.parameters.replace(",", "_") + "(";
+				vTableLine = ", \r" + methodname + "_" + matchingmethod.parameters.replace(",", "_") + "(";
 			}
 			else{
 				vTableLine = ", \r" + methodname + "(";

@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 /*
@@ -20,16 +20,18 @@ class ccBlock extends Visitor{
 	public LinkedList<String> blockLines;
 	private HashMap<String, String> variables;
 	private LinkedList<String> localVariableNames;
+	private LinkedList<ccClass> classList;
 	
 	public ccBlock(){
 		localVariableNames = new LinkedList<String>();
 		blockLines = new LinkedList<String>();
 	}
 
-	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames) {
+	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes) {
 		blockLines = new LinkedList<String>();
 		localVariableNames = new LinkedList<String>();
 		localVariableNames.addAll(parameterNames);
+		classList = classes;
 		variables = var;
 		visit(n);
 	}

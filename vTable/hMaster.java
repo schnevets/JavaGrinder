@@ -227,7 +227,6 @@ public class hMaster {
 					Iterator classiterate = classy.overloadedmethods.iterator();
 					while(classiterate.hasNext()){
 						overloads.add(classy.classname + "^" + (String)classiterate.next());
-						//classname^generalmethodname
 					}
 					classy.resolveOverloads();
 					//System.out.println("printing the class " + classy.classname);

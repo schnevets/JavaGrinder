@@ -121,7 +121,7 @@ public class vTableLayoutLine{
 		}
 		else{
 			if(overloaded == true){
-				vTableLine = vTableLine + "(*" + methodname + parameters.replace(",", "_") + ") ";
+				vTableLine = vTableLine + "(*" + methodname + "_" + parameters.replace(",", "_") + ") ";
 			}
 			else{
 				vTableLine = vTableLine + "(*" + methodname + ") ";

@@ -1,11 +1,14 @@
-package oop.JavaGrinder.cc;
+package oop;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import xtc.tree.GNode;
 
 public class ccMethod {
 	private String name;
+	private final String originalName;
+	private boolean nameMangled;
 	private final ccClass parentClass;
 	private final String access;
 	private final String returnType;
@@ -16,7 +19,7 @@ public class ccMethod {
 	
 	// The first constructor only makes dummy methods, and will not actually be used
 	public ccMethod(String mName, ccClass mClass){
-		name = mName;
+		originalName = mName;
 		parentClass = mClass;
 		access = "";
 		returnType = "";
@@ -26,6 +29,8 @@ public class ccMethod {
 	}
 	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName){
 		name = mName;
+		originalName = mName;
+		nameMangled = false;
 		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
@@ -41,6 +46,8 @@ public class ccMethod {
 	}
 	public ccMethod(String mName, ccClass mClass, String mAccess, String mReturnType, String[] mparameterType, String[] mparameterName, boolean mIsStatic){
 		name = mName;
+		originalName = mName;
+		nameMangled = false;
 		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
@@ -63,15 +70,27 @@ public class ccMethod {
 		parameterType[0] = "__" + parameterType[0] + "*";
 	}
 	
+	// name_param1_param2_etc
 	public void mangleName(){
-		name = parentClass + "__" + name;
-		for (int i = 0; i < parameterType.length; i++){
-			name += "__" + parameterType[i];
+		if(!nameMangled){
+			for (int i = 1; i < parameterType.length; i++){
+				name += "_" + parameterType[i];
+			}
+			nameMangled = true;
 		}
 	}
 	
 	public String getName(){
 		return name;
+	}
+	
+	public boolean match(String mName, String[] mparameterType){
+		if(mName != originalName)								return false;
+		if((mparameterType.length + 1) != parameterType.length)	return false;
+		for(int i=0; i< mparameterType.length; i++){
+			if(mparameterType[i] != parameterType[i+1])			return false;
+		}
+		return true;
 	}
 	
 	public String getParentClass(){
@@ -81,7 +100,7 @@ public class ccMethod {
 	public String publishDeclaration(){
 		String decl = "";
 		if((isStatic||access.matches("private|protected"))){
-			//decl = access + ": "; 
+			decl = access + ": "; 
 		}
 		if(isStatic){ 
 			decl += "static ";

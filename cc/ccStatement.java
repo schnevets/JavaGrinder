@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import oop.ccBlock;
 import xtc.tree.GNode;
@@ -115,16 +115,7 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitArguments(GNode n){
-		line += "(";
-		int i = 0;
-		for (Object o : n){
-			if(i > 0){line += ", ";}
-			if (o instanceof Node){
-				dispatch((Node)o);
-			}
-			i++;
-		}
-		line += ")";
+		visit(n);
 	}
 	
 	public void visitSelectionExpression(GNode n){
@@ -144,10 +135,7 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitNewClassExpression(GNode n){
-		System.out.println(line);
-		line+= "__";
-		visit(n);
-		
+		line+= "new __" + n.getNode(2).getString(0) + "()";
 	}
 	
 	public  String publish() {
@@ -160,7 +148,7 @@ public class ccStatement extends Visitor{
 				dispatch((Node)o);
 			}
 			else if(o instanceof String){
-				line+=o+"";
+				line+=o+" ";
 			}
 		}
 	}

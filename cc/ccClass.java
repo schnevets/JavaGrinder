@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,15 +83,15 @@ public class ccClass {
 		return packageNames;
 	}
 	/**
-	 * Searches for and returns method named s.
+	 * Searches for and returns method named s with parameters param[].
 	 * If the desired method is not in the list of methods, it returns a dummy method with the name "METHOD NOT FOUND".
 	 * 
 	 * @param s Name of desired method.
 	 * @return The method with name s.
 	 */
-	public ccMethod getMethod(String s){
+	public ccMethod getMethod(String s, String[] param){
 		for(int i = 0; i < methods.size(); i++){
-			if(methods.get(i).getName() == s)
+			if(methods.get(i).match(s, param))
 				return methods.get(i);
 		}
 		return new ccMethod("METHOD NOT FOUND", this);
