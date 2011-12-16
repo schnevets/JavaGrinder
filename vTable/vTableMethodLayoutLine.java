@@ -110,15 +110,23 @@ public class vTableMethodLayoutLine {
 	*/
 	public void writeFile(BufferedWriter writer){
 		if(overloaded == true){
-			vTableLine = "static " + returntype + " " + methodname + "_" +    //removed modifier inclusion for now
+			vTableLine = "static " + returntype + " " + methodname +  //removed modifier inclusion for now
 			parameters.replace(",", "_") + "(" + referencetype;
 		}
 		else{
-			vTableLine = "static " + returntype + " " + methodname + "(" + referencetype;
+			vTableLine = "static " + returntype + " " + methodname + "("; 
+			if(staticcheck == false){
+				vTableLine = vTableLine + referencetype;
+			}
 		}
 		
 		if (parametercount > 0){
-			vTableLine = vTableLine + parameters;
+			if(staticcheck == false){
+				vTableLine = vTableLine + parameters;
+			}
+			else{
+				vTableLine = vTableLine + parameters.replaceFirst(",", " \b");
+			}
 		}
 		vTableLine = vTableLine + "); \r";
 		
