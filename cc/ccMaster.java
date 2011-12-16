@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,7 +63,7 @@ public class ccMaster extends Visitor {
 		FileWriter fw;
 		BufferedWriter out;
 		if(mainMethod!=null){
-			file = new File(directory.getAbsolutePath() + "/main.cc");
+			file = new File(directory.getAbsolutePath() + "/main_" + mainMethod.getParentClass() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			

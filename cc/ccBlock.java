@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 /*
@@ -65,7 +65,6 @@ class ccBlock extends Visitor{
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");
 	}
-
 
 
 	public void visitConditionalStatement(GNode n){

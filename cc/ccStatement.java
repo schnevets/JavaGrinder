@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import oop.ccBlock;
 import xtc.tree.GNode;

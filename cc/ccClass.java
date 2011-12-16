@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class ccClass {
 		isStatic = clIsStatic;
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
-		ccConstructor emptyCon = new ccConstructor(this.get_Name(), "public", new String[0], new String[0], this);
+		ccConstructor emptyCon = new ccConstructor(this.getName(), "public", new String[0], new String[0], this);
 		emptyCon.setBlock(new ccManualBlock());
 		constructors.add(emptyCon);
 		constructorAdded = false;

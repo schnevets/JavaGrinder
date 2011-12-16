@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.LinkedList;
 
@@ -72,6 +72,10 @@ public class ccMethod {
 	
 	public String getName(){
 		return name;
+	}
+	
+	public String getParentClass(){
+		return parentClass.getName();
 	}
 	
 	public String publishDeclaration(){

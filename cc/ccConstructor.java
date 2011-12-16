@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.LinkedList;
 
@@ -36,7 +36,7 @@ public class ccConstructor {
 	
 	public String publishDeclaration(){
 		String decl = "";
-		decl = parentClass.get_Name() + "::" + name  + "(";
+		decl = parentClass.get_Name() + "::__" + name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
 			decl += parameterType[i] + " " + parameterName[i];
