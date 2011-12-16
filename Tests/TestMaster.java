@@ -1,8 +1,9 @@
-package oop;
+package oop.JavaGrinder.Tests;
 
 import java.io.File;
 import java.io.IOException;
 
+import oop.JavaGrinder;
 import oop.JavaGrinder.RequiredFileNotFoundException;
 
 
@@ -12,8 +13,8 @@ public class TestMaster {
 	String[] testArray;
 	
 	public TestMaster() {
-		String currentDir = "";
-		testArray = new String[21];
+		String currentDir = "/home/user/xtc/src/Translator/src/oop/Tests/";
+		testArray = new String[20];
 		testArray[0] = currentDir + "CompileTest.java";
 		testArray[1] = currentDir + "ConstructorTest.java";
 		testArray[2] = currentDir + "MethodDecTest.java";
@@ -28,13 +29,12 @@ public class TestMaster {
 		testArray[11] = currentDir + "ExtensionTest.java";
 		testArray[12] = currentDir + "OverrideTest.java";
 		testArray[13] = currentDir + "DependencyTest.java";
-		testArray[14] = currentDir + "GenericTest.java";
-		testArray[15] = currentDir + "CastTest.java";
-		testArray[16] = currentDir + "OverloadTest.java";
-		testArray[17] = currentDir + "NestedMethodTest.java";
-		testArray[18] = currentDir + "MultipleClassTest.java";
-		testArray[19] = currentDir + "NestedClassTest.java";
-		testArray[20] = currentDir + "ArrayTest.java";
+		testArray[14] = currentDir + "CastTest.java";
+		testArray[15] = currentDir + "OverloadTest.java";
+		testArray[16] = currentDir + "NestedMethodTest.java";
+		testArray[17] = currentDir + "MultipleClassTest.java";
+		testArray[18] = currentDir + "ArrayTest.java";
+		testArray[19] = currentDir + "LoopTest.java";
 
 		try{
 			JavaGrinder jg = new JavaGrinder(testArray);

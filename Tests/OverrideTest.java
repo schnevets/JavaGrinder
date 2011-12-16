@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /**
  *  Tests super, overriding methods, this

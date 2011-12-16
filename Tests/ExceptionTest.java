@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /**
  * Tests methods throwing exceptions, try...catch statements, printStackTrace()

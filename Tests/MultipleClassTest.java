@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /**
  * Test multiple classes in the same file

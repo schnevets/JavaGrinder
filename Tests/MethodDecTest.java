@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /** 
  * Tests for a single method

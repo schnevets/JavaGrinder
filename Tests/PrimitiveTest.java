@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /**
  * Basic test of ints, chars, bytes, longs, shorts, floats, doubles, booleans

@@ -49,9 +49,6 @@ public class ccMaster extends Visitor {
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
 		}
-		for(ccClass c : classList){
-			System.out.println(c.getName());
-		}
 		try{
 			this.publishToFiles();
 		} catch (IOException e){
@@ -76,16 +73,21 @@ public class ccMaster extends Visitor {
 			//includes
 			for(int i=0; i < classList.size(); i++){
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
-				System.out.println(classList.get(i).getName());	
 			}
 
 			//usingNameSpace
-			String usingNameSpace = "using namespace ";
-			for(int i = 0; i<mainMethod.getParentClass().getPackage().size(); i++){
-				if(i>0){usingNameSpace += "::";}
-				usingNameSpace += mainMethod.getParentClass().getPackage().get(i);
+			HashSet<String> usingNameSpaceList = new HashSet<String>();
+			for(int q = 0; q < classList.size(); q++){
+				String usingNameSpace = "using namespace ";
+				for(int i = 0; i<classList.get(q).getPackage().size(); i++){
+					if(i>0){usingNameSpace += "::";}
+					usingNameSpace += classList.get(q).getPackage().get(i);
+				}
+			usingNameSpaceList.add(usingNameSpace + ";\n");
 			}
-			out.write(usingNameSpace + ";\n");
+			for(String s : usingNameSpaceList){
+				out.write(s);
+			}
 			
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
@@ -291,7 +293,7 @@ public class ccMaster extends Visitor {
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = ccHelper.convertType(param.getNode(i).getNode(1).getNode(0).getString(0));
+			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass));
@@ -320,7 +322,7 @@ public class ccMaster extends Visitor {
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = ccHelper.convertType(param.getNode(i).getNode(1).getNode(0).getString(0));
+			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		if(name.matches("main")){

@@ -1,4 +1,4 @@
-package oop.Tests;
+package oop.JavaGrinder.Tests;
 
 /** 
  * Tests instance, method, static, final, assignment, parameter variables, ints
