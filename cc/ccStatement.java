@@ -33,8 +33,21 @@ public class ccStatement extends Visitor{
 				line+=" << std::endl";
 			}
 		}
-		else	
-			visit(n);
+		else{
+			String objectType = block.currentClass;
+			ccMethod methodInQuestion;
+			if(null != n.getNode(0) && null != n.getNode(0).getString(0)){
+				if(block.variables.containsKey(n.getNode(0).getString(0))){
+					objectType = block.variables.get(n.getNode(0).getString(0));
+				}
+			} 
+			for(int i=0; i< block.classList.size(); i++){
+				if(block.classList.get(i).getName().startsWith(objectType)){ 
+					System.out.println(block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
+				}
+			}
+		}
+		visit(n);
 	}
 	
 	public void visitMultiplicativeExpression(GNode n){
@@ -152,6 +165,37 @@ public class ccStatement extends Visitor{
 		return line;
 	}
 
+	public String[] findArgumentTypes(Node n){
+		String[] argTypes = new String[n.size()];
+		for(int i=0; i< n.size(); i++){
+			if(n.getNode(i).getName().matches("IntegerLiteral")){
+				System.out.println("int32_t");
+				argTypes[i] = "int32_t";
+			}
+			else if(n.getNode(i).getName().matches("FloatingPointLiteral")){
+				System.out.println("double");
+				argTypes[i] = "double";
+			}
+			else if(n.getNode(i).getName().matches("StringLiteral")){
+				System.out.println("String");
+				argTypes[i] = "String";
+			}
+			else if(n.getNode(i).getName().matches("BooleanLiteral")){
+				System.out.println("bool");
+				argTypes[i] = "bool";
+			}
+			else if(n.getNode(i).getName().matches("ThisExpression")){
+				System.out.println(block.currentClass);
+				argTypes[i] = block.currentClass;
+			}
+			else if(n.getNode(i).getName().matches("PrimaryIdentifier")){
+				System.out.println("!!!:" + n.getNode(i).getString(0));
+				argTypes[i] = block.variables.get(n.getNode(i).getString(0));
+			}
+		}
+		return argTypes;
+	}
+	
 	public void visit(Node n) {
 		for (Object o : n){
 			if (o instanceof Node){

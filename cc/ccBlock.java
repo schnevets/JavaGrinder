@@ -18,24 +18,26 @@ import xtc.tree.Visitor;
 class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
-	private HashMap<String, String> variables;
+	public HashMap<String, String> variables;
 	private LinkedList<String> localVariableNames;
-	private LinkedList<ccClass> classList;
+	public LinkedList<ccClass> classList;
+	public String currentClass;
 	
 	public ccBlock(){
 		localVariableNames = new LinkedList<String>();
 		blockLines = new LinkedList<String>();
 	}
 
-	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes) {
+	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes, String currentc) {
 		blockLines = new LinkedList<String>();
 		localVariableNames = new LinkedList<String>();
 		localVariableNames.addAll(parameterNames);
 		classList = classes;
+		currentClass = currentc;
 		variables = var;
 		visit(n);
 	}
-
+	
 	public ccBlock(GNode n) {
 		localVariableNames = new LinkedList<String>();
 		blockLines = new LinkedList<String>();
@@ -43,7 +45,7 @@ class ccBlock extends Visitor{
 		visit(n);
 		blockLines.add("}");
 	}
-
+	
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
@@ -62,7 +64,7 @@ class ccBlock extends Visitor{
 
 	public void visitBlock(GNode n){
 		System.out.println(n);
-		ccBlock blockStatement = new ccBlock(n);
+		ccBlock blockStatement = new ccBlock(n, variables, localVariableNames, classList, currentClass);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");

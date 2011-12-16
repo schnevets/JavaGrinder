@@ -96,6 +96,15 @@ public class ccClass {
 		}
 		return new ccMethod("METHOD NOT FOUND", this);
 	}
+	
+	public String getMethodName(String s, String[] param){
+		for(int i = 0; i < methods.size(); i++){
+			if(methods.get(i).match(s, param))
+				return methods.get(i).getName();
+		}
+		return "This is an error.";
+	}
+	
 	/**
 	 * Searches for and returns constructor named s.
 	 * If the desired constructor is not found, it returns a dummy constructor with the name "CONSTRUCTOR NOT FOUND".

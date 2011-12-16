@@ -208,7 +208,7 @@ public class ccMaster extends Visitor {
 				parameterNames.add(n.getString(3));
 			}
 			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList);
+				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName());
 			}
 			
 			public void addDefaultMethods(ccClass clas){
@@ -279,7 +279,7 @@ public class ccMaster extends Visitor {
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
+			argumentType[i] = ccHelper.convertType(param.getNode(i).getNode(1).getNode(0).getString(0));
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass));
@@ -308,7 +308,7 @@ public class ccMaster extends Visitor {
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
+			argumentType[i] = ccHelper.convertType(param.getNode(i).getNode(1).getNode(0).getString(0));
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		if(name.matches("main")){
