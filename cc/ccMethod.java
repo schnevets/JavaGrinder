@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.LinkedList;
 
@@ -81,7 +81,7 @@ public class ccMethod {
 	public String publishDeclaration(){
 		String decl = "";
 		if((isStatic||access.matches("private|protected"))){
-			decl = access + ": "; 
+			//decl = access + ": "; 
 		}
 		if(isStatic){ 
 			decl += "static ";

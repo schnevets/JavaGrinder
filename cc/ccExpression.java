@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import xtc.tree.GNode;
 import xtc.tree.Visitor;
@@ -26,6 +26,10 @@ public class ccExpression extends Visitor{
 	public void visitPostfixExpression(GNode n){
 		line = new ccStatement(n, block).publish();
 	}
+	public void visitNewClassExpression(GNode n){
+		line = "new " + new ccStatement(n, block).publish();
+	}
+	
 	
 	public String publish(){
 		return line + ";";
