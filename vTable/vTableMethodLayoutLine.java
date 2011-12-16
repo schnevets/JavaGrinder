@@ -14,6 +14,7 @@ public class vTableMethodLayoutLine {
 	int parametercount;
 	String vTableLine;
 	String visibility;
+	boolean staticcheck;
 	boolean overloaded;
 	String namemanglename;
 	
@@ -31,6 +32,7 @@ public class vTableMethodLayoutLine {
 		parameters = "";
 		referencetype = "";
 		visibility = "protected";
+		staticcheck = false;
 	}
 	
 	public void setModifer(String modifiable){
@@ -40,8 +42,13 @@ public class vTableMethodLayoutLine {
 		else if(modifiable.equals("public") || modifiable.equals("private") || modifiable.equals("protected")){
 			visibility = modifiable;
 		}
-		else{
-			modifier = modifiable;
+		else{  //most likely static
+			if(modifiable.equals("static")){
+				staticcheck = true;
+			}
+			else{
+				System.out.println("invalid modifier given");
+			}
 		}
 		//modifier = modifiable;
 	}

@@ -719,9 +719,11 @@ public class hMaster {
 					currentclass.appendTableLayout("MethodName", n.getString(3));
 					currentclass.appendTableLayout("ReferenceType", currentclass.classname);
 					visit(n);
+					
+					currentclass.addMethod();
 					boolean hasStaticPrivate = currentclass.checkStaticPrivate();
 					if(hasStaticPrivate == false){
-						currentclass.addMethod();
+						//currentclass.addMethod();
 						currentclass.addTableAddress();
 						currentclass.addTableLayout();
 					}

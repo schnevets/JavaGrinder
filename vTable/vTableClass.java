@@ -238,7 +238,7 @@ public class vTableClass {
 	public boolean checkStaticPrivate(){
 		//System.out.println("checking static private of " + currentmethod.methodname);
 		//System.out.println(currentmethod.methodname + " is " + currentmethod.modifier);
-		if(currentmethod.modifier.contains("static") || currentmethod.visibility.contains("private")){
+		if(currentmethod.staticcheck == true || currentmethod.visibility.contains("private")){
 			return true;
 		}
 		else{
