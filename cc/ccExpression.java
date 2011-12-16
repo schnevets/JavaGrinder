@@ -1,5 +1,6 @@
 package oop;
 
+import oop.ccStatement;
 import xtc.tree.GNode;
 import xtc.tree.Visitor;
 
@@ -24,6 +25,9 @@ public class ccExpression extends Visitor{
 		line = new ccStatement(n, block).publish();
 	}
 	public void visitPostfixExpression(GNode n){
+		line = new ccStatement(n, block).publish();
+	}
+	public void visitNewClassExpression(GNode n){
 		line = new ccStatement(n, block).publish();
 	}
 	

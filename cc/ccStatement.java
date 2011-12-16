@@ -115,7 +115,16 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitArguments(GNode n){
-		visit(n);
+		line += "(";
+		int i = 0;
+		for (Object o : n){
+			if(i > 0){line += ", ";}
+			if (o instanceof Node){
+				dispatch((Node)o);
+			}
+			i++;
+		}
+		line += ")";
 	}
 	
 	public void visitSelectionExpression(GNode n){
@@ -135,7 +144,8 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitNewClassExpression(GNode n){
-		line+= "new __" + n.getNode(2).getString(0) + "()";
+		line+= "__";
+		visit(n);
 	}
 	
 	public  String publish() {
@@ -148,7 +158,7 @@ public class ccStatement extends Visitor{
 				dispatch((Node)o);
 			}
 			else if(o instanceof String){
-				line+=o+" ";
+				line+=o+"";
 			}
 		}
 	}
