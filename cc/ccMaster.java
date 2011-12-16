@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -72,6 +72,15 @@ public class ccMaster extends Visitor {
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			}
 			
+			//namespace
+			int packageSize = classList.get(0).getPackage().size();
+			String usingNameSpace = "using namespace ";
+			for(int q = 0; q < packageSize; q++){
+				if(q>0){usingNameSpace += "::";}
+				usingNameSpace += classList.get(0).getPackage().get(q);
+			}
+			out.write(usingNameSpace + ";\n");
+				
 			out.write(mainMethod.publishDeclaration() + "{\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){;
@@ -96,8 +105,8 @@ public class ccMaster extends Visitor {
 			out.write("#include \"ptr.h\"\n");
 			
 			//namespaces
-			int packageNumber = classList.get(i).getPackage().size();
-			for(int q = 0; q < packageNumber; q++){
+			int packageSize = classList.get(i).getPackage().size();
+			for(int q = 0; q < packageSize; q++){
 				out.write("namespace " + classList.get(i).getPackage().get(q)+ "{\n");
 			}
 			
@@ -129,7 +138,7 @@ public class ccMaster extends Visitor {
 			}
 			
 			String qualifiedPackageName = "";
-			for(int q = 0; q < packageNumber; q++){
+			for(int q = 0; q < packageSize; q++){
 				qualifiedPackageName += classList.get(i).getPackage().get(q) + ".";
 			}
 			
@@ -144,7 +153,7 @@ public class ccMaster extends Visitor {
 			out.write(classList.get(i).get_Name() + "_VT" + " " + classList.get(i).get_Name() + "::__vtable;\n");
 			
 			//namespace brackets
-			for(int q = 1; q < packageNumber; q++){
+			for(int q = 1; q < packageSize; q++){
 				out.write("}\n");
 			}
 			
