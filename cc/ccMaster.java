@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -276,7 +276,7 @@ public class ccMaster extends Visitor {
 		currentClass.addField(name, type);
 		if((null != n.getNode(2).getNode(0).get(2))&&
 				("NewArrayExpression" != n.getNode(2).getNode(0).getNode(2).getName())){
-			ccDeclaration declarationStatement = new ccDeclaration(n);
+			ccDeclaration declarationStatement = new ccDeclaration(n, null);
 	        setInstanceVariables.add(currentClass.get_Name() + "::" + " " + declarationStatement.publish() + "\n");
 		}
 	}

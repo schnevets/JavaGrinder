@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -104,9 +104,11 @@ public class ccMethod {
 //			System.out.println("~~~2 (" + mparameterType.length + ")");
 			for(int i=0; i< mparameterType.length; i++){
 //				System.out.println("~~~3:" + i + " (" + mparameterType[i] + " - " + parameterType[i+1] + ")");
+				System.out.println(mparameterType[i]);
 				if(!mparameterType[i].contentEquals(parameterType[i+1]))	return false;
 			}
 		}
+		
 		return true;
 	}
 	

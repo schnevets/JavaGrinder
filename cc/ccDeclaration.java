@@ -1,5 +1,6 @@
-package oop;
+package oop.JavaGrinder.cc;
 
+import oop.ccStatement;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 
@@ -9,11 +10,13 @@ public class ccDeclaration {
 	private String name="";
 	private String declaration="";
 	private String value="";
+	private ccBlock block;
 	
-	public ccDeclaration(GNode n) {
+	public ccDeclaration(GNode n, ccBlock b) {
 		modifiers = extract((GNode)n.get(0));
 		types = extract((GNode)n.get(1));
 		types = new ccHelper().convertType(types);
+		block = b;
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
 //		System.out.println(this.publish());					//To be added to ccBlock
 	}
@@ -26,8 +29,14 @@ public class ccDeclaration {
 
 	private void treatDeclarator(GNode n) {
 		name=n.getString(0);
-		if(n.get(2)!=null)
-			value = new ccStatement((GNode)n.get(2)).publish();
+		if(n.get(2)!=null){
+			if(block!=null){
+				value = new ccStatement((GNode)n.get(2), block).publish();
+			}
+			else{
+				value = new ccStatement((GNode)n.get(2)).publish();
+			}
+		}
 		if(n.getNode(2).hasName("StringLiteral")){
 			value = "new __String("+n.getNode(2).getString(0)+")";
 		}

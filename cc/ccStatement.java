@@ -1,6 +1,7 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccBlock;
+import oop.ccMethod;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -65,43 +66,43 @@ public class ccStatement extends Visitor{
 			for(int i=0; i< block.classList.size(); i++){
 				if(block.classList.get(i).getName().startsWith(objectType)){ 
 //					System.out.println("  " + findArgumentTypes(n.getNode(3)).length);
-					System.out.println("  " + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
+//					System.out.println("  " + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
+					for(String s : findArgumentTypes(n.getNode(3))){
+						System.out.println(s);
+					}
 					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)));
-					System.out.println("    " + methodInQuestion.isStatic);
+//					System.out.println("    " + methodInQuestion.isStatic);
 					if(methodInQuestion.isStatic){
-						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(";
-						for(int j = 0; j < n.getNode(3).size(); j++){
-							line+= ", ";
-							visit(n.getNode(3).getNode(j));
-						}
-						line+= ")";
+						line+= __this + "." + methodInQuestion.getName() + "(" + __this;
 					}
-					else if(methodInQuestion.access.contentEquals("private")){
-						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(" + __this;
-						for(int j = 0; j < n.getNode(3).size(); j++){
-							line+= ", ";
-							visit(n.getNode(3).getNode(j));
-						}
-						line+= ")";
-					}
+//					else if(methodInQuestion.access.contentEquals("private")){
+//						line+= __this + "." + methodInQuestion.getName() + "(" + __this;
+//					}
 					else {
 						line+= __this + "->__vptr->" + methodInQuestion.getName() + "(" + __this;
-						for(int j = 0; j < n.getNode(3).size(); j++){
-							line+= ", ";
-							if(n.getNode(3).getNode(j).hasName("StringLiteral")){
-								line+="new __String("+n.getNode(3).getNode(j).getString(0)+")";
-							}
-							else{
-								visit(n.getNode(3).getNode(j));
-							}
-						}
-						line+= ")";
 					}
+					for(int j = 0; j < n.getNode(3).size(); j++){
+						line+= ", ";
+						if(n.getNode(3).getNode(j).hasName("StringLiteral")){
+							line+="new __String("+n.getNode(3).getNode(j).getString(0)+")";
+						}
+						else{
+							dispatch(n.getNode(3).getNode(j));
+						}
+					}
+					line+= ")";
 				}
 			}
 		}
 	}
-	
+	public void visitCastExpression(GNode n){
+		System.out.println(n);
+		line+="(";
+		dispatch(n.getNode(0));
+		line+=")";
+		dispatch(n.getNode(1));
+		
+	}
 	public void visitUnaryExpression(GNode n){
 		line+=n.getString(0);
 		visit(n);
@@ -259,7 +260,12 @@ public class ccStatement extends Visitor{
 //				System.out.println("  !!!:" + block.variables.get(n.getNode(i).getString(0)));
 				argTypes[i] = block.variables.get(n.getNode(i).getString(0));
 			}
+			else if(n.getNode(i).getName().matches("CastExpression")){
+				argTypes[i] = n.getNode(i).getNode(0).getNode(0).getString(0);
+				System.out.println(n.getNode(i).getNode(0).getNode(0).getString(0));
+			}
 		}
+		System.out.println(argTypes);
 		return argTypes;
 	}
 	
