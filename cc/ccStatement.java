@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import oop.ccBlock;
 import xtc.tree.GNode;
@@ -69,21 +69,21 @@ public class ccStatement extends Visitor{
 					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)));
 					System.out.println("    " + methodInQuestion.isStatic);
 					if(methodInQuestion.isStatic){
-						line+= __this + "." + methodInQuestion.getName() + "(" + __this;
+						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(";
 						for(int j = 0; j < n.getNode(3).size(); j++){
 							line+= ", ";
 							visit(n.getNode(3).getNode(j));
 						}
 						line+= ")";
 					}
-//					else if(methodInQuestion.access.contentEquals("private")){
-//						line+= __this + "." + methodInQuestion.getName() + "(" + __this;
-//						for(int j = 0; j < n.getNode(3).size(); j++){
-//							line+= ", ";
-//							visit(n.getNode(3).getNode(j));
-//						}
-//						line+= ")";
-//					}
+					else if(methodInQuestion.access.contentEquals("private")){
+						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(" + __this;
+						for(int j = 0; j < n.getNode(3).size(); j++){
+							line+= ", ";
+							visit(n.getNode(3).getNode(j));
+						}
+						line+= ")";
+					}
 					else {
 						line+= __this + "->__vptr->" + methodInQuestion.getName() + "(" + __this;
 						for(int j = 0; j < n.getNode(3).size(); j++){

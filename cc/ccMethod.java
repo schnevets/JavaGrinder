@@ -51,15 +51,21 @@ public class ccMethod {
 		parentClass = mClass;
 		access = mAccess;
 		returnType = mReturnType;
-		parameterType = new String[mparameterType.length + 1];
-		parameterType[0] = parentClass.getName();
-		parameterName = new String[mparameterName.length + 1];
-		parameterName[0] = "__this";
-		for(int i=1; i<parameterType.length; i++){
-			parameterType[i] = mparameterType[i - 1];
-			parameterName[i] = mparameterName[i - 1];
-		}
 		isStatic = mIsStatic;
+		if(isStatic){
+			parameterType = mparameterType;
+			parameterName = mparameterName;
+		}
+		else {
+			parameterType = new String[mparameterType.length + 1];
+			parameterType[0] = parentClass.getName();
+			parameterName = new String[mparameterName.length + 1];
+			parameterName[0] = "__this";
+			for(int i=1; i<parameterType.length; i++){
+				parameterType[i] = mparameterType[i - 1];
+				parameterName[i] = mparameterName[i - 1];
+			}
+		}
 	}
 	
 	
@@ -88,13 +94,18 @@ public class ccMethod {
 	}
 	
 	public boolean match(String mName, String[] mparameterType){
-		if(!mName.contentEquals(originalName))					return false;
+		if(!mName.contentEquals(originalName))								return false;
 //		System.out.println("~~~1 (" + originalName + ")");
-		if((mparameterType.length + 1) != parameterType.length)	return false;
-//		System.out.println("~~~2 (" + mparameterType.length + ")");
-		for(int i=0; i< mparameterType.length; i++){
-//			System.out.println("~~~3:" + i + " (" + mparameterType[i] + " - " + parameterType[i+1] + ")");
-			if(!mparameterType[i].contentEquals(parameterType[i+1]))			return false;
+		if(isStatic){
+			if(!Arrays.equals(parameterType, mparameterType))				return false;
+		}
+		else{
+			if((mparameterType.length + 1) != parameterType.length)			return false;
+//			System.out.println("~~~2 (" + mparameterType.length + ")");
+			for(int i=0; i< mparameterType.length; i++){
+//				System.out.println("~~~3:" + i + " (" + mparameterType[i] + " - " + parameterType[i+1] + ")");
+				if(!mparameterType[i].contentEquals(parameterType[i+1]))	return false;
+			}
 		}
 		return true;
 	}
@@ -104,18 +115,8 @@ public class ccMethod {
 	}
 	
 	public String publishDeclaration(){
-		String decl = "";
-		if((isStatic||access.matches("private|protected"))){
-		//	decl = access + ": "; 
-		}
-		if(isStatic){ 
-			decl += "static ";
-		}
-			decl +=	ccHelper.convertType(returnType) + " "; 
-		if(!(isStatic||access.matches("private"))){
-			decl += parentClass.get_Name() + "::";
-		}
-		decl += name  + "(";
+		String decl = ccHelper.convertType(returnType) + " " + 
+				parentClass.get_Name() + "::" + name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
 			if(!(isStatic&&(i==0))){
