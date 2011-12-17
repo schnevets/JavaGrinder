@@ -3,7 +3,6 @@
 	<name>JavaGrinder</name>
 	<comment></comment>
 	<projects>
-		<project>xtc</project>
 	</projects>
 	<buildSpec>
 	</buildSpec>

@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import oop.ccBlock;
 import xtc.tree.GNode;
@@ -50,18 +50,24 @@ public class ccStatement extends Visitor{
 		}
 		else{
 			String objectType = block.currentClass;
+			String __this = "__this";
 			ccMethod methodInQuestion;
 			if(null != n.getNode(0) && null != n.getNode(0).getString(0)){
 				if(block.variables.containsKey(n.getNode(0).getString(0))){
-					objectType = block.variables.get(n.getNode(0).getString(0));
+					__this = n.getNode(0).getString(0);
+					objectType = block.variables.get(__this);
+					System.out.println(objectType);
 				}
 			} 
 			for(int i=0; i< block.classList.size(); i++){
 				if(block.classList.get(i).getName().startsWith(objectType)){ 
-					System.out.println(block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
+					System.out.println("  " + findArgumentTypes(n.getNode(3)).length);
+					System.out.println("  " + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
+					line+= __this + "->__vptr->" + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))) + "(" + __this;
+					visit(n.getNode(3));
+					line+= ")";
 				}
 			}
-			visit(n);
 		}
 	}
 	
@@ -201,28 +207,25 @@ public class ccStatement extends Visitor{
 	public String[] findArgumentTypes(Node n){
 		String[] argTypes = new String[n.size()];
 		for(int i=0; i< n.size(); i++){
+			System.out.println("  visiting: " + n.getNode(i).getName());
 			if(n.getNode(i).getName().matches("IntegerLiteral")){
-				System.out.println("int32_t");
 				argTypes[i] = "int32_t";
 			}
 			else if(n.getNode(i).getName().matches("FloatingPointLiteral")){
-				System.out.println("double");
 				argTypes[i] = "double";
 			}
 			else if(n.getNode(i).getName().matches("StringLiteral")){
-				System.out.println("String");
 				argTypes[i] = "String";
 			}
 			else if(n.getNode(i).getName().matches("BooleanLiteral")){
-				System.out.println("bool");
 				argTypes[i] = "bool";
 			}
 			else if(n.getNode(i).getName().matches("ThisExpression")){
-				System.out.println(block.currentClass);
 				argTypes[i] = block.currentClass;
 			}
 			else if(n.getNode(i).getName().matches("PrimaryIdentifier")){
-				System.out.println("!!!:" + n.getNode(i).getString(0));
+				System.out.println("  !!!:" + n.getNode(i).getString(0));
+				System.out.println("  !!!:" + block.variables.get(n.getNode(i).getString(0)));
 				argTypes[i] = block.variables.get(n.getNode(i).getString(0));
 			}
 		}

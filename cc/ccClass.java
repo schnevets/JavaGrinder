@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,7 +102,7 @@ public class ccClass {
 			if(methods.get(i).match(s, param))
 				return methods.get(i).getName();
 		}
-		return "This is an error.";
+		return "This is an error.                         !!!";
 	}
 	
 	/**

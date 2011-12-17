@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 /*
@@ -63,7 +63,7 @@ class ccBlock extends Visitor{
 	}
 
 	public void visitBlock(GNode n){
-		System.out.println(n);
+//		System.out.println(n);
 		ccBlock blockStatement = new ccBlock(n, variables, localVariableNames, classList, currentClass);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
