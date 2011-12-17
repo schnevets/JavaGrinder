@@ -25,7 +25,7 @@ public class ccDeclaration {
 	 */
 
 	private void treatDeclarator(GNode n) {
-		name=(String)n.get(0);
+		name=n.getString(0);
 		if(n.get(2)!=null)
 			value = new ccStatement((GNode)n.get(2)).publish();
 		if(n.get(1)==null&&value!="")

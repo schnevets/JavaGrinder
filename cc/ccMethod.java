@@ -10,11 +10,11 @@ public class ccMethod {
 	private final String originalName;
 	private boolean nameMangled;
 	private final ccClass parentClass;
-	private final String access;
+	public final String access;
 	private final String returnType;
 	private final String[] parameterType;
 	private final String[] parameterName;
-	private final boolean isStatic;
+	public final boolean isStatic;
 	private ccBlock block;
 	
 	// The first constructor only makes dummy methods, and will not actually be used
@@ -89,9 +89,12 @@ public class ccMethod {
 	
 	public boolean match(String mName, String[] mparameterType){
 		if(!mName.contentEquals(originalName))					return false;
+//		System.out.println("~~~1 (" + originalName + ")");
 		if((mparameterType.length + 1) != parameterType.length)	return false;
+//		System.out.println("~~~2 (" + mparameterType.length + ")");
 		for(int i=0; i< mparameterType.length; i++){
-			if(mparameterType[i] != parameterType[i+1])			return false;
+//			System.out.println("~~~3:" + i + " (" + mparameterType[i] + " - " + parameterType[i+1] + ")");
+			if(!mparameterType[i].contentEquals(parameterType[i+1]))			return false;
 		}
 		return true;
 	}
