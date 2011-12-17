@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -28,6 +28,9 @@ public class ccDeclaration {
 		name=n.getString(0);
 		if(n.get(2)!=null)
 			value = new ccStatement((GNode)n.get(2)).publish();
+		if(n.getNode(2).hasName("StringLiteral")){
+			value = "new __String("+n.getNode(2).getString(0)+")";
+		}
 		if(n.get(1)==null&&value!="")
 			declaration="=";
 

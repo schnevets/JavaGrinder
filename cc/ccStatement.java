@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccBlock;
 import xtc.tree.GNode;
@@ -88,7 +88,12 @@ public class ccStatement extends Visitor{
 						line+= __this + "->__vptr->" + methodInQuestion.getName() + "(" + __this;
 						for(int j = 0; j < n.getNode(3).size(); j++){
 							line+= ", ";
-							visit(n.getNode(3).getNode(j));
+							if(n.getNode(3).getNode(j).hasName("StringLiteral")){
+								line+="new __String("+n.getNode(3).getNode(j).getString(0)+")";
+							}
+							else{
+								visit(n.getNode(3).getNode(j));
+							}
 						}
 						line+= ")";
 					}
@@ -229,7 +234,7 @@ public class ccStatement extends Visitor{
 	public  String publish() {
 		return line;
 	}
-
+	
 	public String[] findArgumentTypes(Node n){
 		String[] argTypes = new String[n.size()];
 		for(int i=0; i< n.size(); i++){
