@@ -14,11 +14,26 @@ public class ccStatement extends Visitor{
 		dispatch(n);
 	}
 	
+	
+	
 	public ccStatement(GNode n) {
 		dispatch(n);
 	}
+	
+	
+	
 	public void visitExpression(GNode n){
 		visit(n);
+	}
+	
+	public void visitType(GNode n){
+		//for arrays
+		if((n.get(1) instanceof Node)&&n.getNode(1).hasName("Dimensions")){
+			line+="__rt::Array<";
+			dispatch(n.getNode(0));
+			line+=">";
+			System.out.println(line);
+		}
 	}
 	public void visitReturnStatement(GNode n){
 		line += "return ";
@@ -46,8 +61,8 @@ public class ccStatement extends Visitor{
 					System.out.println(block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
 				}
 			}
+			visit(n);
 		}
-		visit(n);
 	}
 	
 	public void visitUnaryExpression(GNode n){
@@ -58,7 +73,13 @@ public class ccStatement extends Visitor{
 	public void visitMultiplicativeExpression(GNode n){
 		visit(n);
 	}
-	
+	public void visitSubscriptExpression(GNode n){
+		dispatch(n.getNode(0));
+		line+="[";
+		dispatch(n.getNode(1));
+		line+="]";
+		
+	}
 	public void visitIntegerLiteral(GNode n){
 		line+=(String) n.get(0);
 	}
@@ -109,7 +130,7 @@ public class ccStatement extends Visitor{
 	public void visitDeclarator(GNode n){
 		line+=n.getString(0);
 		if(n.getNode(1)==null)
-			line+="=";
+			line+="= ";
 		else
 			line+=n.getString(1);
 		dispatch(n.getGeneric(2));
@@ -151,13 +172,20 @@ public class ccStatement extends Visitor{
 	public void visitThisExpression(GNode n){
 		line+="this->";
 	}
+	public void visitNewArrayExpression(GNode n){
+		line+="new __rt::Array<";
+		dispatch(n.getNode(0));
+		line+=">[";
+		dispatch(n.getNode(1));
+		line+="]";
+	}
 	public void visitPrimaryIdentifier(GNode n){
 		if(block!=null&&!block.getLocalVariables().contains(n.get(0))){
-			line+=(String) "__this::" + n.get(0)+" ";
+			line+=(String) "__this::" + n.get(0);
 		}	
 
 		else{
-			line+=(String) n.get(0)+" ";
+			line+=(String) n.get(0);
 		}
 	}
 	
@@ -207,7 +235,12 @@ public class ccStatement extends Visitor{
 				dispatch((Node)o);
 			}
 			else if(o instanceof String){
-				line+=o+"";
+				if(((String) o).matches("=")){
+					line+=" = ";
+				}
+				else{
+					line+=o;
+				}
 			}
 		}
 	}

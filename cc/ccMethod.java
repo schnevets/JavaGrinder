@@ -61,7 +61,10 @@ public class ccMethod {
 		}
 		isStatic = mIsStatic;
 	}
-
+	
+	
+	
+	
 	public void setBlock(ccBlock blk){
 		block = blk;
 	}

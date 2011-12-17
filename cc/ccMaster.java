@@ -107,9 +107,6 @@ public class ccMaster extends Visitor {
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			
-			System.out.println(classList.get(i).getName());
-			System.out.println(classList.size());
-			
 			//includes
 			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			out.write("#include \"java_lang.h\"\n");
@@ -297,7 +294,7 @@ public class ccMaster extends Visitor {
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
+			argumentType[i] = new ccStatement(param.getNode(i).getGeneric(1)).publish();
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		currentClass.addConstructor(new ccConstructor(name, access, argumentType, argumentName, currentClass));
@@ -319,14 +316,14 @@ public class ccMaster extends Visitor {
 		modifierList.clear();
 		if(n.getNode(2).hasName("VoidType")){ /* nope, we already good */}
 		else{
-			returnType = n.getNode(2).getNode(0).getString(0);
+			returnType = new ccStatement(n.getGeneric(2)).publish();
 		}
 		
 		Node param = n.getNode(4);
 		argumentType = new String[param.size()];
 		argumentName = new String[param.size()];
 		for(int i = 0; i < param.size(); i++){
-			argumentType[i] = param.getNode(i).getNode(1).getNode(0).getString(0);
+			argumentType[i] = new ccStatement(param.getNode(i).getGeneric(1)).publish();
 			argumentName[i] = param.getNode(i).getString(3);
 		}
 		if(name.matches("main")){
