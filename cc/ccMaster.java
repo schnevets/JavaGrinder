@@ -15,9 +15,6 @@ import oop.ccMethod;
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
-//import xtc.util.Pair;
-//import xtc.util.Melon;
-//import xtc.util.Grape;
 
 public class ccMaster extends Visitor {
 	
@@ -49,11 +46,15 @@ public class ccMaster extends Visitor {
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
 		}
+		//for(ccClass c : classList){
+		//	System.out.println(c.getName());
+		//}
 		try{
 			this.publishToFiles();
 		} catch (IOException e){
 			e.printStackTrace();
 		}
+
 	}
 	/**
 	 * Printy Thingy
@@ -74,6 +75,7 @@ public class ccMaster extends Visitor {
 			for(int i=0; i < classList.size(); i++){
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			}
+			out.write("#include \"java_lang.h\"\n");
 
 			//usingNameSpace
 			HashSet<String> usingNameSpaceList = new HashSet<String>();
@@ -85,6 +87,7 @@ public class ccMaster extends Visitor {
 				}
 			usingNameSpaceList.add(usingNameSpace + ";\n");
 			}
+			usingNameSpaceList.add("using namespace java::lang;\n");
 			for(String s : usingNameSpaceList){
 				out.write(s);
 			}
@@ -99,12 +102,13 @@ public class ccMaster extends Visitor {
 			out.close();
 		}
 		
-		
-		for(int i=classCounter; i < classList.size(); i++){
+		for(int i=0; i < classList.size(); i++){
 			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
 			
+			System.out.println(classList.get(i).getName());
+			System.out.println(classList.size());
 			
 			//includes
 			out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
