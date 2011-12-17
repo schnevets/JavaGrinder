@@ -112,7 +112,7 @@ public class ccMethod {
 		decl += name  + "(";
 		for (int i = 0; i < parameterType.length; i++){
 			if(i != 0) decl += ", ";
-			if(!(isStatic||access.matches("private")&&(i==0))){
+			if(!(isStatic&&(i==0))){
 				decl += parameterType[i] + " " + parameterName[i];	
 			}
 		}

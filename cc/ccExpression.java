@@ -30,6 +30,9 @@ public class ccExpression extends Visitor{
 	public void visitNewClassExpression(GNode n){
 		line = new ccStatement(n, block).publish();
 	}
+	public void visitUnaryExpression(GNode n){
+		line = new ccStatement(n, block).publish();
+	}
 	
 	public String publish(){
 		return line + ";";

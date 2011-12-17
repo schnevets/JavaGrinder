@@ -50,6 +50,11 @@ public class ccStatement extends Visitor{
 		visit(n);
 	}
 	
+	public void visitUnaryExpression(GNode n){
+		line+=n.getString(0);
+		visit(n);
+	}
+	
 	public void visitMultiplicativeExpression(GNode n){
 		visit(n);
 	}
