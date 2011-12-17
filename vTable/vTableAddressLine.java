@@ -8,11 +8,15 @@ import java.io.FileWriter;
 public class vTableAddressLine{
 	//String vTableClass;
 	String methodname;
-	String typecast;
+	boolean typecast;
 	String classname;
 	String vTableLine;
 	//String parameters;
 	boolean overloaded;
+	
+	//for typecasting
+	String returntype;
+	String parameters;
 	
 	vTableClass parent;
 	vTableLayoutLine matchinglayout;
@@ -21,14 +25,24 @@ public class vTableAddressLine{
 	public vTableAddressLine(vTableClass parentable){
 		parent = parentable;
 		overloaded = false;
+		typecast = false;
 	}
 	
 	public void setMethodName(String methodnamable){
 		methodname = methodnamable;
 	}
 	
-	public void setTypeCast(String typecastable){
-		typecast = typecastable;
+	public void setTypeCast(String returntype, String parameters){
+		typecast = true;
+		this.returntype = returntype;
+		if(parameters != null)
+			this.parameters = parameters;
+		else{
+			this.parameters = " \b";
+		}
+		//currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
+	    //			+ this.classname + currentmethod.parameters + "))");
+		
 	}
 	
 	public void setClassName(String classnamable){
@@ -67,10 +81,14 @@ public class vTableAddressLine{
 		}
 	}
 	*/
-	public void writeFile(BufferedWriter writer){
+	public void writeFile(BufferedWriter writer, vTableClass currentclass){
 		if(methodname.equals("__isa")){
 			vTableLine = methodname + "(";
-			vTableLine = vTableLine + "__" + classname + "::" + "__class()" + ")";
+			vTableLine = vTableLine + "__" + currentclass.classname + "::" + "__class()" + ")";
+		}
+		else if(methodname.equals("__delete")){
+			vTableLine = ", \r" + methodname + "(";
+			vTableLine = vTableLine + "&__" + currentclass.classname + "::" + "__delete" + ")";
 		}
 		else{
 			if(overloaded == true){
@@ -80,12 +98,16 @@ public class vTableAddressLine{
 				vTableLine = ", \r" + methodname + "(";
 			}
 			
-			if(!(typecast == null)){
-				vTableLine = vTableLine + "" + typecast + ""; 
+			if(typecast == true){
+				//vTableLine = vTableLine + "" + typecast + ""; 
+				vTableLine = vTableLine + "" + "(" + returntype + "(*)(" 
+			    			+ currentclass.classname + parameters + "))"; 
+				//currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
+			    //			+ this.classname + currentmethod.parameters + "))");
 			}
 			
 			if(overloaded == true){
-				vTableLine = vTableLine + "&__" + classname + "::" + methodname + "_" 
+				vTableLine = vTableLine + "&__" + classname + "::" + methodname //+ "_" 
 				+ matchingmethod.parameters.replace(",", "_") + ")";
 			}
 			else{
@@ -119,7 +141,7 @@ public class vTableAddressLine{
 				vTableLine = ", \r" + methodname + "(";
 			}
 			
-			if(!(typecast == null)){
+			if(!(typecast == true)){
 				vTableLine = vTableLine + "(" + typecast + ")"; 
 			}
 			

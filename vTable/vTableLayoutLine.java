@@ -111,13 +111,17 @@ public class vTableLayoutLine{
 		vTableLine = vTableLine + "; \r";
 	}
 	*/
-	public void writeFile(BufferedWriter writer){
+	public void writeFile(BufferedWriter writer, vTableClass currentclass){
+		setReferenceType(currentclass.classname);
 		if(returntype == null)
 			returntype = "void";
 		vTableLine = returntype + " "; //+ "(*" + methodname + ") " + parameters + "); \r";
 		
 		if (methodname.equals("__isa")){
 			vTableLine = vTableLine + methodname;
+		}
+		else if(methodname.equals("__delete")){
+			vTableLine = vTableLine + "(*" + methodname + ")(__" + currentclass.classname + "*)";
 		}
 		else{
 			if(overloaded == true){

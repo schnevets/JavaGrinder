@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,15 +13,17 @@ public class vTableClass {
 	String classname;
 	String modifier;
 	LinkedList<String> namespace;
-	LinkedList<String> includes;
+	HashSet<String> includes;
+	HashSet<String> usings;
 	HashSet<String> overloadedmethods;
-	vTableClass superclass;  //may even want to give a vTableClass reference as the superclass
+	vTableClass superclass;  
 	LinkedList<vTableMethodLayoutLine> vMethodLayout;
 	LinkedList<vTableLayoutLine> vTableLayout;
 	LinkedList<vTableAddressLine> vTableAddress;
 	LinkedList<vClassConstructor> vClassConstructors;
 	vTableForwardDeclarations forwarddeclarations;
 	LinkedList<String> dataLayout;
+	File file;
 	
 	//create a new linked list of vClassConstructors
 	
@@ -45,9 +48,15 @@ public class vTableClass {
 		namespace = new LinkedList<String>();
 		dataLayout = new LinkedList<String>();
 		overloadedmethods = new HashSet<String>();
-		includes = new LinkedList<String>();
+		includes = new HashSet<String>();
+		usings = new HashSet<String>();
+		
 	}
 	
+	public void setFile(File writeto){
+		file = writeto;
+		//System.out.println("file set to " + file.getName());
+	}
 	
 	public void setNoWrite(){
 		writeable = false;
@@ -55,6 +64,11 @@ public class vTableClass {
 	
 	public void setModifier(String mod){
 		modifier = mod;
+	}
+	
+	public void addUsings(String state){
+		System.out.println("added using " + state);
+		usings.add(state);
 	}
 	
 	public void addSuperClass(vTableClass parenting){
@@ -70,7 +84,25 @@ public class vTableClass {
 	}
 	
 	public void addIncludes(String s){
-		includes.add(s);
+		if(!includes.contains(s)){
+			//System.out.println("added includes " + s);
+			includes.add(s);
+		}
+	}
+	
+	public boolean checkJavaLang(String s){
+		//System.out.println("checking " + s);
+		if(s.equals("String") || s.equals("Object") || s.equals("Class")){
+			return true;
+		}
+		return false;
+	}
+	
+	public void addAdditionalInclude(String s){
+		if(!includes.contains("\"" + s + ".h\"") && (checkJavaLang(s) != true)){
+			includes.add("\"" + s + ".h\"");
+			addUsings(s);
+		}
 	}
 	
 	public void copysupertable(){
@@ -109,12 +141,10 @@ public class vTableClass {
 			}
 			else{
 				currentmethod = methoditerate.next();
-				if(currentmethod.visibility.equals("public")){
+				if((currentmethod.visibility.equals("public") || currentmethod.visibility.equals("protected")) && currentmethod.staticcheck != true){
 					//System.out.println("copying supermethod " + superclass.classname + currentmethod.methodname);
 					currentmethod.setReferenceType(classname);
-					currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
-						+ currentmethod.referencetype + currentmethod.parameters + "))");
-				
+					currentaddress.setTypeCast(currentmethod.returntype,currentmethod.parameters);
 					vTableLayout.add(currentlayout);
 					vTableAddress.add(currentaddress);
 					vMethodLayout.add(currentmethod);
@@ -333,7 +363,7 @@ public class vTableClass {
 	//to the printline method instead
 	public void appendAddress(String command, String arg){
 		if(command.equals("TypeCast")){
-			currentaddress.setTypeCast(arg);
+			//currentaddress.setTypeCast(arg);
 		}
 		else if(command.equals("ClassName")){
 			currentaddress.setClassName(arg);
@@ -346,7 +376,7 @@ public class vTableClass {
 		}
 	}
 	
-	public void writeFile(BufferedWriter writer){
+	public void writeFile(BufferedWriter writer, HashMap usingStates){
 		try {
 			//FileWriter writee = new FileWriter(file);
 			//BufferedWriter writer = new BufferedWriter(writee);
@@ -363,7 +393,19 @@ public class vTableClass {
 			
 			forwarddeclarations.writefile(writer);
 			//using statements
-			writer.write("using namespace java::lang;\r\r");
+			writer.write("using namespace java::lang;\r");  //always by default
+			//other statements
+			iterate = usings.iterator();
+			HashSet<String> writtenUsings = new HashSet<String>();
+			while(iterate.hasNext()){
+				String s = (String)usingStates.get(iterate.next());
+				if(!writtenUsings.contains(s)){
+					writer.write( s + ";\r");
+					writtenUsings.add(s);
+				}
+			}
+			
+			writer.write("\r");
 			
 			writer.write("struct " + "__" + classname + "{ \r");
 			writer.write("__" + classname + "_VT*" + " __vptr;\r");
@@ -399,7 +441,7 @@ public class vTableClass {
 			Iterator<vTableMethodLayoutLine> methodIterate = vMethodLayout.iterator();
 			while(methodIterate.hasNext()){
 				vTableMethodLayoutLine current = methodIterate.next();
-				current.writeFile(writer);
+				current.writeFile(writer, this);
 			}
 			//writer = new BufferedWriter(writee);
 			writer.write("\r");
@@ -412,7 +454,7 @@ public class vTableClass {
 			Iterator<vTableLayoutLine> tableIterate = vTableLayout.iterator();
 			while(tableIterate.hasNext()){
 				vTableLayoutLine current = tableIterate.next();
-				current.writeFile(writer);
+				current.writeFile(writer, this);
 			}
 			//writer = new BufferedWriter(writee);
 			writer.write("\r");
@@ -421,7 +463,7 @@ public class vTableClass {
 			Iterator<vTableAddressLine> addressIterate = vTableAddress.iterator();
 			while(addressIterate.hasNext()){
 				vTableAddressLine current = addressIterate.next();
-				current.writeFile(writer);
+				current.writeFile(writer, this);
 			}
 			//writer = new BufferedWriter(writee);
 			writer.write("{}\r};\r");
@@ -495,216 +537,3 @@ public class vTableClass {
 	}
 	
 }
-
-/*
-
-				public void readJavaLang(){
-
-					//vTableLayoutH
-					vTableLayoutLine line = new vTableLayoutLine();
-					line.setVTableClass("Object");
-					line.setReturnType("Class");
-					line.setMethodName("__isa");
-					line.createVTableLine();
-					OvTableLayoutH.add(line);
-					line = new vTableLayoutLine();
-					line.setVTableClass("Object");
-					line.setReturnType("int32_t");
-					line.setMethodName("hashCode");
-					line.setReferenceParameter("Object");
-					line.createVTableLine();
-					OvTableLayoutH.add(line);
-					line = new vTableLayoutLine();
-					line.setVTableClass("Object");
-					line.setReturnType("bool");
-					line.setMethodName("equals");
-					line.setReferenceParameter("Object");
-					line.setParameters("Object");
-					line.createVTableLine();
-					OvTableLayoutH.add(line);
-					line = new vTableLayoutLine();
-					line.setVTableClass("Object");
-					line.setReturnType("Class");
-					line.setMethodName("getClass");
-					line.setReferenceParameter("Object");
-					line.createVTableLine();
-					OvTableLayoutH.add(line);
-					line = new vTableLayoutLine();
-					line.setVTableClass("Object");
-					line.setReturnType("String");
-					line.setMethodName("toString");
-					line.setReferenceParameter("Object");
-					line.createVTableLine();
-					OvTableLayoutH.add(line);
-					
-					//vTableAddressH
-					vTableAddressLine liner = new vTableAddressLine();
-					
-					liner.setVTableClass("Object");
-					liner.setClassname("__Object");
-					liner.setMethodName("__isa");
-					liner.createVTableLine();
-					OvTableAddressH.add(liner);
-					liner = new vTableAddressLine();
-					liner.setVTableClass("Object");
-					liner.setClassname("__Object");
-					liner.setMethodName("hashCode");
-					liner.createVTableLine();
-					OvTableAddressH.add(liner);
-					liner = new vTableAddressLine();
-					liner.setVTableClass("Object");
-					liner.setClassname("__Object");
-					liner.setMethodName("equals");
-					liner.createVTableLine();
-					OvTableAddressH.add(liner);
-					liner = new vTableAddressLine();
-					liner.setVTableClass("Object");
-					liner.setClassname("__Object");
-					liner.setMethodName("getClass");
-					liner.createVTableLine();
-					OvTableAddressH.add(liner);
-					liner = new vTableAddressLine();
-					liner.setVTableClass("Object");
-					liner.setClassname("__Object");
-					liner.setMethodName("toString");
-					liner.createVTableLine();
-					OvTableAddressH.add(liner);
-					
-					//testing
-					while(!(OvTableLayoutH.isEmpty())){
-						vTableLayoutLine current = OvTableLayoutH.pop();
-						System.out.print(current.vTableLine);
-					}
-					while(!(OvTableAddressH.isEmpty())){
-						vTableAddressLine current = OvTableAddressH.pop();
-						System.out.print(current.vTableLine);
-					}
-					
-				}
-				
-public void convertVLayoutPrelim(String classname){
-					//clone the OvTableLayoutH
-					LinkedList<vTableLayoutLine> cloneOL = new LinkedList<vTableLayoutLine>();
-					int counter = 0;
-					try{
-						while(true){
-						vTableLayoutLine current = OvTableLayoutH.get(counter);
-						vTableLayoutLine news = new vTableLayoutLine();
-						news.setMethodName(current.methodname);
-						news.resetParameters(current.parameters);
-						news.setReferenceParameter(current.referenceparameter);
-						news.setReturnType(current.returntype);
-						news.setVTableClass(current.vTableClass);
-						cloneOL.add(news);
-						counter = counter + 1;
-						}
-					}
-					catch(Exception e){
-						//System.out.println("counter = " + counter);
-					}
-					
-					
-					LinkedList<vTableLayoutLine> newclone = new LinkedList<vTableLayoutLine>();
-					while(!(cloneOL.isEmpty())){
-						vTableLayoutLine current = cloneOL.pop();
-						current.setReferenceParameter(classname);
-						current.setVTableClass(classname);
-						current.createVTableLine();
-						newclone.add(current);
-					}
-					
-					//testing
-					
-					while(!(newclone.isEmpty())){
-						vTableLayoutLine current = newclone.pop();
-						System.out.print(current.vTableLine);
-					}
-					
-					//return newclone;
-					vTableLayoutH.addAll(newclone);
-				}
-				
-				//in progress conversion of addresslines to the right reference types
-				public void convertVTableAddress(String classname){
-					LinkedList<vTableAddressLine> cloneOA= new LinkedList<vTableAddressLine>();
-					int counter = 0;
-					try{
-						while(true){
-						vTableAddressLine current = OvTableAddressH.get(counter);
-						vTableAddressLine news = new vTableAddressLine();
-						//news.resetParameters(current.parameters);
-						//news.setReferenceParameter(current.referenceparameter);
-						//news.setReturnType(current.returntype);
-						news.setVTableClass(current.vTableClass);
-						news.setTypeCast(current.typecast);
-						news.setClassname(current.classname);
-						news.setMethodName(current.methodname);
-						cloneOA.add(news);
-						counter = counter + 1;
-						}
-					}
-					catch(Exception e){
-						//System.out.println("counter = " + counter);
-					}
-					
-					LinkedList<vTableAddressLine> newclone = new LinkedList<vTableAddressLine>();
-					while(!(cloneOA.isEmpty())){
-						vTableAddressLine current = cloneOA.pop();
-						//current.setReferenceParameter(classname);
-						current.setVTableClass(classname);
-						if(current.methodname.equals("getClass")){
-							//current.classname = "__" + classname;
-							current.typecast = "(Class(*)(__" + classname + "))";
-						}
-						current.createVTableLine();
-						newclone.add(current);
-					}
-					
-					vTableAddressH.addAll(newclone);
-				}
-				
-				public void searchForMethodOverride(){
-					String classsearch = currentLayoutLine.vTableClass;
-					//System.out.println(classsearch);
-					String methodsearch = currentLayoutLine.methodname;
-					//System.out.println(methodsearch);
-					String parametersearch = currentLayoutLine.parameters;
-					//System.out.println(parametersearch);
-					String returntypesearch = currentLayoutLine.returntype;
-					//System.out.println(returntypesearch);
-					//System.out.println();
-					int counter = 0;
-					try{
-						boolean found = false;
-						while(true){
-							vTableLayoutLine current = vTableLayoutH.get(counter);
-							//if (current.vTableClass.equals(classsearch) && current.returntype.equals(returntypesearch) && current.methodname.equals(methodsearch) && current.parameters.equals(parametersearch)){
-							if(current.vTableLine.equals(currentLayoutLine.vTableLine))	{
-								vTableLayoutH.remove(counter);
-								found = true;
-								//System.out.println("found over");
-								break;
-							}
-							counter = counter + 1;
-						}
-						if(found == true){
-							counter = 0;
-							classsearch = currentAddressLine.vTableClass;
-							methodsearch = currentAddressLine.methodname;
-							//System.out.println("looking for " + methodsearch);
-							while(true){
-								vTableAddressLine current = vTableAddressH.get(counter);
-								//System.out.println(current.vTableClass + " " + current.methodname);
-								if(current.vTableClass.equals(classsearch) && current.methodname.equals(methodsearch) && !current.methodname.equals(null)){
-									vTableAddressH.remove(counter);
-									break;
-								}
-								counter = counter + 1;
-							}
-						}
-					}
-					catch (Exception e){
-						
-					}
-				}
- */

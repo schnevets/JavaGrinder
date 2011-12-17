@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,12 +23,14 @@ public class hMaster {
 	LinkedList<vTableClass> fileprint;
 	//used by cc translator for method overloading
 	HashSet<String> overloads;
+	HashMap usings;
 	
-	public hMaster(HashSet dependencies, File hostDirectory){
+	public hMaster(HashSet dependencies, File hostDirectory) throws Exception{
 		classes = new LinkedList<vTableClass>();
 		waitqueue = new LinkedList<String>();
 		classlist = new HashSet<String>();
 		overloads = new HashSet<String>();
+		usings = new HashMap();
 		hardIncludeJavaLangObject();
 		Iterator iterate = dependencies.iterator();
 		
@@ -37,17 +40,64 @@ public class hMaster {
 			translate(currentfilename, hostDirectory);
 		}
 		
-		//do not use for now
-		
+		//resolve any lingering files not translated the first time around due to a missing superclass
+		int queuecount = 0;
 		while(!(waitqueue.isEmpty())){
 			System.out.println("waitqueue is not empty");
 			translate(waitqueue.pop(), hostDirectory);
+			if (queuecount > 100){
+				throw new Exception("Wait Queue cycle limit reached in H Side");
+			}
+			queuecount++;
 		}
 		
+		//resolve namespace usings now that we have the full set of classes
+		//resolveUsings();
+		
+		//write the files here
+		while(!classes.isEmpty()){
+			printClass(classes.pop());
+		}
 		//setup a file
 		//write the forward declarations in the saved namespace
 		//write the rest
 		//includes
+	}
+	
+	public void resolveUsings(){
+		Iterator<vTableClass> iterate = classes.iterator();
+		while(iterate.hasNext()){
+			vTableClass classy = iterate.next();
+			Iterator<String> user = classy.includes.iterator();
+			while(user.hasNext()){
+				classy.addUsings((String)usings.get(user.next()));
+			}
+		}
+	}
+	
+	public void printClass(vTableClass classy){
+		//Iterator<vTableClass> iterate = fileprint.iterator();
+		FileWriter writee;
+		BufferedWriter writer = null;
+		if(classy.writeable == true){
+		try {
+			writee = new FileWriter(classy.file);
+			writer = new BufferedWriter(writee);
+			//forwarddeclarations.writefile(writer);
+			Iterator classiterate = classy.overloadedmethods.iterator();
+			while(classiterate.hasNext()){
+				overloads.add(classy.classname + "^" + (String)classiterate.next());
+				//classname^generalmethodname
+			}
+			classy.resolveOverloads();
+			//System.out.println("printing the class " + classy.classname);
+			//classy.printLines();
+			classy.writeFile(writer, usings);	
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		}
 	}
 	
 	public void hardIncludeJavaLangObject(){
@@ -216,28 +266,28 @@ public class hMaster {
 			String dataLayout;
 			String operation;
 			
-			public void printClass(File file, vTableClass classy){
-				//Iterator<vTableClass> iterate = fileprint.iterator();
-				FileWriter writee;
-				BufferedWriter writer = null;
-				try {
-					writee = new FileWriter(file);
-					writer = new BufferedWriter(writee);
-					//forwarddeclarations.writefile(writer);
-					Iterator classiterate = classy.overloadedmethods.iterator();
-					while(classiterate.hasNext()){
-						overloads.add(classy.classname + "^" + (String)classiterate.next());
-						//classname^generalmethodname
-					}
-					classy.resolveOverloads();
-					//System.out.println("printing the class " + classy.classname);
-					//classy.printLines();
-					classy.writeFile(writer);	
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
+//			public void printClass(File file, vTableClass classy){
+//				//Iterator<vTableClass> iterate = fileprint.iterator();
+//				FileWriter writee;
+//				BufferedWriter writer = null;
+//				try {
+//					writee = new FileWriter(file);
+//					writer = new BufferedWriter(writee);
+//					//forwarddeclarations.writefile(writer);
+//					Iterator classiterate = classy.overloadedmethods.iterator();
+//					while(classiterate.hasNext()){
+//						overloads.add(classy.classname + "^" + (String)classiterate.next());
+//						//classname^generalmethodname
+//					}
+//					classy.resolveOverloads();
+//					//System.out.println("printing the class " + classy.classname);
+//					//classy.printLines();
+//					classy.writeFile(writer);	
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
 			
 			//potentially outdated
 //			public void printFile(File file){
@@ -433,6 +483,7 @@ public class hMaster {
 					addSuperClass(returnable);
 				}
 				else if(operation.equals("dataLayout")){
+					currentclass.addAdditionalInclude(returnable);
 					dataLayout = dataLayout + returnable + " ";
 				}
 				else if(operation.equals("Constructor")){
@@ -445,6 +496,7 @@ public class hMaster {
 					//System.out.println("for node " + n.hashCode());
 				}
 				else if(operation.equals("MethodParameter")){
+					currentclass.addAdditionalInclude(returnable);
 					currentclass.appendMethod("Parameters", returnable);
 					currentclass.appendTableLayout("Parameters", returnable);
 					//System.out.println("parameter " + returnable + " for " + currentclass.currentmethod.methodname);
@@ -453,7 +505,8 @@ public class hMaster {
 			}
 
 			public void visitBlock(GNode n){
-				//nothing for now, may have to add special cases for method call chains
+				//last part of any declaration, no code needed for now
+				
 			}
 			
 			/**
@@ -690,9 +743,6 @@ public class hMaster {
 				//System.out.println("missingsuper test = " + missingsuper);
 				
 				//currentclass.printLines();
-				classlist.add(currentclass.classname);
-				classes.add(currentclass);
-				fileprint.add(currentclass);
 				
 				File file = new File(hostPath + "/" + currentclass.classname + ".h");
 				try {
@@ -701,7 +751,22 @@ public class hMaster {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				printClass(file, currentclass);
+				currentclass.setFile(file);
+				Iterator<String> usingIterator = currentclass.namespace.iterator();
+				String usingstate = "using namespace ";
+				if(usingIterator.hasNext()){
+					usingstate = usingstate + usingIterator.next();
+				}
+				while(usingIterator.hasNext()){
+					usingstate = usingstate + "::" + usingIterator.next();
+				}
+
+				usings.put(currentclass.classname,usingstate);
+				
+				classlist.add(currentclass.classname);
+				classes.add(currentclass);
+				fileprint.add(currentclass);
+				//printClass(file, currentclass);
 			}
 
 			public void visitArguments(GNode n){

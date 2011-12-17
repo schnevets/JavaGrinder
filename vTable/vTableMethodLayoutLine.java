@@ -108,7 +108,14 @@ public class vTableMethodLayoutLine {
 		vTableLine = vTableLine + "); \r";
 	}
 	*/
-	public void writeFile(BufferedWriter writer){
+	public void writeFile(BufferedWriter writer, vTableClass currentclass){
+		if(this.methodname.equals("__delete")){
+			setReferenceType("__" + currentclass.classname + "*");
+		}
+		else{
+			setReferenceType(currentclass.classname);
+		}
+		
 		if(overloaded == true){
 			vTableLine = "static " + returntype + " " + methodname +  //removed modifier inclusion for now
 			parameters.replace(",", "_") + "(" + referencetype;
