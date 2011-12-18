@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,7 +40,8 @@ public class ccMaster extends Visitor {
 		directory = dir;
 		classList = new LinkedList<ccClass>();
 		mainMethodList = new LinkedList<ccMainMethod>();
-		classCounter = -1;
+		classCounter = 2;
+		javaLangMethods();
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
@@ -56,6 +57,43 @@ public class ccMaster extends Visitor {
 		}
 
 	}
+	
+	/**
+	 * Adds Object, String and Class into the class list data structure.
+	 */
+	private void javaLangMethods(){
+		//Object
+		currentClass = new ccClass("Object", "public", false);
+		classList.add(currentClass);
+		currentClass.addInheritedMethods();
+		
+		//String
+		currentClass = new ccClass("String", "public", false);
+		classList.add(currentClass);
+		argumentType = new String[0];
+		argumentName = new String[0];
+		currentClass.addMethod(new ccMethod("length", currentClass, "public", "int32_t", argumentType, argumentName));
+		currentClass.addMethod(new ccMethod("charAt", currentClass, "public", "char", argumentType, argumentName));
+		currentClass.addInheritedMethods();
+		
+		//Class
+		currentClass = new ccClass("Class", "public", false);
+		classList.add(currentClass);
+		argumentType = new String[0];
+		argumentName = new String[0];
+		currentClass.addMethod(new ccMethod("getName", currentClass, "public", "Class", argumentType, argumentName));
+		currentClass.addMethod(new ccMethod("getSuperclass", currentClass, "public", "String", argumentType, argumentName));
+		currentClass.addMethod(new ccMethod("isPrimitive", currentClass, "public", "Class", argumentType, argumentName));
+		currentClass.addMethod(new ccMethod("isArray", currentClass, "public", "String", argumentType, argumentName));
+		currentClass.addMethod(new ccMethod("getComponentType", currentClass, "public", "Class", argumentType, argumentName));
+		argumentType = new String[1];
+		argumentType[0] = "Object";
+		argumentName = new String[1];
+		argumentName[0] = "o";
+		currentClass.addMethod(new ccMethod("isInstance", currentClass, "public", "String", argumentType, argumentName));
+		currentClass.addInheritedMethods();
+	}
+	
 	/**
 	 * Printy Thingy
 	 * 
@@ -72,7 +110,7 @@ public class ccMaster extends Visitor {
 			out = new BufferedWriter(fw);
 			
 			//includes
-			for(int i=0; i < classList.size(); i++){
+			for(int i=3; i < classList.size(); i++){
 				out.write("#include \"" + classList.get(i).getName() + ".h\"\n");
 			}
 			out.write("#include \"java_lang.h\"\n");
@@ -102,7 +140,7 @@ public class ccMaster extends Visitor {
 			out.close();
 		}
 		
-		for(int i=0; i < classList.size(); i++){
+		for(int i=3; i < classList.size(); i++){
 			file = new File(directory.getAbsolutePath() + "/" + classList.get(i).getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
@@ -181,6 +219,12 @@ public class ccMaster extends Visitor {
 
 	public void visitCompilationUnit(GNode n){
 		visit(n);
+		
+		// Making sure each class has all the inherited methods before the secondary visit starts
+		for(int i=3; i < classList.size(); i++){
+			classList.get(i).addInheritedMethods();
+		}
+		
 		/* It's the glorious visitor-within-a-visitor that makes the blocks! It's the blocker! */
 		new Visitor() {
 			private int constructorCounter;
@@ -276,7 +320,7 @@ public class ccMaster extends Visitor {
 		currentClass.addField(name, type);
 		if((null != n.getNode(2).getNode(0).get(2))&&
 				("NewArrayExpression" != n.getNode(2).getNode(0).getNode(2).getName())){
-			ccDeclaration declarationStatement = new ccDeclaration(n, null);
+			ccDeclaration declarationStatement = new ccDeclaration(n, new ccBlock());
 	        setInstanceVariables.add(currentClass.get_Name() + "::" + " " + declarationStatement.publish() + "\n");
 		}
 	}

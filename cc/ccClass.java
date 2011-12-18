@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,6 +97,14 @@ public class ccClass {
 		return new ccMethod("METHOD NOT FOUND", this);
 	}
 	
+	public boolean hasMethod(String s, String[] param){
+		for(int i = 0; i < methods.size(); i++){
+			if(methods.get(i).match(s, param))
+				return true;
+		}
+		return false;
+	}
+	
 	public String getMethodName(String s, String[] param){
 		for(int i = 0; i < methods.size(); i++){
 			if(methods.get(i).match(s, param))
@@ -145,6 +153,25 @@ public class ccClass {
 	 */
 	public ccConstructor getConstructorAtIndex(int i){
 		return constructors.get(i);
+	}
+	
+	public void addInheritedMethods(){
+		String[] argumentType = new String[0];
+		String[] argumentName = new String[0];
+		if(!hasMethod("hashCode", argumentType))
+			addMethod(new ccMethod("hashCode", this, "public", "int32_t", argumentType, argumentName));
+		argumentType = new String[1];
+		argumentType[0] = "Object";
+		argumentName = new String[1];
+		argumentName[0] = "other";
+		if(!hasMethod("equals", argumentType)) 
+			addMethod(new ccMethod("equals", this, "public", "bool", argumentType, argumentName));
+		argumentType = new String[0];
+		argumentName = new String[0];
+		if(!hasMethod("getClass", argumentType))
+			addMethod(new ccMethod("getClass", this, "public", "Class", argumentType, argumentName));
+		if(!hasMethod("toString", argumentType))
+			addMethod(new ccMethod("toString", this, "public", "String", argumentType, argumentName));
 	}
 	
 	public String toString(){
