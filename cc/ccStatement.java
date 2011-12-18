@@ -72,7 +72,7 @@ public class ccStatement extends Visitor{
 					for(String s : findArgumentTypes(n.getNode(3))){
 						System.out.println(s);
 					}
-					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)));
+					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)), block.classList);
 //					System.out.println("    " + methodInQuestion.isStatic);
 					if(methodInQuestion.isStatic){
 						line+= objectType + "::" + methodInQuestion.getName() + "(" + __this;
@@ -106,7 +106,6 @@ public class ccStatement extends Visitor{
 		
 	}
 	public void visitUnaryExpression(GNode n){
-		line+=n.getString(0);
 		visit(n);
 	}
 	

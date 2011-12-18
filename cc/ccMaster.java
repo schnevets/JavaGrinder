@@ -325,6 +325,9 @@ public class ccMaster extends Visitor {
 				throw new Exception();
 			}
 		}
+		else{
+			currentClass.addSuper(classList.get(0));
+		}
 		visit(n);
 		addDefaultMethods(currentClass);
 	}

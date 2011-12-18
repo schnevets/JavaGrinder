@@ -2,6 +2,7 @@ package oop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 
 
@@ -101,9 +102,9 @@ public class ccClass {
 	 * @param s Name of desired method.
 	 * @return The method with name s.
 	 */
-	public ccMethod getMethod(String s, String[] param){
+	public ccMethod getMethod(String s, String[] param, LinkedList<ccClass> classList){
 		for(int i = 0; i < methods.size(); i++){
-			if(methods.get(i).match(s, param))
+			if(methods.get(i).match(s, param, classList))
 				return methods.get(i);
 		}
 		return new ccMethod("METHOD NOT FOUND", this);
@@ -116,9 +117,9 @@ public class ccClass {
 		}
 		return false;
 	}
-	public String getMethodName(String s, String[] param){
+	public String getMethodName(String s, String[] param, LinkedList<ccClass> classList){
 		for(int i = 0; i < methods.size(); i++){
-			if(methods.get(i).match(s, param))
+			if(methods.get(i).match(s, param, classList))
 				return methods.get(i).getName();
 		}
 		return "This is an error.                         !!!";
@@ -160,6 +161,10 @@ public class ccClass {
 	 */
 	public ccConstructor getConstructorAtIndex(int i){
 		return constructors.get(i);
+	}
+	
+	public ccClass getSuperClass(){
+		return superClass;
 	}
 	
 	public void addInheritedMethods(){

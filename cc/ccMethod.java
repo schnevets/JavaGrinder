@@ -96,18 +96,54 @@ public class ccMethod {
 	public String[] getParamTypes(){
 		return parameterType;
 	}
+	public boolean match(String mName, String[] mparameterType, LinkedList<ccClass> classList){
+		if(!mName.contentEquals(originalName))								return false;
+		int offset = 1;
+		if(isStatic){
+			offset = 0;
+		}
+		if((mparameterType.length + offset) != parameterType.length)		return false;
+		for(int i=0; i< mparameterType.length; i++){
+			if(!mparameterType[i].contentEquals(parameterType[i+1]) && !parameterType[i+offset].contentEquals("Object")){
+				boolean check = false;
+				ccClass superClass = classList.get(3);
+				for(int j=3; j<classList.size(); j++){
+					superClass = classList.get(j);
+					if(superClass.getName().equals(mName)){
+						check = true;
+						break;
+					}
+				}
+				if(check){
+					superClass = superClass.getSuperClass();
+					check = false;
+					while(!check){
+						if(superClass.getName().contentEquals(parameterType[i+offset])){
+							check = true;
+						}
+						else if(superClass.getName().contentEquals("Object")){
+							break;
+						}
+						else{
+							superClass = superClass.getSuperClass();
+						}
+					}
+				}
+				
+				return check;
+			}
+		}		
+		return true;
+	}
+	
 	public boolean match(String mName, String[] mparameterType){
 		if(!mName.contentEquals(originalName))								return false;
-		System.out.println("~~~1 (" + originalName + ")");
 		if(isStatic){
 			if(!Arrays.equals(parameterType, mparameterType))				return false;
 		}
 		else{
 			if((mparameterType.length + 1) != parameterType.length)			return false;
-			System.out.println("~~~2 (" + mparameterType.length + ")");
 			for(int i=0; i< mparameterType.length; i++){
-				System.out.println("~~~3:" + i + " (" + mparameterType[i] + " - " + parameterType[i+1] + ")");
-				System.out.println(mparameterType[i]);
 				if(!mparameterType[i].contentEquals(parameterType[i+1]))	return false;
 			}
 		}
