@@ -107,8 +107,8 @@ public class vTableClass {
 	
 	public void copysupertable(){
 		Iterator<vTableMethodLayoutLine> methoditerate = superclass.vMethodLayout.iterator();
-		Iterator<vTableAddressLine> addressiterate = superclass.vTableAddress.iterator();
-		Iterator<vTableLayoutLine> layoutiterate = superclass.vTableLayout.iterator();
+		//Iterator<vTableAddressLine> addressiterate = superclass.vTableAddress.iterator();
+		//Iterator<vTableLayoutLine> layoutiterate = superclass.vTableLayout.iterator();
 		Iterator<String> superincludes = superclass.includes.iterator();
 		
 		while(superincludes.hasNext()){
@@ -122,35 +122,50 @@ public class vTableClass {
 			includes.add("\"" + superclass.classname + ".h" + "\"");
 		}
 		
+		//add in __isa
+		vTableLayout.add(superclass.vTableLayout.getFirst());
+		vTableAddress.add(superclass.vTableAddress.getFirst());
+		
 		while(methoditerate.hasNext()){
-			currentlayout = layoutiterate.next();
-			currentlayout.setReferenceType(classname);
-			currentaddress = addressiterate.next();
-			if(currentaddress.methodname.equals("__isa") || currentaddress.methodname.equals("__delete")){
-				currentaddress.setClassName(classname);
-				//System.out.println("copying specialmethod " + currentaddress.methodname);
-				if(currentaddress.methodname.equals("__delete")){
-					currentmethod = methoditerate.next();
-					//currentlayout.setReferenceType(this.classname);
-					currentmethod.setReferenceType("__" + classname + "*");
-					currentlayout.setReferenceType("__" + classname + "*");
+			currentmethod = methoditerate.next();
+			//if(layoutiterate.hasNext()){
+				//currentlayout = layoutiterate.next();
+				//currentmethod.matchinglayout.setReferenceType(classname);
+				//currentaddress = addressiterate.next();
+				if(currentmethod.methodname.equals("__delete")){
+					//currentaddress.setClassName(classname);
+					//System.out.println("copying specialmethod " + currentaddress.methodname);
+						//currentlayout.setReferenceType(this.classname);
+						//currentmethod.setReferenceType("__" + classname + "*");
+						//currentlayout.setReferenceType("__" + classname + "*");
 					vMethodLayout.add(currentmethod);
+					vTableLayout.add(currentmethod.matchinglayout);
+					vTableAddress.add(currentmethod.matchingaddress);
+//					vTableLayout.add(currentlayout);
+//					vTableAddress.add(currentaddress);
 				}
-				vTableLayout.add(currentlayout);
-				vTableAddress.add(currentaddress);
-			}
-			else{
-				currentmethod = methoditerate.next();
-				if((currentmethod.visibility.equals("public") || currentmethod.visibility.equals("protected")) && currentmethod.staticcheck != true){
-					//System.out.println("copying supermethod " + superclass.classname + currentmethod.methodname);
-					currentmethod.setReferenceType(classname);
-					currentaddress.setTypeCast(currentmethod.returntype,currentmethod.parameters);
-					vTableLayout.add(currentlayout);
-					vTableAddress.add(currentaddress);
-					vMethodLayout.add(currentmethod);
+				else if((currentmethod.visibility.equals("public") || currentmethod.visibility.equals("protected")) && currentmethod.staticcheck != true){
+						//System.out.println("copying supermethod " + superclass.classname + currentmethod.methodname);
+						//currentmethod.setReferenceType(classname);
+						//currentaddress.setTypeCast(currentmethod.returntype,currentmethod.parameters);
+						vMethodLayout.add(currentmethod);
+						if(currentmethod.matchingaddress != null){
+							vTableLayout.add(currentmethod.matchinglayout);
+							vTableAddress.add(currentmethod.matchingaddress);
+						}
 				}
 			}
-		}
+//			else{
+//				if((currentmethod.visibility.equals("public") || currentmethod.visibility.equals("protected")) && currentmethod.staticcheck != true){
+//					//System.out.println("copying supermethod " + superclass.classname + currentmethod.methodname);
+//					currentmethod.setReferenceType(classname);
+//					//currentaddress.setTypeCast(currentmethod.returntype,currentmethod.parameters);
+//					//vTableLayout.add(currentlayout);
+//					//vTableAddress.add(currentaddress);
+//					vMethodLayout.add(currentmethod);
+//				}
+//			}
+		
 	}
 	
 	public void addNameSpace(String s){
@@ -454,7 +469,9 @@ public class vTableClass {
 			Iterator<vTableLayoutLine> tableIterate = vTableLayout.iterator();
 			while(tableIterate.hasNext()){
 				vTableLayoutLine current = tableIterate.next();
-				current.writeFile(writer, this);
+				if(current!=null){
+					current.writeFile(writer, this);
+				}
 			}
 			//writer = new BufferedWriter(writee);
 			writer.write("\r");
@@ -463,6 +480,7 @@ public class vTableClass {
 			Iterator<vTableAddressLine> addressIterate = vTableAddress.iterator();
 			while(addressIterate.hasNext()){
 				vTableAddressLine current = addressIterate.next();
+				if(current!=null)
 				current.writeFile(writer, this);
 			}
 			//writer = new BufferedWriter(writee);

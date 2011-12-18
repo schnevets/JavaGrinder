@@ -35,6 +35,8 @@ public class vTableMethodLayoutLine {
 		visibility = "protected";
 		staticcheck = false;
 		finalcheck = false;
+		matchinglayout = null;
+		matchingaddress = null;
 	}
 	
 	public void setModifer(String modifiable){
