@@ -28,9 +28,14 @@ namespace java {
     __Object::__Object() : __vptr(&__vtable) {
     }
 
+    // The destructor.
+    void __Object::__delete(__Object* __this) {
+      delete __this;
+    }
+
     // java.lang.Object.hashCode()
     int32_t __Object::hashCode(Object __this) {
-      return (int32_t)(intptr_t)__this;
+      return (int32_t)(intptr_t)__this.raw();
     }
 
     // java.lang.Object.equals(Object)
@@ -50,14 +55,14 @@ namespace java {
 
       std::ostringstream sout;
       sout << k->__vptr->getName(k)->data
-           << '@' << std::hex << (uintptr_t)__this;
+           << '@' << std::hex << (uintptr_t)__this.raw();
       return new __String(sout.str());
     }
 
     // Internal accessor for java.lang.Object's class.
     Class __Object::__class() {
       static Class k =
-        new __Class(__rt::literal("java.lang.Object"), (Class)__rt::null());
+        new __Class(__rt::literal("java.lang.Object"), __rt::null());
       return k;
     }
 
@@ -71,6 +76,11 @@ namespace java {
     __String::__String(std::string data)
       : __vptr(&__vtable), 
         data(data) {
+    }
+
+    // The destructor.
+    void __String::__delete(__String* __this) {
+      delete __this;
     }
 
     // java.lang.String.hashCode()
@@ -95,7 +105,7 @@ namespace java {
       if (! k->__vptr->isInstance(k, o)) return false;
 
       // Do the actual comparison.
-      String other = (String)o; // Downcast.
+      String other = o; // Implicit downcast.
       return __this->data.compare(other->data) == 0;
     }
 
@@ -131,6 +141,84 @@ namespace java {
     // invokes the default no-arg constructor for __String_VT.
     __String_VT __String::__vtable;
 
+    std::ostream& operator<<(std::ostream& out, String s) {
+      out << s->data;
+      return out;
+    }
+
+		String operator+(Object left, Object right){
+        std::string result = left->__vptr->toString(left)->data;
+        result += right->__vptr->toString(right)->data;
+        
+        return __rt::literal(&(result)[0]);
+  	}
+
+		String operator+(bool left, Object right){
+				std::string result;
+				if(left==0)
+					result += "false";
+				else
+					result += "true";
+        result += right->__vptr->toString(right)->data;
+        return __rt::literal(&(result)[0]);
+  	}
+		String operator+(Object left, bool right){
+        std::string result = left->__vptr->toString(left)->data;
+				if(right==0)
+					result += "false";
+				else
+					result += "true";
+        return __rt::literal(&(result)[0]);
+  	}  	
+
+		String operator+(Object left, char right){
+        std::string result = left->__vptr->toString(left)->data;
+				result += right;
+        return __rt::literal(&(result)[0]);
+  	}  	
+		String operator+(char left, Object right){
+        std::string result;
+				result = left;
+        result += right->__vptr->toString(right)->data;
+        return __rt::literal(&(result)[0]);
+  	}  	
+
+		String operator+(float left, Object right){
+        std::stringstream result;
+				result << left;
+        result << right->__vptr->toString(right)->data;
+        return __rt::literal(&(result.str())[0]);
+  	}  	
+		String operator+(int left, Object right){
+        std::stringstream result;
+				result << left;
+        result << right->__vptr->toString(right)->data;
+        return __rt::literal(&(result.str())[0]);
+  	}  	
+		String operator+(double left, Object right){
+        std::stringstream result;
+				result << left;
+        result << right->__vptr->toString(right)->data;
+        return __rt::literal(&(result.str())[0]);
+  	}
+		String operator+(Object left, float right){
+        std::stringstream result;
+        result << left->__vptr->toString(left)->data;
+				result << right;
+        return __rt::literal(&(result.str())[0]);
+  	}  	
+		String operator+(Object left, int right){
+        std::stringstream result;
+        result << left->__vptr->toString(left)->data;
+				result << right;
+        return __rt::literal(&(result.str())[0]);
+  	}  	
+		String operator+(Object left, double right){
+        std::stringstream result;
+        result << left->__vptr->toString(left)->data;
+				result << right;
+        return __rt::literal(&(result.str())[0]);
+  	}  	
     // =======================================================================
 
     // java.lang.Class(String, Class)
@@ -140,6 +228,11 @@ namespace java {
         parent(parent),
         component(component),
         primitive(primitive) {
+    }
+
+    // The destructor.
+    void __Class::__delete(__Class* __this) {
+      delete __this;
     }
 
     // java.lang.Class.toString()
@@ -168,7 +261,7 @@ namespace java {
 
     // java.lang.Class.isArray()
     bool __Class::isArray(Class __this) {
-      return (Class)__rt::null() != __this->component;
+      return __rt::null() != __this->component;
     }
 
     // java.lang.Class.getComponentType()
@@ -181,10 +274,10 @@ namespace java {
       Class k = o->__vptr->getClass(o);
 
       do {
-        if (__this->__vptr->equals(__this, (Object)k)) return true;
+        if (__this->__vptr->equals(__this, k)) return true;
 
         k = k->__vptr->getSuperclass(k);
-      } while ((Class)__rt::null() != k);
+      } while (__rt::null() != k);
 
       return false;
     }
@@ -205,8 +298,7 @@ namespace java {
     // java.lang.Integer.TYPE
     Class __Integer::TYPE() {
       static Class k =
-        new __Class(__rt::literal("int"), (Class)__rt::null(),
-                    (Class)__rt::null(), true);
+        new __Class(__rt::literal("int"), __rt::null(), __rt::null(), true);
       return k;
     }
 
@@ -224,6 +316,12 @@ namespace __rt {
   }
 
   // Template specialization for arrays of ints.
+  template<>
+  Array<int32_t>::Array(const int32_t length)
+  : __vptr(&__vtable), length(length), __data(new int32_t[length]) {
+    std::memset(__data, 0, length * sizeof(int32_t));
+  }
+
   template<>
   java::lang::Class Array<int32_t>::__class() {
     static java::lang::Class k =
