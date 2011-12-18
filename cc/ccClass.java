@@ -13,6 +13,7 @@ public class ccClass {
 	private HashMap<String, String> fields;
 	private ArrayList<String> packageNames;
 	private boolean constructorAdded;
+	private ccClass superClass;
 	
 	public ccClass(String clName, String clAccess){
 		name = clName;
@@ -32,6 +33,11 @@ public class ccClass {
 		constructorAdded = false;
 		fields = new HashMap<String, String>();
 		packageNames = new ArrayList<String>();
+		superClass = null;
+	}
+	
+	public void addSuper(ccClass sClubSeven){
+		superClass = sClubSeven;
 	}
 	
 	/** Adds method to class's list of methods */
@@ -158,6 +164,12 @@ public class ccClass {
 	}
 	
 	public void addInheritedMethods(){
+		
+		if(null != superClass){
+			superClass.bequeath(methods);
+		}
+		
+		// Object methods:
 		String[] argumentType = new String[0];
 		String[] argumentName = new String[0];
 		if(!hasMethod("hashCode", argumentType))
@@ -174,6 +186,22 @@ public class ccClass {
 			methods.add(new ccMethod("getClass", this, "public", "Class", argumentType, argumentName));
 		if(!hasMethod("toString", argumentType))
 			methods.add(new ccMethod("toString", this, "public", "String", argumentType, argumentName));
+	}
+	
+	// meth is short for method
+	public ArrayList<ccMethod> bequeath(ArrayList<ccMethod> meth){
+		for(int i = 0; i<methods.size(); i++){
+			boolean mFlag = true;
+			for(int j = 0; j<meth.size(); j++){
+				if(meth.get(j).match(methods.get(i))){
+					mFlag = false;
+				}
+			}
+			if(mFlag){
+				meth.add(methods.get(i));
+			}
+		}
+		return meth;
 	}
 	
 	public String toString(){

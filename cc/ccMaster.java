@@ -32,7 +32,7 @@ public class ccMaster extends Visitor {
 	private String[] currentPackage;
 	
 	
-	public ccMaster(HashSet dependencies, HashSet mangleList, File dir){
+	public ccMaster(LinkedList<String> dependencies, HashSet mangleList, File dir){
 		
 		Iterator iterate = dependencies.iterator();
 		ASTGenerator ast = new ASTGenerator();
@@ -284,7 +284,7 @@ public class ccMaster extends Visitor {
 			}
 		}.dispatch(n);
 	}
-	public void visitClassDeclaration(GNode n){
+	public void visitClassDeclaration(GNode n) throws Exception{
 		setInstanceVariables = new LinkedList<String>();
 		String name = (String)n.getString(1);
 		String access = "public";
@@ -302,6 +302,24 @@ public class ccMaster extends Visitor {
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
 		currentClass.addPackage(currentPackage);
+		
+		if(null != n.getNode(3)){
+			String extension = n.getNode(3).getNode(0).getNode(0).getString(0);
+			boolean extensionCheck = false;
+			for(int i = 3; i < classList.size()-1; i++){
+				if(classList.get(i).getName().contentEquals(extension)){
+					currentClass.addSuper(classList.get(i));
+					extensionCheck = true;
+					break;
+				}
+			}
+			if(!(extensionCheck || extension.contentEquals("Object"))){
+				System.out.println("Incorrect argument ordering: file containing class \"" + name + 
+						"\" should proceed file containing class \"" + extension + "\".");
+				throw new Exception();
+			}
+		}
+		
 		visit(n);
 	}
 	

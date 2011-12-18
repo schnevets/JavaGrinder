@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class JavaGrinder {
 	
@@ -22,14 +23,8 @@ public class JavaGrinder {
 		File directory = new File(dirName);
 		directory.mkdir();
 		
-		File check = new File("ptr.cc");
+		File check = new File("ptr.h");
 		File copy;
-		if(!check.exists()){
-			throw new RequiredFileNotFoundException(check.getName());
-		}
-		copy = new File(dirName + "/ptr.cc");
-		copyFile(check, copy);
-		check = new File("ptr.h");
 		if(!check.exists()){
 			throw new RequiredFileNotFoundException(check.getName());
 		}
@@ -52,14 +47,19 @@ public class JavaGrinder {
 		DependencyMaster dependency = new DependencyMaster();
 		dependency.checkDependencies(args);
 		dependency.checkForFiles(args);
-		
 		HashSet<String> translateMe = new HashSet<String>();
+		LinkedList<String> noTranslateMe = new LinkedList<String>();
 		for(int i=0; i< args.length; i++){
 			translateMe.add(args[i]);
+			noTranslateMe.add(args[i]);
 		}
-		hMaster hTranslate = new hMaster(translateMe, directory);
-		HashSet<String> overloads = hTranslate.overloads;
-		ccMaster ccTranslate = new ccMaster(translateMe, overloads, directory);
+		try{
+			hMaster hTranslate = new hMaster(translateMe, directory);
+			HashSet<String> overloads = hTranslate.overloads;
+			ccMaster ccTranslate = new ccMaster(noTranslateMe, overloads, directory);
+		}catch(Exception e){}
+		
+		
 		
 		System.out.println("Checkit: done.");
 	}

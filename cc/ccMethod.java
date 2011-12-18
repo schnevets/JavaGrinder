@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -93,6 +93,10 @@ public class ccMethod {
 		return name;
 	}
 	
+	public String[] getParamTypes(){
+		return parameterType;
+	}
+	
 	public boolean match(String mName, String[] mparameterType){
 		if(!mName.contentEquals(originalName))								return false;
 //		System.out.println("~~~1 (" + originalName + ")");
@@ -108,6 +112,13 @@ public class ccMethod {
 				if(!mparameterType[i].contentEquals(parameterType[i+1]))	return false;
 			}
 		}
+		
+		return true;
+	}
+	
+	public boolean match(ccMethod meth){
+		if(!meth.getName().contentEquals(originalName))						return false;
+		if(!Arrays.equals(parameterType, meth.getParamTypes()))				return false;
 		
 		return true;
 	}
