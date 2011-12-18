@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccStatement;
 import xtc.tree.GNode;
@@ -14,7 +14,8 @@ public class ccDeclaration {
 	
 	public ccDeclaration(GNode n, ccBlock b) {
 		modifiers = extract((GNode)n.get(0));
-		types = extract((GNode)n.get(1));
+		modifiers = modifiers.replace("final", "const");
+		types = new ccStatement(n.getGeneric(1),block).publish();
 		types = new ccHelper().convertType(types);
 		block = b;
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
@@ -37,7 +38,7 @@ public class ccDeclaration {
 				value = new ccStatement((GNode)n.get(2)).publish();
 			}
 		}
-		if(n.getNode(2).hasName("StringLiteral")){
+		if(n.getNode(2)!=null&&n.getNode(2).hasName("StringLiteral")){
 			value = "new __String("+n.getNode(2).getString(0)+")";
 		}
 		if(n.get(1)==null&&value!="")
@@ -46,18 +47,31 @@ public class ccDeclaration {
 	}
 	
 	public String publish(){
-		return modifiers+" "+types+" "+name+" "+declaration+" "+value+";";
+		return modifiers+types+ " "+name+" "+declaration+" "+value+";";
 	}
 
+	public String publishShort(){
+		return name+" "+declaration+" "+value+";\n";
+	}
+	public String getModifiers(){
+		return modifiers;
+	}
+	public boolean declaresToValue(){
+		return declaration.contains("=");
+	}
+	public String getTypes(){
+		return types;
+	}
 	public String extract(GNode n){
+		String modifiers = "";
 		for(Object s: n){
 			if (s instanceof String){
-				return (String)s;
+				modifiers+=(String)s+" ";
 			}
 			else if(s instanceof GNode){
-				return extract((GNode)s);
+				modifiers+= extract((GNode)s);
 			}
 		}
-		return "";
+		return modifiers;
 	}
 }

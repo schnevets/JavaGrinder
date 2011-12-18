@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,13 +23,13 @@ public class ccMaster extends Visitor {
 	private LinkedList<ccMainMethod> mainMethodList;
 	private LinkedList<ccClass> classList;
 	private LinkedList<String> modifierList;
-	private LinkedList<String> setInstanceVariables;
 	private String[] argumentType;
 	private String[] argumentName;
 	private ccBlock latestBlock;
 	private HashSet mangleNames;
 	private File directory;
 	private String[] currentPackage;
+	private LinkedList<String> printToConstructors;
 	
 	
 	public ccMaster(LinkedList<String> dependencies, HashSet mangleList, File dir){
@@ -42,6 +42,7 @@ public class ccMaster extends Visitor {
 		mainMethodList = new LinkedList<ccMainMethod>();
 		classCounter = 2;
 		javaLangMethods();
+		printToConstructors = new LinkedList<String>();
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
@@ -57,7 +58,6 @@ public class ccMaster extends Visitor {
 		}
 
 	}
-	
 	/**
 	 * Adds Object, String and Class into the class list data structure.
 	 */
@@ -93,7 +93,6 @@ public class ccMaster extends Visitor {
 		currentClass.addMethod(new ccMethod("isInstance", currentClass, "public", "String", argumentType, argumentName));
 		currentClass.addInheritedMethods();
 	}
-	
 	/**
 	 * Printy Thingy
 	 * 
@@ -159,8 +158,8 @@ public class ccMaster extends Visitor {
 			out.write("\n");
 			
 			//class variables that are set as they are declared
-			for(int j=0; j < setInstanceVariables.size(); j++){
-				out.write(setInstanceVariables.get(j));
+			for(int j=0; j < classList.get(i).getInstanceVariables().size(); j++){
+				out.write(classList.get(i).getInstanceVariables().get(j));
 			}
 			
 			out.write("\n");
@@ -219,15 +218,14 @@ public class ccMaster extends Visitor {
 
 	public void visitCompilationUnit(GNode n){
 		visit(n);
-		
 		// Making sure each class has all the inherited methods before the secondary visit starts
 		for(int i=3; i < classList.size(); i++){
 			classList.get(i).addInheritedMethods();
 		}
-		
 		/* It's the glorious visitor-within-a-visitor that makes the blocks! It's the blocker! */
 		new Visitor() {
 			private int constructorCounter;
+			private boolean constructorFlag;
 			private int methodCounter;
 			private LinkedList<String> parameterNames;
 			
@@ -240,13 +238,15 @@ public class ccMaster extends Visitor {
 					}
 				}
 				constructorCounter = 0;
+				constructorFlag = false;
 				methodCounter = 0;
 				parameterNames = new LinkedList<String>();
 				visit(n);
-				addDefaultMethods(currentClass);
 			}
 			public void visitConstructorDeclaration(GNode n){
+				constructorFlag = true;
 				visit(n);
+				constructorFlag = false;
 				currentClass.getConstructorAtIndex(constructorCounter).setBlock(latestBlock);
 				constructorCounter++;
 			}
@@ -254,7 +254,7 @@ public class ccMaster extends Visitor {
 			public void visitMethodDeclaration(GNode n){
 				String name = (String)n.getString(3);
 				visit(n);
-				if(name.matches("main")){
+				if(name.trim().equals("main")){
 					mainMethodList.getLast().setBlock(latestBlock);
 				}
 				else{
@@ -267,25 +267,17 @@ public class ccMaster extends Visitor {
 				parameterNames.add(n.getString(3));
 			}
 			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName());
+				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName(), constructorFlag);
+				if(constructorFlag){
+					latestBlock.publish().addAll(printToConstructors);
+				}
 			}
-			
-			public void addDefaultMethods(ccClass clas){
-				ccManualBlock deleteBlock = new ccManualBlock();
-				deleteBlock.addCustomLine("  delete __this;");
-				ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
-				delete.setBlock(deleteBlock);
-				delete.changeThisToPointer();
-				clas.addMethod(delete);
-			}
-			
 			public void visit(Node n) {
 				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
 			}
 		}.dispatch(n);
 	}
 	public void visitClassDeclaration(GNode n) throws Exception{
-		setInstanceVariables = new LinkedList<String>();
 		String name = (String)n.getString(1);
 		String access = "public";
 		boolean isStatic = false;
@@ -302,7 +294,6 @@ public class ccMaster extends Visitor {
 		classList.add(new ccClass(name, access, isStatic));
 		currentClass = classList.getLast();
 		currentClass.addPackage(currentPackage);
-		
 		if(null != n.getNode(3)){
 			String extension = n.getNode(3).getNode(0).getNode(0).getString(0);
 			boolean extensionCheck = false;
@@ -319,8 +310,8 @@ public class ccMaster extends Visitor {
 				throw new Exception();
 			}
 		}
-		
 		visit(n);
+		addDefaultMethods(currentClass);
 	}
 	
 	public void visitPackageDeclaration(GNode n){
@@ -336,10 +327,16 @@ public class ccMaster extends Visitor {
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		currentClass.addField(name, type);
-		if((null != n.getNode(2).getNode(0).get(2))&&
-				("NewArrayExpression" != n.getNode(2).getNode(0).getNode(2).getName())){
-			ccDeclaration declarationStatement = new ccDeclaration(n, new ccBlock());
-	        setInstanceVariables.add(currentClass.get_Name() + "::" + " " + declarationStatement.publish() + "\n");
+		ccDeclaration declarationStatement = new ccDeclaration(n, null);
+		boolean isArray = (declarationStatement.getTypes().contains("__rt::Array"));
+		boolean isStatic = declarationStatement.getModifiers().contains("static");
+		String isConst = "";
+		if(declarationStatement.getModifiers().contains("const")){isConst="const";}
+		if(isStatic||isArray){
+				currentClass.addInstanceVariable(isConst +" " + declarationStatement.getTypes() + " " + currentClass.get_Name() + "::" + declarationStatement.publishShort() + "\n");
+		}
+		if((!isStatic)&&(declarationStatement.declaresToValue())){
+			printToConstructors.add(declarationStatement.publishShort());
 		}
 	}
 	public void visitConstructorDeclaration(GNode n){
@@ -392,6 +389,7 @@ public class ccMaster extends Visitor {
 			mainMethodList.add(new ccMainMethod(currentClass, access, returnType, argumentType, argumentName, isStatic));
 		}
 		else{
+			
 			ccMethod newMethod = new ccMethod(name, currentClass, access, returnType, argumentType, argumentName, isStatic);
 			Iterator manIterate = mangleNames.iterator();
 			while (manIterate.hasNext()){
@@ -408,6 +406,14 @@ public class ccMaster extends Visitor {
 		}
 	}
 
+	public void addDefaultMethods(ccClass clas){
+		ccManualBlock deleteBlock = new ccManualBlock();
+		deleteBlock.addCustomLine("  delete __this;");
+		ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
+		delete.setBlock(deleteBlock);
+		delete.changeThisToPointer();
+		clas.addMethod(delete);
+	}
 	
 	public void visit(Node n) {
 		for (Object o : n) if (o instanceof Node) dispatch((Node)o);

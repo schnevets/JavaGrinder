@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 
 /*
@@ -22,19 +22,21 @@ class ccBlock extends Visitor{
 	private LinkedList<String> localVariableNames;
 	public LinkedList<ccClass> classList;
 	public String currentClass;
+	private boolean isConstructorBlock;
 	
 	public ccBlock(){
 		localVariableNames = new LinkedList<String>();
 		blockLines = new LinkedList<String>();
 	}
 
-	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes, String currentc) {
+	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes, String currentc, boolean construct) {
 		blockLines = new LinkedList<String>();
 		localVariableNames = new LinkedList<String>();
 		localVariableNames.addAll(parameterNames);
 		classList = classes;
 		currentClass = currentc;
 		variables = var;
+		isConstructorBlock = construct;
 		visit(n);
 	}
 	
@@ -64,7 +66,7 @@ class ccBlock extends Visitor{
 
 	public void visitBlock(GNode n){
 //		System.out.println(n);
-		ccBlock blockStatement = new ccBlock(n, variables, localVariableNames, classList, currentClass);
+		ccBlock blockStatement = new ccBlock(n, variables, localVariableNames, classList, currentClass, isConstructorBlock);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");
@@ -72,36 +74,41 @@ class ccBlock extends Visitor{
 
 
 	public void visitConditionalStatement(GNode n){
-		ccStatement ifLine = new ccStatement(n);
+		ccStatement ifLine = new ccStatement(n, this);
 		blockLines.add("  " + ifLine.line + "\n");
 	}
 	public void visitForStatement(GNode n){
 //		System.out.println(n);
-		ccStatement forLine = new ccStatement(n);
+		ccStatement forLine = new ccStatement(n, this);
 		blockLines.add("  " + forLine.line + "\n");
 	}
 	public void visitBreakStatement(GNode n){
 //		System.out.println(n);
-		ccStatement breakLine = new ccStatement(n);
+		ccStatement breakLine = new ccStatement(n, this);
 		blockLines.add("  " + breakLine.line + "\n");
 	}
 	public void visitWhileStatement(GNode n){
-		ccStatement whileLine = new ccStatement(n);
+		ccStatement whileLine = new ccStatement(n, this);
 		blockLines.add("  " + whileLine.line + "\n");
 	}
 	public void visitReturnStatement(GNode n){
-		ccStatement whileLine = new ccStatement(n);
+		ccStatement whileLine = new ccStatement(n, this);
 		blockLines.add("  " + whileLine.line + "\n");
 	}
-		
+	
+	public boolean getIsConstructorBlock(){
+		return isConstructorBlock;
+	}
+	
 	public LinkedList<String> getLocalVariables(){
 		return localVariableNames;
 	}
-	
 	public void addLine(String s){
 		blockLines.add(s);
 	}
-	
+	public void addLineFront(String s){
+		blockLines.addFirst(s);
+	}
 	public LinkedList<String> publish() {
 		return blockLines;
 	}

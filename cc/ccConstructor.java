@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.LinkedList;
 
@@ -29,7 +29,9 @@ public class ccConstructor {
 	public void setBlock(ccBlock blk){
 		block = blk;
 	}
-	
+	public ccBlock getBlock(){
+		return block;
+	}
 	public String getName(){
 		return name;
 	}

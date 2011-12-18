@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccBlock;
 import oop.ccMethod;
@@ -218,13 +218,13 @@ public class ccStatement extends Visitor{
 		line+="]";
 	}
 	public void visitPrimaryIdentifier(GNode n){
-		if(block!=null&&!block.getLocalVariables().contains(n.get(0))){
-			line+= "__this::" + ccHelper.convertType(n.getString(0));
+		if(!((block==null)||(block.getLocalVariables().contains(n.get(0)))||(block.getIsConstructorBlock()))){
+			line+= "__this->" + ccHelper.convertType(n.getString(0));	
 		}	
-
 		else{
 			line+= ccHelper.convertType(n.getString(0));
 		}
+		
 	}
 	
 	public void visitNewClassExpression(GNode n){
@@ -256,16 +256,12 @@ public class ccStatement extends Visitor{
 				argTypes[i] = block.currentClass;
 			}
 			else if(n.getNode(i).getName().matches("PrimaryIdentifier")){
-//				System.out.println("  !!!:" + n.getNode(i).getString(0));
-//				System.out.println("  !!!:" + block.variables.get(n.getNode(i).getString(0)));
 				argTypes[i] = block.variables.get(n.getNode(i).getString(0));
 			}
 			else if(n.getNode(i).getName().matches("CastExpression")){
 				argTypes[i] = n.getNode(i).getNode(0).getNode(0).getString(0);
-				System.out.println(n.getNode(i).getNode(0).getNode(0).getString(0));
 			}
 		}
-		System.out.println(argTypes);
 		return argTypes;
 	}
 	

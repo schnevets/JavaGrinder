@@ -1,7 +1,9 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+
 
 public class ccClass {
 	private final String name;
@@ -13,6 +15,7 @@ public class ccClass {
 	private HashMap<String, String> fields;
 	private ArrayList<String> packageNames;
 	private boolean constructorAdded;
+	private ArrayList<String> instanceVariables;
 	private ccClass superClass;
 	
 	public ccClass(String clName, String clAccess){
@@ -28,18 +31,19 @@ public class ccClass {
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
 		ccConstructor emptyCon = new ccConstructor(this.getName(), "public", new String[0], new String[0], this);
-		emptyCon.setBlock(new ccManualBlock());
+		emptyCon.setBlock(new ccBlock());
 		constructors.add(emptyCon);
 		constructorAdded = false;
 		fields = new HashMap<String, String>();
 		packageNames = new ArrayList<String>();
+		instanceVariables=new ArrayList<String>();
 		superClass = null;
+		mCount = 0;
 	}
 	
 	public void addSuper(ccClass sClubSeven){
 		superClass = sClubSeven;
 	}
-	
 	/** Adds method to class's list of methods */
 	public void addMethod(ccMethod method){
 		methods.add(method);
@@ -112,7 +116,6 @@ public class ccClass {
 		}
 		return false;
 	}
-	
 	public String getMethodName(String s, String[] param){
 		for(int i = 0; i < methods.size(); i++){
 			if(methods.get(i).match(s, param))
@@ -131,12 +134,8 @@ public class ccClass {
 	 * @param s Name of desired constructor.
 	 * @return The constructor with name s.
 	 */
-	public ccConstructor getConstructor(String s){
-		for(int i = 0; i < constructors.size(); i++){
-			if(constructors.get(i).getName() == s)
-				return constructors.get(i);
-		}
-		return new ccConstructor("CONSTRUCTOR NOT FOUND", this);
+	public ArrayList<ccConstructor> getConstructors(){
+		return constructors;
 	}
 	public int getMethodCount(){
 		return mCount;
@@ -203,7 +202,6 @@ public class ccClass {
 		}
 		return meth;
 	}
-	
 	public String toString(){
 
 		String s = access + " class Name:\"" + name + "\" Static:" + isStatic + " Constructors:";
@@ -223,6 +221,12 @@ public class ccClass {
 		else s += "none";
 
 		return s;
+	}
+	public void addInstanceVariable(String string) {
+		instanceVariables.add(string);
+	}
+	public ArrayList<String> getInstanceVariables() {
+		return instanceVariables;
 	}
 	
 }
