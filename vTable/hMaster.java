@@ -263,6 +263,7 @@ public class hMaster {
 			vTableClass currentclass;
 			LinkedList<String> namespace;
 			boolean missingsuper;
+			boolean arraycheck;
 			String dataLayout;
 			String operation;
 			
@@ -316,6 +317,11 @@ public class hMaster {
 //				}
 //			}
 			
+			public void visitDimensions(GNode n){
+				//only for method argument only
+				//don't need for now
+			}
+			
 			/**
 			 * Possible Parents: None
 			 * Writes to Elements: No
@@ -325,6 +331,7 @@ public class hMaster {
 			public void visitCompilationUnit(GNode n){
 				//System.out.println("made it");
 				namespace = new LinkedList<String>();
+				arraycheck = false;
 				for(Object o : n){
 					if (o instanceof Node){ 
 						missingsuper = false;
@@ -416,7 +423,13 @@ public class hMaster {
 			 * @param n
 			 */
 			public void visitType(GNode n){
+				if(n.getNode(1) != null){
+					//has dimensions
+					System.out.println("has array");
+					arraycheck = true;
+				}
 				visit(n);
+				arraycheck = false;
 			}
 
 			/**
@@ -440,18 +453,42 @@ public class hMaster {
 //				}
 				
 				if(operation.equals("dataLayout")){
-					dataLayout = dataLayout + returntype + " ";
+					if(arraycheck == false){
+						dataLayout = dataLayout + returntype + " ";
+					}
+					else{
+						dataLayout = dataLayout + returntype + "* ";
+					}
 				}
 				else if(operation.equals("Constructor")){
-					dataLayout = dataLayout + returntype + " ";
+					if(arraycheck == false){
+						dataLayout = dataLayout + returntype + " ";
+					}
+					else{
+						dataLayout = dataLayout + returntype+"* ";
+					}
 				}
 				else if(operation.equals("Method")){
-					currentclass.appendMethod("ReturnType", returntype);
-					currentclass.appendTableLayout("ReturnType", returntype);
+					if(arraycheck == false){
+						currentclass.appendMethod("ReturnType", returntype);
+						currentclass.appendTableLayout("ReturnType", returntype);
+					}
+					else{
+						//"__rt::Array<"+returnable+">"
+						currentclass.appendMethod("ReturnType", returntype+"*");
+						currentclass.appendTableLayout("ReturnType", returntype+"*");					
+					}
+					
 				}
 				else if(operation.equals("MethodParameter")){
-					currentclass.appendMethod("Parameters", returntype);
-					currentclass.appendTableLayout("Parameters", returntype);
+					if(arraycheck == false){
+						currentclass.appendMethod("Parameters", returntype);
+						currentclass.appendTableLayout("Parameters", returntype);	
+					}
+					else{
+						currentclass.appendMethod("Parameters", returntype+"*");
+						currentclass.appendTableLayout("Parameters", returntype+"*");
+					}
 				}
 			}
 
@@ -484,10 +521,20 @@ public class hMaster {
 				}
 				else if(operation.equals("dataLayout")){
 					currentclass.addAdditionalInclude(returnable);
-					dataLayout = dataLayout + returnable + " ";
+					if(arraycheck == false){
+						dataLayout = dataLayout + returnable + " ";
+					}
+					else{
+						dataLayout = dataLayout + "__rt::Array<"+returnable+"> ";
+					}
 				}
 				else if(operation.equals("Constructor")){
-					dataLayout = dataLayout + returnable + " ";
+					if(arraycheck == false){
+						dataLayout = dataLayout + returnable + " ";
+					}
+					else{
+						dataLayout = dataLayout + "__rt::Array<"+returnable+"> ";
+					}
 				}
 				else if(operation.equals("Method")){
 					currentclass.appendMethod("ReturnType", returnable);
@@ -497,8 +544,15 @@ public class hMaster {
 				}
 				else if(operation.equals("MethodParameter")){
 					currentclass.addAdditionalInclude(returnable);
-					currentclass.appendMethod("Parameters", returnable);
-					currentclass.appendTableLayout("Parameters", returnable);
+					if(arraycheck == true){
+						currentclass.appendMethod("Parameters", "__rt::Array<"+returnable+">");
+						currentclass.appendTableLayout("Parameters", "__rt::Array<"+returnable+">");
+					}
+					else{
+						currentclass.appendMethod("Parameters", returnable);
+						currentclass.appendTableLayout("Parameters", returnable);
+					}
+
 					//System.out.println("parameter " + returnable + " for " + currentclass.currentmethod.methodname);
 					//System.out.println("for node " + n.hashCode());
 				}
@@ -539,6 +593,9 @@ public class hMaster {
 					//dataLayout = dataLayout + returnable + " ";
 					if(returnable.equals("final")){
 						dataLayout = dataLayout + "const ";
+					}
+					if(returnable.equals("static")){
+						dataLayout = dataLayout + "static ";
 					}
 				}
 				else if(operation.equals("Constructor") && returnable.equals("final")){

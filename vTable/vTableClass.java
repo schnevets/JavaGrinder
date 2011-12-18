@@ -92,7 +92,7 @@ public class vTableClass {
 	
 	public boolean checkJavaLang(String s){
 		//System.out.println("checking " + s);
-		if(s.equals("String") || s.equals("Object") || s.equals("Class")){
+		if(s.equals("String") || s.equals("Object") || s.equals("Class") || s.equals("Exception")){
 			return true;
 		}
 		return false;
