@@ -9,6 +9,7 @@ public class ccClass {
 	private final boolean isStatic;
 	private ArrayList<ccConstructor> constructors;
 	private ArrayList<ccMethod> methods;
+	private int mCount;
 	private HashMap<String, String> fields;
 	private ArrayList<String> packageNames;
 	private boolean constructorAdded;
@@ -36,6 +37,7 @@ public class ccClass {
 	/** Adds method to class's list of methods */
 	public void addMethod(ccMethod method){
 		methods.add(method);
+		mCount++;
 	}
 	/** Adds constructor to class's list of constructors */
 	public void addConstructor(ccConstructor constructor){
@@ -131,7 +133,7 @@ public class ccClass {
 		return new ccConstructor("CONSTRUCTOR NOT FOUND", this);
 	}
 	public int getMethodCount(){
-		return methods.size();
+		return mCount;
 	}
 	public int getConstructorCount(){
 		return constructors.size();
@@ -159,19 +161,19 @@ public class ccClass {
 		String[] argumentType = new String[0];
 		String[] argumentName = new String[0];
 		if(!hasMethod("hashCode", argumentType))
-			addMethod(new ccMethod("hashCode", this, "public", "int32_t", argumentType, argumentName));
+			methods.add(new ccMethod("hashCode", this, "public", "int32_t", argumentType, argumentName));
 		argumentType = new String[1];
 		argumentType[0] = "Object";
 		argumentName = new String[1];
 		argumentName[0] = "other";
 		if(!hasMethod("equals", argumentType)) 
-			addMethod(new ccMethod("equals", this, "public", "bool", argumentType, argumentName));
+			methods.add(new ccMethod("equals", this, "public", "bool", argumentType, argumentName));
 		argumentType = new String[0];
 		argumentName = new String[0];
 		if(!hasMethod("getClass", argumentType))
-			addMethod(new ccMethod("getClass", this, "public", "Class", argumentType, argumentName));
+			methods.add(new ccMethod("getClass", this, "public", "Class", argumentType, argumentName));
 		if(!hasMethod("toString", argumentType))
-			addMethod(new ccMethod("toString", this, "public", "String", argumentType, argumentName));
+			methods.add(new ccMethod("toString", this, "public", "String", argumentType, argumentName));
 	}
 	
 	public String toString(){
