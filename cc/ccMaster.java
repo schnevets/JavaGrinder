@@ -426,7 +426,7 @@ public class ccMaster extends Visitor {
 
 	public void addDefaultMethods(ccClass clas){
 		ccManualBlock deleteBlock = new ccManualBlock();
-		deleteBlock.addCustomLine("  delete __this;");
+		deleteBlock.addCustomLine("{  delete __this;}");
 		ccMethod delete = new ccMethod("__delete", clas, "public", "void", new String[0], new String[0]);
 		delete.setBlock(deleteBlock);
 		delete.changeThisToPointer();

@@ -1,6 +1,6 @@
 package oop;
 
-import oop.ccBlock;
+
 import oop.ccMethod;
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -8,6 +8,7 @@ import xtc.tree.Visitor;
 
 public class ccStatement extends Visitor{
 	String line="";
+	private boolean assignmentFlag;
 	private ccBlock block;
 	
 	public ccStatement(GNode n, ccBlock parent) {
@@ -23,6 +24,9 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitExpression(GNode n){
+		if (n.get(1).equals("=")){
+			assignmentFlag = true;
+		}
 		visit(n);
 	}
 	
@@ -126,7 +130,12 @@ public class ccStatement extends Visitor{
 		line+=(String) n.get(0);
 	}
 	public void visitStringLiteral(GNode n){
-		line+=(String) n.get(0);
+		if (assignmentFlag){
+			line+=" new __String(" + n.get(0) +")";
+		}
+		else{
+			line+=(String) n.get(0);
+		}
 	}
 	public void visitBooleanLiteral(GNode n){
 		line+=(String) n.get(0);		

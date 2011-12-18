@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import oop.ccBlock;
+
 
 
 public class ccClass {
@@ -32,7 +34,10 @@ public class ccClass {
 		methods = new ArrayList<ccMethod>();
 		constructors = new ArrayList<ccConstructor>();
 		ccConstructor emptyCon = new ccConstructor(this.getName(), "public", new String[0], new String[0], this);
-		emptyCon.setBlock(new ccBlock());
+		ccBlock emptyBlock = new ccBlock();
+		emptyBlock.blockLines.add("{\n");
+		emptyBlock.blockLines.add("}\n");
+		emptyCon.setBlock(emptyBlock);
 		constructors.add(emptyCon);
 		constructorAdded = false;
 		fields = new HashMap<String, String>();
