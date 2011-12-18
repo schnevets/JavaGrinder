@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import oop.ccStatement;
 import xtc.tree.GNode;
@@ -35,7 +35,7 @@ public class ccDeclaration {
 				value = new ccStatement((GNode)n.get(2), block).publish();
 			}
 			else{
-				value = new ccStatement((GNode)n.get(2)).publish();
+				value = new ccStatement((GNode)n.get(2), block).publish();
 			}
 		}
 		if(n.getNode(2)!=null&&n.getNode(2).hasName("StringLiteral")){

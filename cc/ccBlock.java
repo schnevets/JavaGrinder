@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 /*
@@ -19,7 +19,7 @@ class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
 	public HashMap<String, String> variables;
-	private LinkedList<String> localVariableNames;
+	public LinkedList<String> localVariableNames;
 	public LinkedList<ccClass> classList;
 	public String currentClass;
 	private boolean isConstructorBlock;
@@ -37,16 +37,18 @@ class ccBlock extends Visitor{
 		currentClass = currentc;
 		variables = var;
 		isConstructorBlock = construct;
-		visit(n);
-	}
-	
-	public ccBlock(GNode n) {
-		localVariableNames = new LinkedList<String>();
-		blockLines = new LinkedList<String>();
-		blockLines.add("{");
+		blockLines.add("{\n");
 		visit(n);
 		blockLines.add("}");
 	}
+	
+//	public ccBlock(GNode n) {
+//		localVariableNames = new LinkedList<String>();
+//		blockLines = new LinkedList<String>();
+//		blockLines.add("{");
+//		visit(n);
+//		blockLines.add("}");
+//	}
 	
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
@@ -104,10 +106,14 @@ class ccBlock extends Visitor{
 		return localVariableNames;
 	}
 	public void addLine(String s){
+		blockLines.remove();
 		blockLines.add(s);
+		blockLines.add("}");
 	}
 	public void addLineFront(String s){
+		blockLines.removeFirst();
 		blockLines.addFirst(s);
+		blockLines.addFirst("{\n");
 	}
 	public LinkedList<String> publish() {
 		return blockLines;

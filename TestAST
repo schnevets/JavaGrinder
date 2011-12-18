@@ -802,7 +802,7 @@ CompilationUnit(
         null,
         Block(
           ReturnStatement(
-            NullLiteral()
+            resLiteral()
           )
         )
       ),

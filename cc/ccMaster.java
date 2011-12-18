@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,7 +19,7 @@ import xtc.tree.Visitor;
 public class ccMaster extends Visitor {
 	
 	private ccClass currentClass;
-	private int classCounter;
+	private int mainCounter;
 	private LinkedList<ccMainMethod> mainMethodList;
 	private LinkedList<ccClass> classList;
 	private LinkedList<String> modifierList;
@@ -40,18 +40,84 @@ public class ccMaster extends Visitor {
 		directory = dir;
 		classList = new LinkedList<ccClass>();
 		mainMethodList = new LinkedList<ccMainMethod>();
-		classCounter = 2;
 		javaLangMethods();
 		printToConstructors = new LinkedList<String>();
+		System.out.println(dependencies.size());
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
 			this.dispatch(ast.generateAST(nextFile));
 		}
+		iterate = dependencies.iterator();
+		currentClass = classList.get(2);
+		mainCounter = 0;
+		while (iterate.hasNext()){
+			modifierList = new LinkedList<String>();
+			String nextFile = (String)iterate.next();
+			new Visitor() {
+				private int constructorCounter;
+				private boolean constructorFlag;
+				private int methodCounter;
+				private LinkedList<String> parameterNames;
+				
+				public void visitClassDeclaration(GNode n){
+					String name = (String)n.getString(1);
+					for(int i=0; i < classList.size(); i++){
+						
+						if(name.equals(classList.get(i).getName())){
+							System.out.println(classList.get(i).getName() + " = " + name);
+							currentClass = classList.get(i);
+						}
+					}
+					constructorCounter = 0;
+					constructorFlag = false;
+					methodCounter = 0;
+					parameterNames = new LinkedList<String>();
+					visit(n);
+				}
+				public void visitConstructorDeclaration(GNode n){
+					constructorFlag = true;
+					visit(n);
+					constructorFlag = false;
+					currentClass.getConstructorAtIndex(constructorCounter).setBlock(latestBlock);
+					constructorCounter++;
+				}
+				
+				public void visitMethodDeclaration(GNode n){
+					String name = (String)n.getString(3);
+					visit(n);
+					if(name.trim().equals("main")){
+						latestBlock.addLineFront(currentClass.getName() + " __this = new " + currentClass.getName() + "();\n" );
+						mainMethodList.get(mainCounter).setBlock(latestBlock);
+						mainCounter++;
+					}
+					else{
+						currentClass.getMethodAtIndex(methodCounter).setBlock(latestBlock);
+						methodCounter++;
+					}
+				}
+				
+				public void visitFormalParameter(GNode n){
+					parameterNames.add(n.getString(3));
+				}
+				public void visitBlock (GNode n){
+					latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName(), constructorFlag);
+					if(constructorFlag){
+						latestBlock.publish().addAll(printToConstructors);
+					}
+				}
+				public void visit(Node n) {
+					for (Object o : n) if (o instanceof Node) dispatch((Node)o);
+				}
+			}.dispatch(ast.generateAST(nextFile));
+		}
+		
 		//for(ccClass c : classList){
 		//	System.out.println(c.getName());
 		//}
+		System.out.println("    before try");
 		try{
+			System.out.println("    in try");
 			this.publishToFiles();
 		} catch (IOException e){
 			e.printStackTrace();
@@ -103,7 +169,9 @@ public class ccMaster extends Visitor {
 		File file;
 		FileWriter fw;
 		BufferedWriter out;
+		System.out.println("      ok");
 		for(ccMainMethod mainMethod : mainMethodList){
+			
 			file = new File(directory.getAbsolutePath() + "/main_" + mainMethod.getParentClass().getName() + ".cc");
 			fw = new FileWriter(file);
 			out = new BufferedWriter(fw);
@@ -116,7 +184,7 @@ public class ccMaster extends Visitor {
 
 			//usingNameSpace
 			HashSet<String> usingNameSpaceList = new HashSet<String>();
-			for(int q = 0; q < classList.size(); q++){
+			for(int q = 3; q < classList.size(); q++){
 				String usingNameSpace = "using namespace ";
 				for(int i = 0; i<classList.get(q).getPackage().size(); i++){
 					if(i>0){usingNameSpace += "::";}
@@ -129,13 +197,13 @@ public class ccMaster extends Visitor {
 				out.write(s);
 			}
 			
-			out.write(mainMethod.publishDeclaration() + "{\n");
+			out.write(mainMethod.publishDeclaration() + "\n");
 			blockLines = mainMethod.publishBlock();
 			while(!blockLines.isEmpty()){;
 				out.write(blockLines.remove(0));
 			}
 			
-			out.write("}\n");
+			out.write("\n");
 			out.close();
 		}
 		
@@ -165,21 +233,21 @@ public class ccMaster extends Visitor {
 			out.write("\n");
 			
 			for(int j=0; j < classList.get(i).getConstructorCount(); j++){
-				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " {\n");
+				out.write(classList.get(i).getConstructorAtIndex(j).publishDeclaration() + " \n");
 				blockLines = classList.get(i).getConstructorAtIndex(j).publishBlock();
 				while(!blockLines.isEmpty()){
 					out.write(blockLines.remove(0));
 				}
-				out.write("}\n");
+				out.write("\n");
 			}
 			
 			for(int j=0; j < classList.get(i).getMethodCount(); j++){
-				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + " {\n");
+				out.write(classList.get(i).getMethodAtIndex(j).publishDeclaration() + " \n");
 				blockLines = classList.get(i).getMethodAtIndex(j).publishBlock();
 				while(!blockLines.isEmpty()){
 					out.write(blockLines.remove(0));
 				}
-				out.write("}\n");
+				out.write("\n");
 			}
 			
 			String qualifiedPackageName = "";
@@ -218,64 +286,11 @@ public class ccMaster extends Visitor {
 
 	public void visitCompilationUnit(GNode n){
 		visit(n);
-		// Making sure each class has all the inherited methods before the secondary visit starts
 		for(int i=3; i < classList.size(); i++){
 			classList.get(i).addInheritedMethods();
 		}
 		/* It's the glorious visitor-within-a-visitor that makes the blocks! It's the blocker! */
-		new Visitor() {
-			private int constructorCounter;
-			private boolean constructorFlag;
-			private int methodCounter;
-			private LinkedList<String> parameterNames;
-			
-			public void visitClassDeclaration(GNode n){
-				classCounter++;
-				String name = (String)n.getString(1);
-				for(int i=0; i < classList.size(); i++){
-					if(name == classList.get(i).getName()){
-						currentClass = classList.get(i);
-					}
-				}
-				constructorCounter = 0;
-				constructorFlag = false;
-				methodCounter = 0;
-				parameterNames = new LinkedList<String>();
-				visit(n);
-			}
-			public void visitConstructorDeclaration(GNode n){
-				constructorFlag = true;
-				visit(n);
-				constructorFlag = false;
-				currentClass.getConstructorAtIndex(constructorCounter).setBlock(latestBlock);
-				constructorCounter++;
-			}
-			
-			public void visitMethodDeclaration(GNode n){
-				String name = (String)n.getString(3);
-				visit(n);
-				if(name.trim().equals("main")){
-					mainMethodList.getLast().setBlock(latestBlock);
-				}
-				else{
-					currentClass.getMethodAtIndex(methodCounter).setBlock(latestBlock);
-					methodCounter++;
-				}
-			}
-			
-			public void visitFormalParameter(GNode n){
-				parameterNames.add(n.getString(3));
-			}
-			public void visitBlock (GNode n){
-				latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName(), constructorFlag);
-				if(constructorFlag){
-					latestBlock.publish().addAll(printToConstructors);
-				}
-			}
-			public void visit(Node n) {
-				for (Object o : n) if (o instanceof Node) dispatch((Node)o);
-			}
-		}.dispatch(n);
+		
 	}
 	public void visitClassDeclaration(GNode n) throws Exception{
 		String name = (String)n.getString(1);
