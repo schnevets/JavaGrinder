@@ -256,9 +256,14 @@ public class ccMaster extends Visitor {
 			
 			//__class
 			String superClass = classList.get(i).getSuperClass().getName();
-			out.write("  " + superClass + " __superClass = new __" + superClass + "();\n");
-			out.write("Class " + classList.get(i).get_Name()+ "::__class() {\n" +
-		        "  static Class k = \n" +
+			
+			out.write("Class " + classList.get(i).get_Name()+ "::__class() {\n");
+			out.write("  " + superClass + " __superClass = new __" + superClass);
+			if(superClass.equals("String"))
+				out.write("(\"\");\n");
+			else
+				out.write("();\n");
+		    out.write("  static Class k = \n" +
 		        "  new __Class(__rt::literal(\""+ qualifiedPackageName + classList.get(i).getName() + "\"), __superClass->__vptr->getClass(__superClass), __rt::null(), false);\n" +
 		        "  return k;\n" +
 		      	"}\n");

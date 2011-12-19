@@ -337,10 +337,12 @@ public class ccStatement extends Visitor{
 		String compareObject = n.getNode(1).getNode(0).getString(0);
 		String compareVariable = n.getNode(0).getString(0);
 		
-		line+= "({" + compareObject + " " +
-				"__instCheck = new __" + compareObject + 
-				"();  __instCheck->__vptr->getClass(__instCheck)->__vptr->isInstance(__instCheck->__vptr->getClass(__instCheck), " + compareVariable +
-				");})";
+		line+= "({" + compareObject + " " + "__instCheck = new __" + compareObject;
+		if(compareObject.equals("String"))
+			line+="(\"\"); ";
+		else
+			line+="(); ";
+		line+= "__instCheck->__vptr->getClass(__instCheck)->__vptr->isInstance(__instCheck->__vptr->getClass(__instCheck), "+compareVariable+");})";
 	}
 	
 	public void visit(Node n) {
