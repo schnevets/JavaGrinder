@@ -11,6 +11,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import oop.ccDeclaration;
+import oop.ccHelper;
+import oop.ccVariable;
+
 import xtc.tree.GNode;
 import xtc.tree.Node;
 import xtc.tree.Visitor;
@@ -57,9 +61,13 @@ class ccBlock extends Visitor{
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = ccHelper.convertType((String)n.getNode(1).getNode(0).getString(0));
+		if(n.getNode(2).getNode(0).getNode(1)!=null && n.getNode(2).getNode(0).getNode(1).hasName("Dimensions")){
+			type = "__rt::Ptr<__rt::Array<" + type + "> >";
+		}
 		variables.put(name, new ccVariable(name, type));
 		localVariables.put(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n, this);
+		declarationStatement.changeTypeTo(type);
 		blockLines.add(" " + declarationStatement.publish() + "\n");
 	}
 

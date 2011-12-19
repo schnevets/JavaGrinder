@@ -40,11 +40,13 @@ public class ccDeclaration {
 		if(n.getNode(2)!=null&&n.getNode(2).hasName("StringLiteral")){
 			value = "new __String("+n.getNode(2).getString(0)+")";
 		}
-		if(n.get(1)==null&&value!="")
+		if((n.get(1)==null||n.getNode(1).hasName("Dimensions"))&&value!="")
 			declaration="=";
 
 	}
-	
+	public void changeTypeTo(String newType){
+		types = newType;
+	}
 	public String publish(){
 		return modifiers+types+ " "+name+" "+declaration+" "+value+";";
 	}
