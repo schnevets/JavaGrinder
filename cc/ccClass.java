@@ -15,7 +15,7 @@ public class ccClass {
 	private ArrayList<ccConstructor> constructors;
 	private ArrayList<ccMethod> methods;
 	private int mCount;
-	private HashMap<String, String> fields;
+	private HashMap<String, ccVariable> fields;
 	private ArrayList<String> packageNames;
 	private boolean constructorAdded;
 	private ArrayList<String> instanceVariables;
@@ -40,7 +40,7 @@ public class ccClass {
 		emptyCon.setBlock(emptyBlock);
 		constructors.add(emptyCon);
 		constructorAdded = false;
-		fields = new HashMap<String, String>();
+		fields = new HashMap<String, ccVariable>();
 		packageNames = new ArrayList<String>();
 		instanceVariables=new ArrayList<String>();
 		superClass = null;
@@ -65,8 +65,8 @@ public class ccClass {
 	}
 	
 	/** Adds field to class's hashmap of fields */
-	public void addField(String name, String type){
-		fields.put(name, type);
+	public void addField(String n, String t, boolean s){
+		fields.put(n, new ccVariable(n, t, this, s));
 	}
 	/** Sets the name of the class' package */
 	public void addPackage(String[] currentPackage){
@@ -174,8 +174,9 @@ public class ccClass {
 	
 	public void addInheritedMethods(){
 		
-		if(null != superClass){
-			superClass.bequeath(methods);
+		if(!(null == superClass) && !superClass.getName().equals("Object")){
+			methods = superClass.bequeath(methods);
+			fields = superClass.bequeath(fields);
 		}
 		
 		// Object methods:
@@ -212,26 +213,20 @@ public class ccClass {
 		}
 		return meth;
 	}
-	public String toString(){
-
-		String s = access + " class Name:\"" + name + "\" Static:" + isStatic + " Constructors:";
-		if(constructors.size() > 0){
-			for(int i = 0; i < constructors.size(); i++){
-				s += "\r\t" + constructors.get(i);
-			}
-			s += "\r";
+	
+	public HashMap<String, ccVariable> bequeath(HashMap<String, ccVariable> fi){
+		LinkedList<ccVariable> iter = new LinkedList<ccVariable>(fields.values());
+		for(int i=0; i<iter.size(); i++){
+			if (!fi.containsKey(iter.get(i).getName()))
+				fi.put(iter.get(i).getName(), iter.get(i));
 		}
-		else s += "none";
-		s += " Methods:";
-		if(methods.size() > 0){
-			for(int i = 0; i < methods.size(); i++){
-				s += "\r\t" + methods.get(i);
-			}
-		}
-		else s += "none";
-
-		return s;
+		return fi;
 	}
+	
+	public ccVariable findField(String n) {
+		return fields.get(n);
+	}
+	
 	public void addInstanceVariable(String string) {
 		instanceVariables.add(string);
 	}

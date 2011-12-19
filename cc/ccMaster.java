@@ -344,10 +344,10 @@ public class ccMaster extends Visitor {
 		
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
-		currentClass.addField(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n, null);
 		boolean isArray = (declarationStatement.getTypes().contains("__rt::Array"));
 		boolean isStatic = declarationStatement.getModifiers().contains("static");
+		currentClass.addField(name, type, isStatic);
 		String isConst = "";
 		if(declarationStatement.getModifiers().contains("const")){isConst="const";}
 		if(isStatic||isArray){

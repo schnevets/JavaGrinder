@@ -18,7 +18,7 @@ import xtc.tree.Visitor;
 class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
-	public HashMap<String, String> variables;
+	public HashMap<String, ccVariable> variables;
 	public LinkedList<String> localVariableNames;
 	public LinkedList<ccClass> classList;
 	public String currentClass;
@@ -53,7 +53,7 @@ class ccBlock extends Visitor{
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
-		variables.put(name, type);
+		variables.put(name, new ccVariable(name, type));
 		localVariableNames.add(name);
 		ccDeclaration declarationStatement = new ccDeclaration(n, this);
 		blockLines.add(" " + declarationStatement.publish() + "\n");

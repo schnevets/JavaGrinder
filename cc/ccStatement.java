@@ -65,7 +65,7 @@ public class ccStatement extends Visitor{
 				}
 				else if(n.getNode(0).get(0) instanceof String && block.variables.containsKey(n.getNode(0).getString(0))){
 					__this = n.getNode(0).getString(0);
-					objectType = block.variables.get(__this);
+					objectType = block.variables.get(__this).getType();
 //					System.out.println(objectType);
 				}
 			} 
@@ -79,10 +79,10 @@ public class ccStatement extends Visitor{
 					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)), block.classList);
 //					System.out.println("    " + methodInQuestion.isStatic);
 					if(methodInQuestion.isStatic){
-						line+= objectType + "::" + methodInQuestion.getName() + "(" + __this;
+						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(";
 					}
 					else if(methodInQuestion.access.contentEquals("private")){
-						line+= objectType + "::" + methodInQuestion.getName() + "(" + __this;
+						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(" + __this;
 					}
 					else {
 						line+= __this + "->__vptr->" + methodInQuestion.getName() + "(" + __this;
@@ -217,7 +217,20 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitSelectionExpression(GNode n){
-		visit(n);
+		if(block.variables.get(n.getString(n.size()-1)) == null){
+			ccClass c;
+			String oType = block.variables.get(n.getNode(0).getString(0)).getType();
+			for(int i = 3; i<block.classList.size(); i++){
+				if(block.classList.get(i).getName().contentEquals(oType)){
+					c = block.classList.get(i);
+					line += c.get_Name() + c.findField(n.getString(n.size()-1)).publish();
+				}
+			}
+		}
+		else{
+			line+= block.variables.get((n.getString(n.size()-1))).publish();
+		}
+		
 	}
 	public void visitThisExpression(GNode n){
 		line+="__this";
@@ -230,12 +243,13 @@ public class ccStatement extends Visitor{
 		line+="]";
 	}
 	public void visitPrimaryIdentifier(GNode n){
-		if(!((block==null)||(block.getLocalVariables().contains(n.get(0)))||(block.getIsConstructorBlock()))){
-			line+= "__this->" + ccHelper.convertType(n.getString(0));	
-		}	
-		else{
-			line+= ccHelper.convertType(n.getString(0));
-		}
+		line+= block.variables.get(n.get(0)).publish();
+//		if(!((block==null)||(block.getLocalVariables().contains(n.get(0)))||(block.getIsConstructorBlock()))){
+//			line+= "__this->" + ccHelper.convertType(n.getString(0));	
+//		}	
+//		else{
+//			line+= ccHelper.convertType(n.getString(0));
+//		}
 		
 	}
 	
@@ -272,7 +286,7 @@ public class ccStatement extends Visitor{
 				argTypes[i] = block.currentClass;
 			}
 			else if(n.getNode(i).getName().matches("PrimaryIdentifier")){
-				argTypes[i] = block.variables.get(n.getNode(i).getString(0));
+				argTypes[i] = block.variables.get(n.getNode(i).getString(0)).getType();
 			}
 			else if(n.getNode(i).getName().matches("AdditiveExpression")){
 				argTypes[i] = "int32_t";
@@ -284,15 +298,24 @@ public class ccStatement extends Visitor{
 		return argTypes;
 	}
 	
-	public void visitLogicalAndExpression(GNode n){
-		dispatch(n.getGeneric(0));
-		line+=" && ";
-		dispatch(n.getGeneric(1));
-	}
-	public void visitEqualityExpression(GNode n){ 
-		line+="(";
-		visit(n); 
-		line+=")";
+	 public void visitLogicalAndExpression(GNode n){
+	        if(n.getGeneric(0).toString().contains("LogicalAndExpression")){
+	            System.out.println("Cool!");
+	            dispatch(n.getGeneric(0));
+	        }
+	        else{
+	            line+="(";        
+	            dispatch(n.getGeneric(0));
+	            line+=")";
+	            }
+	        line+=" && ";
+	        line+="(";        
+	        dispatch(n.getGeneric(1));
+	        line+=")";
+
+ }
+	 public void visitEqualityExpression(GNode n){ 
+		 visit(n);
 	}
 	public void visitLogicalNegationExpression(GNode n){
 		line+="!(";
