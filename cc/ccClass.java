@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class ccClass {
 	private int mCount;
 	private HashMap<String, ccVariable> fields;
 	private ArrayList<String> packageNames;
-	private boolean constructorAdded;
+	public boolean constructorOverWritten;
 	private ArrayList<String> instanceVariables;
 	private ccClass superClass;
 	
@@ -39,7 +39,7 @@ public class ccClass {
 		emptyBlock.blockLines.add("}\n");
 		emptyCon.setBlock(emptyBlock);
 		constructors.add(emptyCon);
-		constructorAdded = false;
+		constructorOverWritten = false;
 		fields = new HashMap<String, ccVariable>();
 		packageNames = new ArrayList<String>();
 		instanceVariables=new ArrayList<String>();
@@ -57,9 +57,9 @@ public class ccClass {
 	}
 	/** Adds constructor to class's list of constructors */
 	public void addConstructor(ccConstructor constructor){
-		if(!constructorAdded){
+		if(constructor.hasNoArgs()){
 			constructors.remove(0);
-			constructorAdded = true;
+			constructorOverWritten = true;
 		}
 		constructors.add(constructor);
 	}

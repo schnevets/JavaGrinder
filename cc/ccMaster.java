@@ -1,9 +1,10 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -42,7 +43,6 @@ public class ccMaster extends Visitor {
 		mainMethodList = new LinkedList<ccMainMethod>();
 		javaLangMethods();
 		printToConstructors = new LinkedList<String>();
-		System.out.println(dependencies.size());
 		while (iterate.hasNext()){
 			modifierList = new LinkedList<String>();
 			String nextFile = (String)iterate.next();
@@ -57,25 +57,29 @@ public class ccMaster extends Visitor {
 			new Visitor() {
 				private int constructorCounter;
 				private boolean constructorFlag;
+				private boolean addedConstructor;
 				private int methodCounter;
-				private LinkedList<String> parameterNames;
+				private HashMap<String, String> parameterNames;
 				
 				public void visitClassDeclaration(GNode n){
 					String name = (String)n.getString(1);
 					for(int i=0; i < classList.size(); i++){
 						
 						if(name.equals(classList.get(i).getName())){
-							System.out.println(classList.get(i).getName() + " = " + name);
 							currentClass = classList.get(i);
 						}
 					}
-					constructorCounter = 0;
+					constructorCounter = 1;
+					if(currentClass.constructorOverWritten){
+						constructorCounter = 0;
+					}
 					constructorFlag = false;
 					methodCounter = 0;
-					parameterNames = new LinkedList<String>();
+					addedConstructor = false;
 					visit(n);
 				}
 				public void visitConstructorDeclaration(GNode n){
+					parameterNames = new HashMap<String, String>();
 					constructorFlag = true;
 					visit(n);
 					constructorFlag = false;
@@ -85,6 +89,7 @@ public class ccMaster extends Visitor {
 				
 				public void visitMethodDeclaration(GNode n){
 					String name = (String)n.getString(3);
+					parameterNames = new HashMap<String, String>();
 					visit(n);
 					if(name.trim().equals("main")){
 						latestBlock.addLineFront(currentClass.getName() + " __this = new __" + currentClass.getName() + "();\n" );
@@ -98,7 +103,7 @@ public class ccMaster extends Visitor {
 				}
 				
 				public void visitFormalParameter(GNode n){
-					parameterNames.add(n.getString(3));
+					parameterNames.put(n.getString(3),new ccStatement(n.getGeneric(1), latestBlock).publish());
 				}
 				public void visitBlock (GNode n){
 					latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName(), constructorFlag);
@@ -112,12 +117,7 @@ public class ccMaster extends Visitor {
 			}.dispatch(ast.generateAST(nextFile));
 		}
 		
-		//for(ccClass c : classList){
-		//	System.out.println(c.getName());
-		//}
-		System.out.println("    before try");
 		try{
-			System.out.println("    in try");
 			this.publishToFiles();
 		} catch (IOException e){
 			e.printStackTrace();
@@ -169,7 +169,6 @@ public class ccMaster extends Visitor {
 		File file;
 		FileWriter fw;
 		BufferedWriter out;
-		System.out.println("      ok");
 		for(ccMainMethod mainMethod : mainMethodList){
 			
 			file = new File(directory.getAbsolutePath() + "/main_" + mainMethod.getParentClass().getName() + ".cc");

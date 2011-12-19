@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 
 /*
@@ -9,6 +9,7 @@ package oop;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -19,23 +20,26 @@ class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
 	public HashMap<String, ccVariable> variables;
-	public LinkedList<String> localVariableNames;
+	public HashMap<String, String> localVariables;
 	public LinkedList<ccClass> classList;
 	public String currentClass;
 	private boolean isConstructorBlock;
 	
 	public ccBlock(){
-		localVariableNames = new LinkedList<String>();
+		localVariables = new HashMap<String, String>();
 		blockLines = new LinkedList<String>();
 	}
 
-	public ccBlock(GNode n, HashMap var, LinkedList<String> parameterNames, LinkedList<ccClass> classes, String currentc, boolean construct) {
+	public ccBlock(GNode n, HashMap var, HashMap<String, String> parameterNamesTypes, LinkedList<ccClass> classes, String currentc, boolean construct) {
 		blockLines = new LinkedList<String>();
-		localVariableNames = new LinkedList<String>();
-		localVariableNames.addAll(parameterNames);
+		localVariables = parameterNamesTypes;
 		classList = classes;
 		currentClass = currentc;
 		variables = var;
+		
+		for(String s : parameterNamesTypes.keySet()){
+			variables.put(s, new ccVariable(s,parameterNamesTypes.get(s)));
+		}
 		isConstructorBlock = construct;
 		blockLines.add("{\n");
 		visit(n);
@@ -54,7 +58,7 @@ class ccBlock extends Visitor{
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = (String)n.getNode(1).getNode(0).getString(0);
 		variables.put(name, new ccVariable(name, type));
-		localVariableNames.add(name);
+		localVariables.put(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n, this);
 		blockLines.add(" " + declarationStatement.publish() + "\n");
 	}
@@ -67,8 +71,7 @@ class ccBlock extends Visitor{
 	}
 
 	public void visitBlock(GNode n){
-//		System.out.println(n);
-		ccBlock blockStatement = new ccBlock(n, variables, localVariableNames, classList, currentClass, isConstructorBlock);
+		ccBlock blockStatement = new ccBlock(n, variables, localVariables, classList, currentClass, isConstructorBlock);
 		blockLines.add("  {\n");
 		blockLines.add("  " + blockStatement.publish());
 		blockLines.add("  }\n");
@@ -80,12 +83,10 @@ class ccBlock extends Visitor{
 		blockLines.add("  " + ifLine.line + "\n");
 	}
 	public void visitForStatement(GNode n){
-//		System.out.println(n);
 		ccStatement forLine = new ccStatement(n, this);
 		blockLines.add("  " + forLine.line + "\n");
 	}
 	public void visitBreakStatement(GNode n){
-//		System.out.println(n);
 		ccStatement breakLine = new ccStatement(n, this);
 		blockLines.add("  " + breakLine.line + "\n");
 	}
@@ -102,8 +103,8 @@ class ccBlock extends Visitor{
 		return isConstructorBlock;
 	}
 	
-	public LinkedList<String> getLocalVariables(){
-		return localVariableNames;
+	public HashMap<String, String> getLocalVariables(){
+		return localVariables;
 	}
 	public void addLine(String s){
 		blockLines.remove();

@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 
 import oop.ccMethod;
@@ -33,10 +33,10 @@ public class ccStatement extends Visitor{
 	public void visitType(GNode n){
 		//for arrays
 		if((n.get(1) instanceof Node)&&n.getNode(1).hasName("Dimensions")){
-			line+="__rt::Array<";
+			line+="__rt::Ptr<__rt::Array<";
 			dispatch(n.getNode(0));
-			line+=">";
-//			System.out.println(line);
+			line+="> >";
+
 		}
 		else{
 			visit(n);
@@ -66,7 +66,6 @@ public class ccStatement extends Visitor{
 				else if(n.getNode(0).get(0) instanceof String && block.variables.containsKey(n.getNode(0).getString(0))){
 					__this = n.getNode(0).getString(0);
 					objectType = block.variables.get(__this).getType();
-//					System.out.println(objectType);
 				}
 			} 
 			for(int i=0; i< block.classList.size(); i++){
@@ -74,7 +73,6 @@ public class ccStatement extends Visitor{
 //					System.out.println("  " + findArgumentTypes(n.getNode(3)).length);
 //					System.out.println("  " + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
 					for(String s : findArgumentTypes(n.getNode(3))){
-						System.out.println(s);
 					}
 					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)), block.classList);
 //					System.out.println("    " + methodInQuestion.isStatic);
@@ -117,8 +115,9 @@ public class ccStatement extends Visitor{
 		visit(n);
 	}
 	public void visitSubscriptExpression(GNode n){
+		line+="(*";
 		dispatch(n.getNode(0));
-		line+="[";
+		line+=")[";
 		dispatch(n.getNode(1));
 		line+="]";
 		
@@ -143,7 +142,7 @@ public class ccStatement extends Visitor{
 	
 	public void visitBlock(GNode n){
 //		line+="{\n";
-		ccBlock blockStatement = new ccBlock(n, block.variables, block.localVariableNames, block.classList, block.currentClass, false);
+		ccBlock blockStatement = new ccBlock(n, block.variables, block.localVariables, block.classList, block.currentClass, false);
 //		line+="}\n";
 		while (!blockStatement.blockLines.isEmpty())
 			line += blockStatement.blockLines.remove()+"\n";
@@ -238,19 +237,22 @@ public class ccStatement extends Visitor{
 	public void visitNewArrayExpression(GNode n){
 		line+="new __rt::Array<";
 		dispatch(n.getNode(0));
-		line+=">[";
+		line+=">(";
 		dispatch(n.getNode(1));
-		line+="]";
+		line+=")";
 	}
 	public void visitPrimaryIdentifier(GNode n){
-		line+= block.variables.get(n.get(0)).publish();
-//		if(!((block==null)||(block.getLocalVariables().contains(n.get(0)))||(block.getIsConstructorBlock()))){
-//			line+= "__this->" + ccHelper.convertType(n.getString(0));	
-//		}	
-//		else{
-//			line+= ccHelper.convertType(n.getString(0));
-//		}
-		
+		if(block.variables.isEmpty()&&block.variables.get(n.get(0))!=null){
+			line+= block.variables.get(n.get(0)).publish();
+		}
+		else{
+			if(!((block==null)||(block.getLocalVariables().containsKey(n.get(0)))||(block.getIsConstructorBlock()))){
+				line+= "__this->" + ccHelper.convertType(n.getString(0));	
+			}	
+			else{
+				line+= ccHelper.convertType(n.getString(0));
+			}
+		}
 	}
 	
 	public void visitNullLiteral(GNode n){
@@ -269,7 +271,6 @@ public class ccStatement extends Visitor{
 	public String[] findArgumentTypes(Node n){
 		String[] argTypes = new String[n.size()];
 		for(int i=0; i< n.size(); i++){
-//			System.out.println("  visiting: " + n.getNode(i).getName());
 			if(n.getNode(i).getName().matches("IntegerLiteral")){
 				argTypes[i] = "int32_t";
 			}
@@ -300,7 +301,6 @@ public class ccStatement extends Visitor{
 	
 	 public void visitLogicalAndExpression(GNode n){
 	        if(n.getGeneric(0).toString().contains("LogicalAndExpression")){
-	            System.out.println("Cool!");
 	            dispatch(n.getGeneric(0));
 	        }
 	        else{

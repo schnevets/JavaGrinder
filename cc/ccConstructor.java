@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import java.util.LinkedList;
 
@@ -9,6 +9,7 @@ public class ccConstructor {
 	private final String[] parameterType;
 	private final String[] parameterName;
 	private ccBlock block;
+	private boolean isNoArg;
 	
 	// The first constructor only makes dummy... constructors... and will not actually be used
 	public ccConstructor(String mName, ccClass mClass){
@@ -17,6 +18,7 @@ public class ccConstructor {
 		access = "";
 		parameterType = new String[0];
 		parameterName = new String[0];
+		isNoArg = true;
 	}
 	public ccConstructor(String conName, String conAccess, String[] pType, String[] pName, ccClass mClass){
 		name = conName;
@@ -24,6 +26,7 @@ public class ccConstructor {
 		access = conAccess;
 		parameterType = pType;
 		parameterName = pName;
+		isNoArg = parameterName.length==0;
 	}
 	
 	public void setBlock(ccBlock blk){
@@ -35,7 +38,9 @@ public class ccConstructor {
 	public String getName(){
 		return name;
 	}
-	
+	public boolean hasNoArgs(){
+		return isNoArg;
+	}
 	public String publishDeclaration(){
 		String decl = "";
 		decl = parentClass.get_Name() + "::__" + name  + "(";

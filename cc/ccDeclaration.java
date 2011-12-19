@@ -1,4 +1,4 @@
-package oop;
+package oop.JavaGrinder.cc;
 
 import oop.ccStatement;
 import xtc.tree.GNode;
@@ -19,7 +19,6 @@ public class ccDeclaration {
 		types = new ccHelper().convertType(types);
 		block = b;
 		treatDeclarator((GNode) ((GNode) n.get(2)).get(0));
-//		System.out.println(this.publish());					//To be added to ccBlock
 	}
 	
 	/*
