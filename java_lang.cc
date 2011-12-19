@@ -323,6 +323,12 @@ namespace __rt {
   }
 
   template<>
+  Array<int16_t>::Array(const int32_t length)
+  : __vptr(&__vtable), length(length), __data(new int16_t[length]) {
+    std::memset(__data, 0, length * sizeof(int16_t));
+  }
+
+  template<>
   java::lang::Class Array<int32_t>::__class() {
     static java::lang::Class k =
       new java::lang::__Class(literal("[I"),
