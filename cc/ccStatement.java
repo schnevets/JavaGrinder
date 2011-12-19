@@ -107,6 +107,12 @@ public class ccStatement extends Visitor{
 		dispatch(n.getNode(1));
 		
 	}
+	public void visitBasicCastExpression(GNode n){
+		line+="(";
+		dispatch(n.getNode(0));
+		line+=")";
+		dispatch(n.getNode(2));
+	}
 	public void visitUnaryExpression(GNode n){
 		visit(n);
 	}
