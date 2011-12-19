@@ -108,11 +108,22 @@ public class ccClass {
 	 * @return The method with name s.
 	 */
 	public ccMethod getMethod(String s, String[] param, LinkedList<ccClass> classList){
+		ccMethod ret = new ccMethod("METHOD NOT FOUND", this);
+//		if(param.length>0){
+//			
+//		}
 		for(int i = 0; i < methods.size(); i++){
-			if(methods.get(i).match(s, param, classList))
-				return methods.get(i);
+			if(methods.get(i).match(s, param, classList)){
+				ccMethod tempM = methods.get(i);
+				if((param.length>0) && tempM.getParamTypes()[1] == param[0]){
+					return tempM;
+				}
+				else{
+					ret = tempM;
+				}
+			}	
 		}
-		return new ccMethod("METHOD NOT FOUND", this);
+		return ret;
 	}
 	
 	public boolean hasMethod(String s, String[] param){
