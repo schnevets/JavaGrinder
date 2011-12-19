@@ -334,9 +334,13 @@ public class ccStatement extends Visitor{
 		line+=")";
 	}
 	public void visitInstanceOfExpression(GNode n){
-		dispatch(n.getNode(0));
-		line+=" instanceof ";
-		dispatch(n.getNode(1));
+		String compareObject = n.getNode(1).getNode(0).getString(0);
+		String compareVariable = n.getNode(0).getString(0);
+		
+		line+= "({" + compareObject + " " +
+				"__instCheck = new __" + compareObject + 
+				"();  __instCheck->__vptr->getClass(__instCheck)->__vptr->isInstance(__instCheck->__vptr->getClass(__instCheck), " + compareVariable +
+				");})";
 	}
 	
 	public void visit(Node n) {
