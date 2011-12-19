@@ -6,6 +6,7 @@ public class ccVariable {
 	private String type;
 	private ccClass parent;
 	private boolean isStatic;
+	private String declareMe;
 	
 	/**
 	 * This constructor is for class variables created outside of a block.
@@ -37,6 +38,21 @@ public class ccVariable {
 		else{
 			return name;
 		}
+	}
+	
+	public void setDeclarationStatement(String s){
+		declareMe = s;
+	}
+	
+	public boolean somethingToDeclare(){
+		if(declareMe == null)
+			return false;
+		else
+			return true;
+	}
+	
+	public String declare(){
+		return declareMe;
 	}
 	
 	public String getType(){

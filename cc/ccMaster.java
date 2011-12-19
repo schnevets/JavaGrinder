@@ -288,6 +288,12 @@ public class ccMaster extends Visitor {
 		visit(n);
 		for(int i=3; i < classList.size(); i++){
 			classList.get(i).addInheritedMethods();
+			LinkedList<ccVariable> vars = new LinkedList(classList.get(i).getFields().values());
+			for(ccVariable nextVar : vars){
+				if(nextVar.somethingToDeclare()){
+					printToConstructors.add(nextVar.declare());
+				}
+			}
 		}
 		/* It's the glorious visitor-within-a-visitor that makes the blocks! It's the blocker! */
 		
@@ -350,11 +356,11 @@ public class ccMaster extends Visitor {
 		currentClass.addField(name, type, isStatic);
 		String isConst = "";
 		if(declarationStatement.getModifiers().contains("const")){isConst="const";}
-		if(isStatic||isArray){
+		if(isStatic){
 				currentClass.addInstanceVariable(isConst +" " + declarationStatement.getTypes() + " " + currentClass.get_Name() + "::" + declarationStatement.publishShort() + "\n");
 		}
 		if((!isStatic)&&(declarationStatement.declaresToValue())){
-			printToConstructors.add(declarationStatement.publishShort());
+			currentClass.findField(name).setDeclarationStatement(declarationStatement.publishShort());
 		}
 	}
 	public void visitConstructorDeclaration(GNode n){
