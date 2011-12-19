@@ -113,9 +113,35 @@ public class hMaster {
 		hardIncludeJavaLangTable(javaobject);
 		hardIncludeJavaLangAddress(javaobject);
 		
+		hardIncludeMatchings(javaobject);
+		
 		//classlist name subject to change
 		classes.add(javaobject); //classes.add(javaclass); classes.add(javastring);
 		classlist.add("Object"); //classlist.add("Class"); classlist.add("String");
+	}
+	
+	public void hardIncludeMatchings(vTableClass javaobject){
+		//tablelayout and address will have __isa, so exclude that
+		Iterator<vTableLayoutLine> table = javaobject.vTableLayout.iterator();
+		Iterator<vTableAddressLine> address = javaobject.vTableAddress.iterator();
+		Iterator<vTableMethodLayoutLine> method = javaobject.vMethodLayout.iterator();
+		
+		//skipping __isa
+		table.next();
+		address.next();
+		
+		while(method.hasNext()){
+			vTableMethodLayoutLine methodable = method.next();
+			vTableAddressLine addressable = address.next();
+			vTableLayoutLine tableable = table.next();
+			
+			methodable.setMatching(tableable, addressable);
+			addressable.setMatching(tableable, methodable);
+			tableable.setMatching(addressable, methodable);
+			if(!methodable.methodname.equals("__delete")){
+				addressable.setTypeCast(methodable.returntype, methodable.parameters);
+			}
+		}
 	}
 	
 	//static void __delete(__Object*); declaration
@@ -503,6 +529,10 @@ public class hMaster {
 				visit(n);
 			}
 
+			public void visitNewClassExpression(GNode n){
+				
+			}
+			
 			/**
 			 * Possible Parents: PackageDeclaration, Type
 			 * Writes to Elements: No
@@ -520,7 +550,7 @@ public class hMaster {
 					addSuperClass(returnable);
 				}
 				else if(operation.equals("dataLayout")){
-					currentclass.addAdditionalInclude(returnable);
+					currentclass.addAdditionalForwards(returnable);
 					if(arraycheck == false){
 						dataLayout = dataLayout + returnable + " ";
 					}
@@ -543,7 +573,7 @@ public class hMaster {
 					//System.out.println("for node " + n.hashCode());
 				}
 				else if(operation.equals("MethodParameter")){
-					currentclass.addAdditionalInclude(returnable);
+					currentclass.addAdditionalForwards(returnable);
 					if(arraycheck == true){
 						currentclass.appendMethod("Parameters", "__rt::Array<"+returnable+">");
 						currentclass.appendTableLayout("Parameters", "__rt::Array<"+returnable+">");

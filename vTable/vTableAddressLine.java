@@ -98,10 +98,15 @@ public class vTableAddressLine{
 				vTableLine = ", \r" + methodname + "(";
 			}
 			
-			if(typecast == true){
-				//vTableLine = vTableLine + "" + typecast + ""; 
-				vTableLine = vTableLine + "" + "(" + returntype + "(*)(" 
+			if(!this.classname.equals(currentclass.classname)){
+				if(typecast == true){
+					vTableLine = vTableLine + "(" + returntype + "(*)(" 
 			    			+ currentclass.classname + parameters + "))"; 
+				}
+				else{
+					vTableLine = vTableLine + "(" + matchingmethod.returntype + "(*)("
+							+ currentclass.classname + matchingmethod.parameters + "))";
+				}
 				//currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
 			    //			+ this.classname + currentmethod.parameters + "))");
 			}

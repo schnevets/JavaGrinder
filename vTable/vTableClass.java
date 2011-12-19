@@ -67,7 +67,7 @@ public class vTableClass {
 	}
 	
 	public void addUsings(String state){
-		System.out.println("added using " + state);
+		//System.out.println("added using " + state);
 		usings.add(state);
 	}
 	
@@ -84,8 +84,8 @@ public class vTableClass {
 	}
 	
 	public void addIncludes(String s){
-		if(!includes.contains(s)){
-			//System.out.println("added includes " + s);
+		if(!includes.contains(s) && !s.equals("\"" + classname + ".h\"")){
+			System.out.println("added includes " + s);
 			includes.add(s);
 		}
 	}
@@ -98,11 +98,17 @@ public class vTableClass {
 		return false;
 	}
 	
-	public void addAdditionalInclude(String s){
-		if(!includes.contains("\"" + s + ".h\"") && (checkJavaLang(s) != true)){
-			includes.add("\"" + s + ".h\"");
-			addUsings(s);
+	public void addAdditionalForwards(String s){
+		if(!this.checkJavaLang(s)){
+			if(!forwarddeclarations.hasDeclarations(s)){
+				forwarddeclarations.addForwardDeclaration(s);
+				forwarddeclarations.addTypeDeclarations(s);
+			}
 		}
+//		if(!includes.contains("\"" + s + ".h\"") && (checkJavaLang(s) != true) && !s.equals(classname)){
+//			includes.add("\"" + s + ".h\"");
+//			addUsings(s);
+//		}
 	}
 	
 	public void copysupertable(){
@@ -112,9 +118,10 @@ public class vTableClass {
 		Iterator<String> superincludes = superclass.includes.iterator();
 		
 		while(superincludes.hasNext()){
-			includes.add(superincludes.next());
+			String nexts = superincludes.next();
+			if(!nexts.equals("\"" + classname + ".h\""))
+				includes.add(nexts);
 		}
-		
 		if(superclass.classname.equals("Object")){
 			includes.add("\"java_lang.h" + "\"");
 		}
