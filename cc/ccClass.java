@@ -127,19 +127,9 @@ public class ccClass {
 			if(methods.get(i).match(s, param, classList))
 				return methods.get(i).getName();
 		}
-		return "This is an error.                         !!!";
+		return "This is an error.";
 	}
 	
-	/**
-	 * Searches for and returns constructor named s.
-	 * If the desired constructor is not found, it returns a dummy constructor with the name "CONSTRUCTOR NOT FOUND".
-	 *
-	 * ****************THIS METHOD IS CURRENTLY WORTHLESS!!!!!******************
-	 * ****IT'S HERE SIMPLY BECAUSE I MAY NEED IT AND FIX IT LATER!!!!!!!!!*****
-	 * 
-	 * @param s Name of desired constructor.
-	 * @return The constructor with name s.
-	 */
 	public ArrayList<ccConstructor> getConstructors(){
 		return constructors;
 	}

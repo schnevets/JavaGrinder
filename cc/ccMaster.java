@@ -30,30 +30,28 @@ public class ccMaster extends Visitor {
 	private HashSet mangleNames;
 	private File directory;
 	private String[] currentPackage;
-	private LinkedList<String> printToConstructors;
+	private LinkedList<LinkedList<String>> printToConstructors;
+	private LinkedList<String> printToCurrentConstructor;
 	
 	
 	public ccMaster(LinkedList<String> dependencies, HashSet mangleList, File dir){
-		
-		Iterator iterate = dependencies.iterator();
 		ASTGenerator ast = new ASTGenerator();
 		mangleNames = mangleList;
 		directory = dir;
 		classList = new LinkedList<ccClass>();
 		mainMethodList = new LinkedList<ccMainMethod>();
 		javaLangMethods();
-		printToConstructors = new LinkedList<String>();
-		while (iterate.hasNext()){
+		printToConstructors = new LinkedList<LinkedList<String>>();
+		for (String next : dependencies){
 			modifierList = new LinkedList<String>();
-			String nextFile = (String)iterate.next();
-			this.dispatch(ast.generateAST(nextFile));
+			this.dispatch(ast.generateAST(next));
 		}
-		iterate = dependencies.iterator();
 		currentClass = classList.get(2);
 		mainCounter = 0;
-		while (iterate.hasNext()){
+		for (int count=0; count<dependencies.size(); count++){
 			modifierList = new LinkedList<String>();
-			String nextFile = (String)iterate.next();
+			String nextFile = dependencies.get(count);
+			printToCurrentConstructor = printToConstructors.get(count);
 			new Visitor() {
 				private int constructorCounter;
 				private boolean constructorFlag;
@@ -108,7 +106,9 @@ public class ccMaster extends Visitor {
 				public void visitBlock (GNode n){
 					latestBlock = new ccBlock(n, currentClass.getFields(), parameterNames, classList, currentClass.getName(), constructorFlag);
 					if(constructorFlag){
-						latestBlock.publish().addAll(printToConstructors);
+						for(String iter : printToCurrentConstructor){
+							if(!latestBlock.hasDeclared(iter.substring(0, iter.indexOf('=')).trim()))		latestBlock.addLineFront(iter);
+						}
 					}
 				}
 				public void visit(Node n) {
@@ -285,12 +285,13 @@ public class ccMaster extends Visitor {
 
 	public void visitCompilationUnit(GNode n){
 		visit(n);
+		printToConstructors.add(new LinkedList<String>());
 		for(int i=3; i < classList.size(); i++){
 			classList.get(i).addInheritedMethods();
 			LinkedList<ccVariable> vars = new LinkedList(classList.get(i).getFields().values());
 			for(ccVariable nextVar : vars){
 				if(nextVar.somethingToDeclare()){
-					printToConstructors.add(nextVar.declare());
+					printToConstructors.getLast().add(nextVar.declare());
 				}
 			}
 		}

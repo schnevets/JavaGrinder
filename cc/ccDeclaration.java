@@ -42,6 +42,11 @@ public class ccDeclaration {
 		}
 		if((n.get(1)==null||n.getNode(1).hasName("Dimensions"))&&value!="")
 			declaration="=";
+		else{
+			declaration="=";
+			if(types.matches("int8_t|int16_t|int32_t|int64_t"))	value = "0";
+			else												value = "__rt::null()";
+		}
 
 	}
 	public void changeTypeTo(String newType){
@@ -50,9 +55,12 @@ public class ccDeclaration {
 	public String publish(){
 		return modifiers+types+ " "+name+" "+declaration+" "+value+";";
 	}
+	public String getName(){
+		return name;
+	}
 
 	public String publishShort(){
-		return name+" "+declaration+" "+value+";\n";
+		return "  " + name+" "+declaration+" "+value+";\n";
 	}
 	public String getModifiers(){
 		return modifiers;
