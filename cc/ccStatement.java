@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 import oop.ccMethod;
@@ -48,9 +48,12 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitCallExpression(GNode n){
-		if(n.getString(2).contains("print")){
-			line+="std::cout << ";
-			dispatch(n.getGeneric(3));
+		if(n.getString(2).matches("print|println")){
+			line+="std::cout";
+			if(!n.getNode(3).isEmpty()){
+				line+= " << ";
+				dispatch(n.getGeneric(3));
+			}
 			if(n.getString(2).equals("println")){
 				line+=" << std::endl";
 			}
@@ -63,6 +66,8 @@ public class ccStatement extends Visitor{
 				if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CastExpression")){
 					visit(n.getNode(0).getNode(0));
 				}
+				//	----- the else-if commented out below will catch chained methods, which we currently DO NOT HANDLE -----
+				//else if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CallExpression")){}
 				else if(n.getNode(0).get(0) instanceof String && block.variables.containsKey(n.getNode(0).getString(0))){
 					__this = n.getNode(0).getString(0);
 					objectType = block.variables.get(__this).getType();
@@ -70,12 +75,9 @@ public class ccStatement extends Visitor{
 			} 
 			for(int i=0; i< block.classList.size(); i++){
 				if(block.classList.get(i).getName().startsWith(objectType)){ 
-//					System.out.println("  " + findArgumentTypes(n.getNode(3)).length);
-//					System.out.println("  " + block.classList.get(i).getMethodName(n.getString(2), findArgumentTypes(n.getNode(3))));
 					for(String s : findArgumentTypes(n.getNode(3))){
 					}
 					methodInQuestion = block.classList.get(i).getMethod(n.getString(2), findArgumentTypes(n.getNode(3)), block.classList);
-//					System.out.println("    " + methodInQuestion.isStatic);
 					if(methodInQuestion.isStatic){
 						line+= "__" + objectType + "::" + methodInQuestion.getName() + "(";
 					}
@@ -107,6 +109,13 @@ public class ccStatement extends Visitor{
 		dispatch(n.getNode(1));
 		
 	}
+	public void visitBasicCastExpression(GNode n){ 
+		line+="(";
+	 	dispatch(n.getNode(0));
+	 	line+=")";
+	 	dispatch(n.getNode(2)); 
+	}
+	
 	public void visitUnaryExpression(GNode n){
 		visit(n);
 	}

@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 public class ccVariable {
 	private boolean classVariable;

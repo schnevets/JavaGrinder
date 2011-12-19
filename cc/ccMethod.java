@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -96,6 +96,12 @@ public class ccMethod {
 	public String[] getParamTypes(){
 		return parameterType;
 	}
+	
+	/**
+	 * Sees if this method matches the given name and parameter types.
+	 * This version properly checks for implicit upcasts, and so this is the one that should be used
+	 * everywhere other than in ccClass.
+	 */
 	public boolean match(String mName, String[] mparameterType, LinkedList<ccClass> classList){
 		if(!mName.contentEquals(originalName))								return false;
 		int offset = 1;
@@ -103,9 +109,10 @@ public class ccMethod {
 			offset = 0;
 		}
 		if((mparameterType.length + offset) != parameterType.length)		return false;
+		boolean check = true;
 		for(int i=0; i< mparameterType.length; i++){
 			if(!mparameterType[i].contentEquals(parameterType[i+1]) && !parameterType[i+offset].contentEquals("Object")){
-				boolean check = false;
+				check = false;
 				ccClass superClass = classList.get(3);
 				for(int j=3; j<classList.size(); j++){
 					superClass = classList.get(j);
@@ -129,13 +136,24 @@ public class ccMethod {
 						}
 					}
 				}
-				
-				return check;
 			}
-		}		
-		return true;
+		}
+		// If we still haven't found a method, and one of the parameters is an integer type (short, int, long) 
+		// I have to check AGAIN to see if there's an appropriate method that uses one of the other two dingleberries.
+		if(!check){
+			for(int i=0; i< mparameterType.length; i++){
+				if(mparameterType[i].matches("int8_t|int16_t|int32_t") && parameterType[i+1].matches("int64_t"))	check = true;
+				if(mparameterType[i].matches("int8_t|int16_t") && parameterType[i+1].matches("int32_t|int64_t"))	check = true;
+				if(mparameterType[i].matches("int8_t") && parameterType[i+1].matches("int16_t|int32_t|int64_t"))	check = true;
+			}
+		}
+		return check;
 	}
 	
+	/**
+	 * Sees if this method matches the given name and parameter types.
+	 * For use within ccClass, elsewhere use the version with three arguments.
+	 */
 	public boolean match(String mName, String[] mparameterType){
 		if(!mName.contentEquals(originalName))								return false;
 		if(isStatic){
@@ -151,6 +169,10 @@ public class ccMethod {
 		return true;
 	}
 	
+	/**
+	 * Sees if this method matches the given name and parameter types.
+	 * For use within ccClass, elsewhere use the version with three arguments.
+	 */
 	public boolean match(ccMethod meth){
 		if(!meth.getName().contentEquals(originalName))						return false;
 		if(!Arrays.equals(parameterType, meth.getParamTypes()))				return false;

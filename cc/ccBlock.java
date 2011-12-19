@@ -1,4 +1,4 @@
-package oop.JavaGrinder.cc;
+package oop;
 
 
 /*
@@ -56,7 +56,7 @@ class ccBlock extends Visitor{
 	
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
-		String type = (String)n.getNode(1).getNode(0).getString(0);
+		String type = ccHelper.convertType((String)n.getNode(1).getNode(0).getString(0));
 		variables.put(name, new ccVariable(name, type));
 		localVariables.put(name, type);
 		ccDeclaration declarationStatement = new ccDeclaration(n, this);
