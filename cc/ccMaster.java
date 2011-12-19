@@ -87,7 +87,7 @@ public class ccMaster extends Visitor {
 					String name = (String)n.getString(3);
 					visit(n);
 					if(name.trim().equals("main")){
-						latestBlock.addLineFront(currentClass.getName() + " __this = new " + currentClass.getName() + "();\n" );
+						latestBlock.addLineFront(currentClass.getName() + " __this = new __" + currentClass.getName() + "();\n" );
 						mainMethodList.get(mainCounter).setBlock(latestBlock);
 						mainCounter++;
 					}
