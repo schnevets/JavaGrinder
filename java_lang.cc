@@ -331,6 +331,15 @@ namespace __rt {
     return k;
   }
 
+  template<>
+  java::lang::Class Array<int16_t>::__class() {
+    static java::lang::Class k =
+      new java::lang::__Class(literal("[S"),
+                              java::lang::__Object::__class(),
+                              java::lang::__Integer::TYPE());
+    return k;
+  }
+
   // Template specialization for arrays of objects.
   template<>
   java::lang::Class Array<java::lang::Object>::__class() {
