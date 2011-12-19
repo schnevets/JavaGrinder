@@ -10,10 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-
-import oop.ccDeclaration;
-import oop.ccHelper;
-import oop.ccVariable;
+import java.util.regex.Pattern;
 
 import xtc.tree.GNode;
 import xtc.tree.Node;
@@ -23,6 +20,7 @@ import xtc.tree.Visitor;
 class ccBlock extends Visitor{
 	
 	public LinkedList<String> blockLines;
+	public LinkedList<String> declared;
 	public HashMap<String, ccVariable> variables;
 	public HashMap<String, String> localVariables;
 	public LinkedList<ccClass> classList;
@@ -50,19 +48,11 @@ class ccBlock extends Visitor{
 		blockLines.add("}");
 	}
 	
-//	public ccBlock(GNode n) {
-//		localVariableNames = new LinkedList<String>();
-//		blockLines = new LinkedList<String>();
-//		blockLines.add("{");
-//		visit(n);
-//		blockLines.add("}");
-//	}
-	
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = ccHelper.convertType((String)n.getNode(1).getNode(0).getString(0));
-		if(n.getNode(2).getNode(0).getNode(1)!=null && n.getNode(2).getNode(0).getNode(1).hasName("Dimensions")){
-			type = "__rt::Ptr<__rt::Array<" + type + "> >";
+		if(n.getNode(2).getNode(0).getNode(1)!=null && n.getNode(2).getNode(0).getNode(1).hasName("Dimensions")){ 
+			type = "__rt::Ptr<__rt::Array<" + type + "> >"; 
 		}
 		variables.put(name, new ccVariable(name, type));
 		localVariables.put(name, type);
@@ -115,7 +105,7 @@ class ccBlock extends Visitor{
 		return localVariables;
 	}
 	public void addLine(String s){
-		blockLines.remove();
+		blockLines.removeLast();
 		blockLines.add(s);
 		blockLines.add("}");
 	}
@@ -127,6 +117,17 @@ class ccBlock extends Visitor{
 	public LinkedList<String> publish() {
 		return blockLines;
 	}
+	
+	/**
+	 * HORRIBLE BRUTE FORCE STRING CHECK
+	 */
+	public boolean hasDeclared(String var){
+		for(String iter : blockLines){
+			if (iter.trim().startsWith(var + " =")) return true;
+		}
+		return false;
+	}
+	
 	public void visit(Node n) {
 		for (Object o : n){
 			if (o instanceof Node){
