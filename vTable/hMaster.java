@@ -491,7 +491,7 @@ public class hMaster {
 						dataLayout = dataLayout + returntype + " ";
 					}
 					else{
-						dataLayout = dataLayout + returntype+"* ";
+						dataLayout = dataLayout + "__rt::Ptr<__rt::Array<"+returntype+"> > ";
 					}
 				}
 				else if(operation.equals("Method")){
@@ -501,8 +501,8 @@ public class hMaster {
 					}
 					else{
 						//"__rt::Array<"+returnable+">"
-						currentclass.appendMethod("ReturnType", returntype+"*");
-						currentclass.appendTableLayout("ReturnType", returntype+"*");					
+						currentclass.appendMethod("ReturnType", "__rt::Ptr<__rt::Array<"+returntype+"> > ");
+						currentclass.appendTableLayout("ReturnType", "__rt::Ptr<__rt::Array<"+returntype+"> > ");					
 					}
 					
 				}
@@ -512,8 +512,8 @@ public class hMaster {
 						currentclass.appendTableLayout("Parameters", returntype);	
 					}
 					else{
-						currentclass.appendMethod("Parameters", returntype+"*");
-						currentclass.appendTableLayout("Parameters", returntype+"*");
+						currentclass.appendMethod("Parameters", "__rt::Ptr<__rt::Array<"+returntype+"> > ");
+						currentclass.appendTableLayout("Parameters", "__rt::Ptr<__rt::Array<"+returntype+"> > ");
 					}
 				}
 			}
@@ -555,7 +555,7 @@ public class hMaster {
 						dataLayout = dataLayout + returnable + " ";
 					}
 					else{
-						dataLayout = dataLayout + "__rt::Array<"+returnable+"> ";
+						dataLayout = dataLayout + "__rt::Ptr<__rt::Array<"+returnable+"> > ";
 					}
 				}
 				else if(operation.equals("Constructor")){
@@ -563,7 +563,7 @@ public class hMaster {
 						dataLayout = dataLayout + returnable + " ";
 					}
 					else{
-						dataLayout = dataLayout + "__rt::Array<"+returnable+"> ";
+						dataLayout = dataLayout + "__rt::Ptr<__rt::Array<"+returnable+"> > ";
 					}
 				}
 				else if(operation.equals("Method")){
@@ -575,8 +575,8 @@ public class hMaster {
 				else if(operation.equals("MethodParameter")){
 					currentclass.addAdditionalForwards(returnable);
 					if(arraycheck == true){
-						currentclass.appendMethod("Parameters", "__rt::Array<"+returnable+">");
-						currentclass.appendTableLayout("Parameters", "__rt::Array<"+returnable+">");
+						currentclass.appendMethod("Parameters", "__rt::Ptr<__rt::Array<"+returnable+"> > ");
+						currentclass.appendTableLayout("Parameters", "__rt::Ptr<__rt::Array<"+returnable+"> > ");
 					}
 					else{
 						currentclass.appendMethod("Parameters", returnable);
