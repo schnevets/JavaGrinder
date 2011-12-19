@@ -51,7 +51,8 @@ class ccBlock extends Visitor{
 	public void visitFieldDeclaration(GNode n){
 		String name = (String)n.getNode(2).getNode(0).getString(0);
 		String type = ccHelper.convertType((String)n.getNode(1).getNode(0).getString(0));
-		if(n.getNode(2).getNode(0).getNode(1)!=null && n.getNode(2).getNode(0).getNode(1).hasName("Dimensions")){ 
+		if((n.getNode(2).getNode(0).getNode(1)!=null && n.getNode(2).getNode(0).getNode(1).hasName("Dimensions"))||
+				(n.getNode(1).get(1)!=null && n.getNode(1).getNode(1).hasName("Dimensions"))){ 
 			type = "__rt::Ptr<__rt::Array<" + type + "> >"; 
 		}
 		variables.put(name, new ccVariable(name, type));
