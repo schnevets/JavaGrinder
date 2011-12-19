@@ -48,7 +48,7 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitCallExpression(GNode n){
-		if(n.getString(2).matches("print|println")){
+		if(n.getString(2).matches("print|println")&&n.get(0).toString().contains("SelectionExpression(PrimaryIdentifier(\"System\"), \"out")){
 			line+="std::cout";
 			if(!n.getNode(3).isEmpty()){
 				line+= " << ";
@@ -158,12 +158,14 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitConditionalStatement(GNode n){
-		line += "if("+new ccStatement((GNode)n.get(0), block).publish()+")\n";
+		System.out.println(n);
+		line += "if("+new ccStatement((GNode)n.get(0), block).publish()+")";
 		dispatch(n.getNode(1));
-		line += "\n else ";
-		dispatch(n.getNode(2));
-//		System.out.println(line);
+		if(n.get(2)!=null){
+			line += "else ";
+			dispatch(n.getNode(2));}
 	}
+
 	public void visitForStatement(GNode n){
 		line = "for(";
 		dispatch(n.getGeneric(0));
