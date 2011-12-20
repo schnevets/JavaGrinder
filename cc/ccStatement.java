@@ -54,7 +54,6 @@ public class ccStatement extends Visitor{
 			if(!n.getNode(3).isEmpty()){
 				line+= " << ";
 				dispatch(n.getGeneric(3));
-				System.out.println(n);
 			}
 			if(n.getString(2).equals("println")){
 				line+=" << std::endl";

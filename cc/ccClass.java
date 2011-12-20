@@ -109,9 +109,6 @@ public class ccClass {
 	 */
 	public ccMethod getMethod(String s, String[] param, LinkedList<ccClass> classList){
 		ccMethod ret = new ccMethod("METHOD NOT FOUND", this);
-//		if(param.length>0){
-//			
-//		}
 		for(int i = 0; i < methods.size(); i++){
 			if(methods.get(i).match(s, param, classList)){
 				ccMethod tempM = methods.get(i);
@@ -119,7 +116,12 @@ public class ccClass {
 					return tempM;
 				}
 				else{
-					ret = tempM;
+					if(ret.getName().equals("METHOD NOT FOUND"))
+						ret = tempM;
+					else if((param.length != 0) && isBetter(tempM.getParamTypes()[tempM.getParamTypes().length - 1],
+							ret.getParamTypes()[ret.getParamTypes().length -1], param[(param.length-1)])){
+						ret = tempM;
+					}
 				}
 			}	
 		}
@@ -139,6 +141,25 @@ public class ccClass {
 				return methods.get(i).getName();
 		}
 		return "This is an error.";
+	}
+	
+	public boolean isBetter(String newThing, String oldThing, String target){
+		if(target.startsWith("int")){
+			if(oldThing.equals("int8_t")){
+			}
+			else if(oldThing.equals("int16_t")){
+				if(newThing.equals("int8_t"))		return true;
+			}
+			else if(oldThing.equals("int32_t")){
+				if(newThing.equals("int8_t"))		return true;
+				if(newThing.equals("int16_t"))		return true;
+			}
+			else if(oldThing.equals("int64_t")){
+				return true;
+			}
+			return false;
+		}
+		return true;
 	}
 	
 	public ArrayList<ccConstructor> getConstructors(){

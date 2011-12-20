@@ -19,6 +19,7 @@ public class ccMethod {
 	
 	// The first constructor only makes dummy methods, and will not actually be used
 	public ccMethod(String mName, ccClass mClass){
+		name = mName;
 		originalName = mName;
 		parentClass = mClass;
 		access = "";
