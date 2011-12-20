@@ -67,11 +67,22 @@ public class ccStatement extends Visitor{
 				if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CastExpression")){
 					visit(n.getNode(0).getNode(0));
 				}
-				//	----- the else-if commented out below will catch chained methods, which we currently DO NOT HANDLE -----
-				//else if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CallExpression")){}
-				else if(n.getNode(0).get(0) instanceof String && block.variables.containsKey(n.getNode(0).getString(0))){
-					__this = n.getNode(0).getString(0);
-					objectType = block.variables.get(__this).getType();
+				else if(n.getNode(0).get(0) instanceof String){
+					boolean classMatch = false;
+					for(ccClass iter : block.classList){
+						if (iter.getName().equals(n.getNode(0).getString(0))){
+							classMatch = true;
+							break;
+						}
+					}
+					if(classMatch){
+						__this = n.getNode(0).getString(0);
+						objectType = n.getNode(0).getString(0);
+					}
+					else if(block.variables.containsKey(n.getNode(0).getString(0))){ 
+						__this = n.getNode(0).getString(0);
+						objectType = block.variables.get(__this).getType();
+					}
 				}
 			} 
 			for(int i=0; i< block.classList.size(); i++){
