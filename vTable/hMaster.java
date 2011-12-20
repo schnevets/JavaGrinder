@@ -292,6 +292,7 @@ public class hMaster {
 			boolean arraycheck;
 			String dataLayout;
 			String operation;
+			vTableData classvariable;
 			
 //			public void printClass(File file, vTableClass classy){
 //				//Iterator<vTableClass> iterate = fileprint.iterator();
@@ -426,6 +427,7 @@ public class hMaster {
 				if(operation.equals("dataLayout")){
 					dataLayout = "";
 				}
+				classvariable = new vTableData();
 				visit(n);
 			}
 
@@ -480,10 +482,12 @@ public class hMaster {
 				
 				if(operation.equals("dataLayout")){
 					if(arraycheck == false){
-						dataLayout = dataLayout + returntype + " ";
+						//dataLayout = dataLayout + returntype + " ";
+						classvariable.setType(returntype);
 					}
 					else{
-						dataLayout = dataLayout + returntype + "* ";
+						//dataLayout = dataLayout + returntype + "* ";
+						classvariable.setType("__rt::Ptr<__rt::Array<"+returntype+"> > ");
 					}
 				}
 				else if(operation.equals("Constructor")){
@@ -552,10 +556,12 @@ public class hMaster {
 				else if(operation.equals("dataLayout")){
 					currentclass.addAdditionalForwards(returnable);
 					if(arraycheck == false){
-						dataLayout = dataLayout + returnable + " ";
+						//dataLayout = dataLayout + returnable + " ";
+						classvariable.setType(returnable);
 					}
 					else{
-						dataLayout = dataLayout + "__rt::Ptr<__rt::Array<"+returnable+"> > ";
+						//dataLayout = dataLayout + "__rt::Ptr<__rt::Array<"+returnable+"> > ";
+						classvariable.setType("__rt::Ptr<__rt::Array<"+returnable+"> > ");
 					}
 				}
 				else if(operation.equals("Constructor")){
@@ -622,10 +628,12 @@ public class hMaster {
 				else if(operation.equals("dataLayout")){
 					//dataLayout = dataLayout + returnable + " ";
 					if(returnable.equals("final")){
-						dataLayout = dataLayout + "const ";
+						//dataLayout = dataLayout + "const ";
+						classvariable.addModifier("const");
 					}
 					if(returnable.equals("static")){
-						dataLayout = dataLayout + "static ";
+						//dataLayout = dataLayout + "static";
+						classvariable.addModifier("static");
 					}
 				}
 				else if(operation.equals("Constructor") && returnable.equals("final")){
@@ -663,15 +671,16 @@ public class hMaster {
 			public void visitDeclarator(GNode n){
 				String addable = n.getString(0); 
 				if(operation.equals("dataLayout")){
-					dataLayout = dataLayout + addable;
+					//dataLayout = dataLayout + addable;
+					classvariable.setName(addable);
 //					if(!(n.getNode(2) == null)){
 //						dataLayout = dataLayout + "=";
 //					}
 				}
 				visit(n);
 				if(operation.equals("dataLayout")){
-					dataLayout = dataLayout + ";\r";
-					currentclass.addDataLayout(dataLayout);
+					//dataLayout = dataLayout + ";\r";
+					currentclass.addDataLayout(classvariable);
 					//System.out.print("added datalayout " + dataLayout);
 				}
 			}
@@ -849,7 +858,7 @@ public class hMaster {
 				}
 
 				usings.put(currentclass.classname,usingstate);
-				
+				currentclass.copysuperdatalayout();
 				classlist.add(currentclass.classname);
 				classes.add(currentclass);
 				fileprint.add(currentclass);
@@ -874,13 +883,14 @@ public class hMaster {
 					currentclass.appendTableLayout("ReferenceType", currentclass.classname);
 					visit(n);
 					
-					currentclass.addMethod();
+					
 					boolean hasStaticPrivate = currentclass.checkStaticPrivate();
 					if(hasStaticPrivate == false){
 						//currentclass.addMethod();
 						currentclass.addTableAddress();
 						currentclass.addTableLayout();
 					}
+					currentclass.addMethod();
 				}
 			}
 			

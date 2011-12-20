@@ -22,7 +22,8 @@ public class vTableClass {
 	LinkedList<vTableAddressLine> vTableAddress;
 	LinkedList<vClassConstructor> vClassConstructors;
 	vTableForwardDeclarations forwarddeclarations;
-	LinkedList<String> dataLayout;
+	//LinkedList<String> dataLayout;
+	LinkedList<vTableData> dataLayout;
 	File file;
 	
 	//create a new linked list of vClassConstructors
@@ -46,7 +47,7 @@ public class vTableClass {
 		vClassConstructors = new LinkedList<vClassConstructor>();
 		forwarddeclarations = new vTableForwardDeclarations();
 		namespace = new LinkedList<String>();
-		dataLayout = new LinkedList<String>();
+		dataLayout = new LinkedList<vTableData>();
 		overloadedmethods = new HashSet<String>();
 		includes = new HashSet<String>();
 		usings = new HashSet<String>();
@@ -111,6 +112,24 @@ public class vTableClass {
 //		}
 	}
 	
+	public void copysuperdatalayout(){
+		Iterator<vTableData> superdata = superclass.dataLayout.iterator();
+		while(superdata.hasNext()){
+			vTableData datable = superdata.next();
+			Iterator<vTableData> currentdata = dataLayout.iterator();
+			boolean namecheck = false;
+			while(currentdata.hasNext()){
+				vTableData currentdatas = currentdata.next();
+				if(datable.name.equals(currentdatas.name)){
+					namecheck = true;
+				}
+			}
+			if(namecheck == false && !datable.modifiers.contains("static")){
+				dataLayout.add(datable);
+			}
+		}
+	}
+	
 	public void copysupertable(){
 		Iterator<vTableMethodLayoutLine> methoditerate = superclass.vMethodLayout.iterator();
 		//Iterator<vTableAddressLine> addressiterate = superclass.vTableAddress.iterator();
@@ -156,6 +175,9 @@ public class vTableClass {
 						//currentmethod.setReferenceType(classname);
 						//currentaddress.setTypeCast(currentmethod.returntype,currentmethod.parameters);
 						vMethodLayout.add(currentmethod);
+						if(currentmethod.overloaded == true){
+							overloadedmethods.add(currentmethod.methodname);
+						}
 						if(currentmethod.matchingaddress != null){
 							vTableLayout.add(currentmethod.matchinglayout);
 							vTableAddress.add(currentmethod.matchingaddress);
@@ -179,7 +201,7 @@ public class vTableClass {
 		namespace.add(s);
 	}
 	
-	public void addDataLayout(String s){
+	public void addDataLayout(vTableData s){
 		dataLayout.add(s);
 	}
 	
@@ -195,7 +217,7 @@ public class vTableClass {
 		vClassConstructors.add(currentconstructor);
 	}
 	
-	public void checkOverride(){
+	public boolean checkOverride(){
 		int index = 0;
 		boolean override = false;
 		try{
@@ -209,9 +231,8 @@ public class vTableClass {
 							throw new Exception(currentmethod.methodname + ":Invalid Override, Super Method is final");
 						}
 						else{
-							vMethodLayout.remove(index);
-							vTableLayout.remove(index + 1);
-							vTableAddress.remove(index + 1);
+							scanline.matchingaddress.setOverride(classname);
+							
 							override = true;
 							break;
 						}
@@ -220,12 +241,10 @@ public class vTableClass {
 				}
 		}
 		catch(Exception e){
-			if(e.getMessage().contains("Invalid Override")){
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
+			//e.printStackTrace();
 			//nothing doin, intentional exception for when an index out of bounds error occurs (meaning no override found)
 		}
+		return override;
 	}
 	
 	public void checkOverload(){
@@ -246,6 +265,7 @@ public class vTableClass {
 						currentmethod.setOverload();
 						currentlayout.setOverload();
 						currentaddress.setOverload();
+						//scanline.matchingaddress.setOverride(classname);
 						overloadedmethods.add(currentmethod.methodname);
 						overload = true;
 						break;
@@ -291,9 +311,12 @@ public class vTableClass {
 	//includes currentaddress, currentmethod, and currentlayout
 	public void addMethod(){
 		setMatching();
-		checkOverride();  
-		checkOverload();
-		vMethodLayout.add(currentmethod);
+		boolean overridecheck = checkOverride();  
+		
+		if(overridecheck == false){
+			checkOverload();
+			vMethodLayout.add(currentmethod);
+		}
 	}
 	
 	public boolean checkStaticPrivate(){
@@ -347,8 +370,10 @@ public class vTableClass {
 	}
 	
 	public void addTableLayout(){
-		//checkOverride("TableLayout");
-		vTableLayout.add(currentlayout);
+		boolean check = checkOverride();
+		if(check == false){
+			vTableLayout.add(currentlayout);
+		}
 	}
 	
 	//note to self, declare the createline method in vtablemethodlayoutline obsolete and move the functionality
@@ -378,7 +403,10 @@ public class vTableClass {
 	
 	public void addTableAddress(){
 		//checkOverride("Address");
-		vTableAddress.add(currentaddress);
+		boolean check = checkOverride();
+		if(check == false){
+			vTableAddress.add(currentaddress);
+		}
 	}
 	
 	//note to self, make the createline method in vtableaddressline obsolete, move the functionality
@@ -432,9 +460,10 @@ public class vTableClass {
 			writer.write("struct " + "__" + classname + "{ \r");
 			writer.write("__" + classname + "_VT*" + " __vptr;\r");
 			
-			iterate = dataLayout.iterator();
-			while(iterate.hasNext()){
-				writer.write(iterate.next());
+			Iterator<vTableData> datas = dataLayout.iterator();
+			while(datas.hasNext()){
+				vTableData currentdata = datas.next();
+				writer.write(currentdata.getDataString());
 			}
 			
 			writer.write("\r");

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashSet;
 
 public class vTableAddressLine{
 	//String vTableClass;
@@ -13,6 +14,7 @@ public class vTableAddressLine{
 	String vTableLine;
 	//String parameters;
 	boolean overloaded;
+	HashSet<String> overrides;
 	
 	//for typecasting
 	String returntype;
@@ -26,6 +28,7 @@ public class vTableAddressLine{
 		parent = parentable;
 		overloaded = false;
 		typecast = false;
+		overrides = new HashSet<String>();
 	}
 	
 	public void setMethodName(String methodnamable){
@@ -43,6 +46,10 @@ public class vTableAddressLine{
 		//currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
 	    //			+ this.classname + currentmethod.parameters + "))");
 		
+	}
+	
+	public void setOverride(String s){
+		overrides.add(s);
 	}
 	
 	public void setClassName(String classnamable){
@@ -99,24 +106,40 @@ public class vTableAddressLine{
 			}
 			
 			if(!this.classname.equals(currentclass.classname)){
-				if(typecast == true){
-					vTableLine = vTableLine + "(" + returntype + "(*)(" 
+				//if(!overrides.contains(currentclass.classname)){
+					if(typecast == true){
+						vTableLine = vTableLine + "(" + returntype + "(*)(" 
 			    			+ currentclass.classname + parameters + "))"; 
-				}
-				else{
-					vTableLine = vTableLine + "(" + matchingmethod.returntype + "(*)("
+					}
+					else{
+						vTableLine = vTableLine + "(" + matchingmethod.returntype + "(*)("
 							+ currentclass.classname + matchingmethod.parameters + "))";
-				}
+					}
+				//}
+				//else{
+			//	}
 				//currentaddress.setTypeCast("(" + currentmethod.returntype + "(*)(" 
 			    //			+ this.classname + currentmethod.parameters + "))");
 			}
 			
 			if(overloaded == true){
-				vTableLine = vTableLine + "&__" + classname + "::" + methodname //+ "_" 
-				+ matchingmethod.parameters.replace(",", "_") + ")";
+				if(!overrides.contains(currentclass.classname)){
+					vTableLine = vTableLine + "&__" + classname + "::" + methodname //+ "_" 
+					+ matchingmethod.parameters.replace(",", "_") + ")";
+				}
+				else{
+					vTableLine = vTableLine + "&__" + currentclass.classname + "::" + methodname //+ "_" 
+					+ matchingmethod.parameters.replace(",", "_") + ")";					
+				}
+					
 			}
 			else{
-				vTableLine = vTableLine + "&__" + classname + "::" + methodname + ")";
+				if(!overrides.contains(currentclass.classname)){
+					vTableLine = vTableLine + "&__" + classname + "::" + methodname + ")";
+				}
+				else{
+					vTableLine = vTableLine + "&__" + currentclass.classname + "::" + methodname + ")";
+				}
 			}
 			//vTableLine = vTableLine + "&__" + classname + "::" + methodname + ")";
 		}
