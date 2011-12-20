@@ -11,6 +11,7 @@ public class ccStatement extends Visitor{
 	private boolean assignmentFlag;
 	private ccBlock block;
 	int clusterCount=1;
+	private boolean hackyLongFlag;
 	
 	public ccStatement(GNode n, ccBlock parent) {
 		block = parent;
@@ -64,7 +65,12 @@ public class ccStatement extends Visitor{
 			String __this = "__this";
 			ccMethod methodInQuestion;
 			if(null != n.getNode(0)){
-				if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CastExpression")){
+				if(n.getNode(0).getName().equals("CallExpression")){
+					dispatch(n.getNode(0));
+					__this=line.trim();
+					line = "";
+				}
+				else if(n.getNode(0).get(0) instanceof Node && n.getNode(0).getNode(0).getName().equals("CastExpression")){
 					visit(n.getNode(0).getNode(0));
 				}
 				else if(n.getNode(0).get(0) instanceof String){
@@ -143,7 +149,8 @@ public class ccStatement extends Visitor{
 		
 	}
 	public void visitIntegerLiteral(GNode n){
-		line+=(String) n.get(0);
+		hackyLongFlag = true;
+		line+=n.getString(0);
 	}
 	public void visitFloatingPointLiteral(GNode n){
 		line+=(String) n.get(0);
@@ -311,7 +318,17 @@ public class ccStatement extends Visitor{
 				argTypes[i] = block.variables.get(n.getNode(i).getString(0)).getType();
 			}
 			else if(n.getNode(i).getName().matches("AdditiveExpression")){
-				argTypes[i] = "int32_t";
+				String temp = line;
+				hackyLongFlag = false;
+				visit(n.getNode(i));
+				line = temp;
+				if (hackyLongFlag){
+					argTypes[i] = "int64_t";
+				}
+				else{
+					argTypes[i] = "int32_t";
+				}
+				
 			}
 			else if(n.getNode(i).getName().matches("CastExpression")){
 				argTypes[i] = n.getNode(i).getNode(0).getNode(0).getString(0);
