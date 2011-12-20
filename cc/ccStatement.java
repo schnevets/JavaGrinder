@@ -226,14 +226,15 @@ public class ccStatement extends Visitor{
 	
 	public void visitSelectionExpression(GNode n){
 		if(block.variables.get(n.getString(n.size()-1)) == null){
-			ccClass c;
-			String oType = block.variables.get(n.getNode(0).getString(0)).getType();
-			for(int i = 3; i<block.classList.size(); i++){
-				if(block.classList.get(i).getName().contentEquals(oType)){
-					c = block.classList.get(i);
-					line += c.get_Name() + c.findField(n.getString(n.size()-1)).publish();
-				}
-			}
+//			ccClass c;
+//			String oType = block.variables.get(n.getNode(0).getString(0)).getType();
+//			for(int i = 3; i<block.classList.size(); i++){
+//				if(block.classList.get(i).getName().contentEquals(oType)){
+//					c = block.classList.get(i);
+//					line += c.get_Name() + c.findField(n.getString(n.size()-1)).publish();
+//				}
+//			}
+			line += n.getNode(0).getString(0) + "->" + n.getString(n.size()-1);
 		}
 		else{
 			line+= block.variables.get((n.getString(n.size()-1))).publish();
@@ -251,7 +252,7 @@ public class ccStatement extends Visitor{
 		line+=")";
 	}
 	public void visitPrimaryIdentifier(GNode n){
-		if(block.variables.isEmpty()&&block.variables.get(n.get(0))!=null){
+		if(!block.variables.isEmpty()&&block.variables.get(n.get(0))!=null&&!block.getIsConstructorBlock()){
 			line+= block.variables.get(n.get(0)).publish();
 		}
 		else{
@@ -312,7 +313,10 @@ public class ccStatement extends Visitor{
 		if(n.toString().contains("StringLiteral")){
 			line+= "({";
 			buildCluster(n);
-			line+="})";}
+			line+="})";
+			}
+		else
+			visit(n);
 	}
 	
 	 private void buildCluster(GNode n) {
