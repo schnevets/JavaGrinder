@@ -149,7 +149,9 @@ public class ccStatement extends Visitor{
 		
 	}
 	public void visitIntegerLiteral(GNode n){
-		hackyLongFlag = true;
+		if(n.getString(0).charAt(1) == 'l'){
+			hackyLongFlag = true;
+		}
 		line+=n.getString(0);
 	}
 	public void visitFloatingPointLiteral(GNode n){
