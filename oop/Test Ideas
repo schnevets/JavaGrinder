@@ -1,0 +1,59 @@
+Tests
+
+Automated System - compares the results of the Java file with the results of the C++ file
+	Option 1: Compare the .cc and .h files with the manual translation
+	Option 2: The testfile's output is based upon the what is being tested. Compare Java output with cc output.
+	
+Things to Test For
+	-Compilation
+	-System.out.println()
+	-Dependencies
+		-imports xtc files
+		-outside of xtc
+	-Method Overriding
+	-Method Overloading
+	-Name Mangling
+	-Arrays
+	-Const methods
+	-Operator Overloading
+	-Smart Pointers
+	-Nested Method Calls
+	-Casts
+	-Namespace
+	-Extension
+	-Parameters
+	-Nested Classes
+	-Exceptions
+	-Weird primitive assignments
+	-Name Mangling problems
+	-Including the right files
+	-access to java lang
+	
+	
+	Tests for
+	-Compilation
+	-Constructors
+	-Method Declarations
+	-Method/Constructor Parameters
+	-Return statements
+	-Method modifiers
+	-System.out.println()
+	-Variable modifiers, assignments
+	-Exceptions
+	-Inheritance
+	-Overriding, super
+	-Calls to other classes
+	-Generics
+	-Casts
+	-Primitives
+	-String concatentation
+	-Nested method calls
+	-Nested classes
+	-Multiple classes
+	-Arrays
+	
+	
+	
+	
+	
+	
