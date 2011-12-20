@@ -312,6 +312,7 @@ public class ccStatement extends Visitor{
 	public void visitAdditiveExpression(GNode n){
 		if(n.toString().contains("StringLiteral")){
 			line+= "({";
+			line+= "String tempResult=new __String(\"\");\n";
 			buildCluster(n);
 			line+="})";
 			}
@@ -320,24 +321,49 @@ public class ccStatement extends Visitor{
 	}
 	
 	 private void buildCluster(GNode n) {
+		boolean notDeclared = true;
 		String part2 = null;
 		for(Object q:n){
 			if(q.toString().startsWith("AdditiveExpression"))
 				buildCluster((GNode)q);
-			if(q.toString().startsWith("StringLiteral")){
+			else if(q.toString().startsWith("StringLiteral")){
 				GNode b = (GNode)q;
 				line+="String temp"+clusterCount+" = new __String("+b.getString(0)+"); \n";
 				part2 = "temp"+(clusterCount);
 				clusterCount++;
 			}
-			if(q.toString().startsWith("PrimaryIdentifier")){
+			else if(q.toString().startsWith("PrimaryIdentifier")){
 				GNode b = (GNode)q;
-				line+="String temp"+clusterCount+" = "+b.getString(0)+"; \n";
+////				line+="String temp"+clusterCount+" = "+b.getString(0)+"+\"\"; \n";
+////				part2 = "temp"+(clusterCount);
+//				System.out.println(b.getString(0));
+				part2 = b.getString(0);
+				clusterCount++;
+			}
+			else if(q.toString().startsWith("IntegerLiteral")){
+				GNode b = (GNode)q;
+				line+="int temp"+clusterCount+" = "+b.getString(0)+"; \n";
 				part2 = "temp"+(clusterCount);
 				clusterCount++;
 			}
+			else if(q.toString().startsWith("CharacterLiteral")){
+				GNode b = (GNode)q;
+				line+="char temp"+clusterCount+" = "+b.getString(0)+"; \n";
+				part2 = "temp"+(clusterCount);
+				clusterCount++;
+			}
+			else if(q.toString().startsWith("BasicCastExpression")){
+				line+="tempResult=tempResult+";
+				dispatch((GNode)q);
+				line+="; \n";
+				notDeclared=false;
+			}
+			if(clusterCount==2&&notDeclared){
+				line+="tempResult=tempResult+"+part2+"; \n";
+				notDeclared=false;
+			}
 		}
-		line+="temp1=temp1+"+part2+";\n";
+		line+="tempResult=tempResult+"+part2+";\n";
 	}
 	
 	public void visitLogicalAndExpression(GNode n){
