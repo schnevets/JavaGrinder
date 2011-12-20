@@ -10,6 +10,7 @@ public class ccStatement extends Visitor{
 	String line="";
 	private boolean assignmentFlag;
 	private ccBlock block;
+	int clusterCount=1;
 	
 	public ccStatement(GNode n, ccBlock parent) {
 		block = parent;
@@ -53,6 +54,7 @@ public class ccStatement extends Visitor{
 			if(!n.getNode(3).isEmpty()){
 				line+= " << ";
 				dispatch(n.getGeneric(3));
+				System.out.println(n);
 			}
 			if(n.getString(2).equals("println")){
 				line+=" << std::endl";
@@ -102,7 +104,6 @@ public class ccStatement extends Visitor{
 		}
 	}
 	public void visitCastExpression(GNode n){
-//		System.out.println(n);
 		line+="(";
 		dispatch(n.getNode(0));
 		line+=")";
@@ -158,7 +159,6 @@ public class ccStatement extends Visitor{
 	}
 	
 	public void visitConditionalStatement(GNode n){
-		System.out.println(n);
 		line += "if("+new ccStatement((GNode)n.get(0), block).publish()+")";
 		dispatch(n.getNode(1));
 		if(n.get(2)!=null){
@@ -185,7 +185,6 @@ public class ccStatement extends Visitor{
 	}
 	public void visitWhileStatement(GNode n){
 		line = "while("+new ccStatement((GNode)n.get(0), block).publish()+")";
-//		System.out.println(line);
 	}
 	public void visitDeclarator(GNode n){
 		line+=n.getString(0);
@@ -214,7 +213,7 @@ public class ccStatement extends Visitor{
 		line+=";";
 	}
 	public void visitArguments(GNode n){
-		line += "(";
+		if(!(n.isEmpty()) && !(n.get(0) instanceof String) && !n.getNode(0).getName().equals("AdditiveExpression"))	line += "(";
 		int i = 0;
 		for (Object o : n){
 			if(i > 0){line += ", ";}
@@ -223,7 +222,7 @@ public class ccStatement extends Visitor{
 			}
 			i++;
 		}
-		line += ")";
+		if(!(n.isEmpty()) && !(n.get(0) instanceof String) && !n.getNode(0).getName().equals("AdditiveExpression"))	line += ")";
 	}
 	
 	public void visitSelectionExpression(GNode n){
@@ -310,8 +309,36 @@ public class ccStatement extends Visitor{
 		return argTypes;
 	}
 	
-	 public void visitLogicalAndExpression(GNode n){
-	        if(n.getGeneric(0).toString().contains("LogicalAndExpression")){
+	public void visitAdditiveExpression(GNode n){
+		if(n.toString().contains("StringLiteral")){
+			line+= "({";
+			buildCluster(n);
+			line+="})";}
+	}
+	
+	 private void buildCluster(GNode n) {
+		String part2 = null;
+		for(Object q:n){
+			if(q.toString().startsWith("AdditiveExpression"))
+				buildCluster((GNode)q);
+			if(q.toString().startsWith("StringLiteral")){
+				GNode b = (GNode)q;
+				line+="String temp"+clusterCount+" = new __String("+b.getString(0)+"); \n";
+				part2 = "temp"+(clusterCount);
+				clusterCount++;
+			}
+			if(q.toString().startsWith("PrimaryIdentifier")){
+				GNode b = (GNode)q;
+				line+="String temp"+clusterCount+" = "+b.getString(0)+"; \n";
+				part2 = "temp"+(clusterCount);
+				clusterCount++;
+			}
+		}
+		line+="temp1=temp1+"+part2+";\n";
+	}
+	
+	public void visitLogicalAndExpression(GNode n){
+	    	if(n.getGeneric(0).toString().contains("LogicalAndExpression")){
 	            dispatch(n.getGeneric(0));
 	        }
 	        else{
